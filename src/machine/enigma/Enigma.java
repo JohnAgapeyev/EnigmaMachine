@@ -5,8 +5,8 @@ import java.util.Random;
 public class Enigma {
 
     private static Random rand = new Random();
-    private static Rotor[] rotors = new Rotor[5];
-    private static int rotorLength = rotors.length;
+    private Rotor[] rotors = new Rotor[5];
+    private int rotorLength = rotors.length;
 
     public Enigma() {
         for (int i = 0; i < rotorLength; i++) {
@@ -42,7 +42,7 @@ public class Enigma {
         return response;
     }
     
-    public static Rotor[] getRotors() {
+    public Rotor[] getRotors() {
         return rotors;
     }
 }

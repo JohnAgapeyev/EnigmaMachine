@@ -28,22 +28,33 @@ public class EnigmaPanel extends JPanel {
     int rotKey = 0;
 
     public EnigmaPanel() {
+        setLayout(null);
         enigma = new Enigma();
         enigmaActionListener = new EnigmaActionListener();
-        outputMessage = new JLabel("yep");
+        outputMessage = new JLabel(
+                "This is a test of the emergency broadcast system");
         rotor1 = new JLabel("");
         rotor2 = new JLabel("");
         rotor3 = new JLabel("");
-        message = new JTextField("", 5);
+        message = new JTextField();
         rotorChange = new JButton("Switch Rotors");
+
         message.addActionListener(enigmaActionListener);
         rotorChange.addActionListener(enigmaActionListener);
+
+        rotorChange.setBounds(90, 200, 115, 30);
+        message.setBounds(90, 40, 130, 24);
+        outputMessage.setBounds(85, 80, 150, 20);
+        rotor1.setBounds(130, 150, 20, 20);
+        rotor2.setBounds(150, 150, 20, 20);
+        rotor3.setBounds(170, 150, 20, 20);
+
         add(outputMessage);
         add(message);
         add(rotorChange);
         add(rotor1);
         add(rotor2);
-        add(rotor3);        
+        add(rotor3);
     }
 
     @Override

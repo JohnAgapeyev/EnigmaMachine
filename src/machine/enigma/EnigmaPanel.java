@@ -4,6 +4,7 @@ import javax.swing.JPanel;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 
 import java.awt.Graphics;
 import java.awt.Insets;
@@ -12,7 +13,7 @@ import java.awt.event.ActionListener;
 
 public class EnigmaPanel extends JPanel {
 
-    Rotor[] rotors;
+    private Rotor[] rotors;
 
     /**
      * Serial ID for the Panel.
@@ -100,7 +101,9 @@ public class EnigmaPanel extends JPanel {
         @Override
         public void actionPerformed(ActionEvent e) {
             if (e.getSource() == message) {
-
+                outputMessage.setText(enigma.encode(message.getText()));
+                rotorRotation[2]++;
+                formatRotorSettings();
             } else if (e.getSource() == rotorSwitch) {
                 formatRotorSettings();
             } else if (e.getSource() == rotorSet) {
@@ -116,11 +119,7 @@ public class EnigmaPanel extends JPanel {
                     for (JButton button : rotorPlusMinus) {
                         button.setVisible(false);
                     }
-                    for (int i = 0; i < rotorRotation.length; i++) {
-                        for (int j = 0; j < rotorRotation[i]; j++) {
-                            rotors[i].rotate();
-                        }
-                    }
+                    formatRotorSettings();
                 }
             } else if (e.getSource() == rotorPlusMinus[0]) {
                 rotorRotation[0]++;
@@ -148,16 +147,16 @@ public class EnigmaPanel extends JPanel {
         for (int i = 0; i < rotorRotation.length; i++) {
             if (rotorRotation[i] < 0) {
                 rotorRotation[i] = 25;
+            } else if (rotorRotation[i] > 25) {
+                if (i > 0) {
+                    rotorRotation[i - 1]++;
+                }
+                rotorRotation[i] = 0;
+            }
+            for (int j = 0; j < rotorRotation[i]; j++) {
+                rotors[i].rotate();
             }
         }
-        // int first, second, third;
-        // if (rotKey < 0) {
-        // rotKey = 0;
-        // }
-        // third = rotKey % 26;
-        // second = (rotKey / 26) % 26;
-        // first = ((rotKey / 26) / 26) % 26;
-
         rotor1.setText(String.valueOf(rotorRotation[0]));
         rotor2.setText(String.valueOf(rotorRotation[1]));
         rotor3.setText(String.valueOf(rotorRotation[2]));

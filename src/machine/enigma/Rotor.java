@@ -9,17 +9,16 @@ public class Rotor {
 
     private static ArrayList<Character> letterList;
 
+    private char[] rotorKey;
+
     public Rotor() {
+        rotorKey = new char[ALPHABET.length];
         if (letterList == null) {
             letterList = new ArrayList<Character>();
             for (int i = 0; i < ALPHABET.length; i++) {
                 letterList.add(ALPHABET[i]);
             }
         }
-    }
-
-    public String generate() {
-        String rotor = "";
         final Random rand = new Random();
         int alphabetLength = letterList.size();
         ArrayList<Integer> alreadyUsed = new ArrayList<Integer>();
@@ -28,10 +27,21 @@ public class Rotor {
             while (alreadyUsed.contains(letterIndex)) {
                 letterIndex = rand.nextInt(alphabetLength);
             }
-            rotor += letterList.get(letterIndex);
+            rotorKey[i] = letterList.get(letterIndex);
             alreadyUsed.add(letterIndex);
         }
+    }
 
-        return rotor;
+    public char[] getRotorKey() {
+        return rotorKey;
+    }
+
+    public void rotate() {
+        char temp = rotorKey[0];
+        final int keyLength = rotorKey.length - 1;
+        for (int i = 0; i < keyLength; i++) {
+            rotorKey[i] = rotorKey[i + 1];
+        }
+        rotorKey[keyLength] = temp;
     }
 }

@@ -16,8 +16,7 @@ public class Enigma {
 
     public String encode(String message) {
         char[] messageLetters = message.toLowerCase().toCharArray();
-        char[] rotorKey = rotors[rand.nextInt(rotorLength)].generate()
-                .toCharArray();
+        char[] rotorKey = rotors[rand.nextInt(rotorLength)].getRotorKey();
         char[] ALPHABET = "abcdefghijklmnopqrstuvwxyz".toCharArray();
         String response = "";
         // response += "abcdefghijklmnopqrstuvwxyz\n";
@@ -41,5 +40,9 @@ public class Enigma {
             }
         }
         return response;
+    }
+    
+    public static Rotor[] getRotors() {
+        return rotors;
     }
 }

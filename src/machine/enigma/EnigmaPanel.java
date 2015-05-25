@@ -5,6 +5,7 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 
+import java.awt.BorderLayout;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -22,24 +23,27 @@ public class EnigmaPanel extends JPanel {
     private JLabel rotor2;
     private JLabel rotor3;
     private JTextField message;
-    private Enigma machine;
+    private Enigma enigma;
+    private EnigmaActionListener enigmaActionListener;
+    int rotKey = 0;
 
     public EnigmaPanel() {
-        machine = new Enigma();
+        enigma = new Enigma();
+        enigmaActionListener = new EnigmaActionListener();
         outputMessage = new JLabel("yep");
-        rotor1 = new JLabel("0");
-        rotor2 = new JLabel("0");
-        rotor3 = new JLabel("0");
+        rotor1 = new JLabel("");
+        rotor2 = new JLabel("");
+        rotor3 = new JLabel("");
         message = new JTextField("", 5);
         rotorChange = new JButton("Switch Rotors");
-        message.addActionListener(new EnigmaActionListener());
-        rotorChange.addActionListener(new EnigmaActionListener());
+        message.addActionListener(enigmaActionListener);
+        rotorChange.addActionListener(enigmaActionListener);
         add(outputMessage);
         add(message);
         add(rotorChange);
         add(rotor1);
         add(rotor2);
-        add(rotor3);
+        add(rotor3);        
     }
 
     @Override
@@ -51,9 +55,24 @@ public class EnigmaPanel extends JPanel {
         @Override
         public void actionPerformed(ActionEvent e) {
             if (e.getSource() == message) {
-                outputMessage.setText(machine.encode(message.getText()));
+                // outputMessage.setText(enigma.encode(message.getText()));
             } else if (e.getSource() == rotorChange) {
-                System.out.println("");
+                Rotor[] x = Enigma.getRotors();
+                char[] key = x[0].getRotorKey();
+                String output = "";
+                for (char letter : key) {
+                    output += letter;
+                }
+                System.out.println(output);
+                x[0].rotate();
+                int first, second, third;
+                third = rotKey % 26;
+                second = (rotKey / 26) % 26;
+                first = ((rotKey / 26) / 26) % 26;
+                rotor1.setText(String.valueOf(first));
+                rotor2.setText(String.valueOf(second));
+                rotor3.setText(String.valueOf(third));
+                rotKey++;
             }
         }
     }

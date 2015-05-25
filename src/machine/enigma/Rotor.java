@@ -3,15 +3,18 @@ package machine.enigma;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class RotorGenerator {
+public class Rotor {
     private static final char[] ALPHABET = "abcdefghijklmnopqrstuvwxyz"
             .toCharArray();
 
-    private static ArrayList<Character> letterList = new ArrayList<Character>();
+    private static ArrayList<Character> letterList;
 
-    public RotorGenerator() {
-        for (int i = 0; i < ALPHABET.length; i++) {
-            letterList.add(ALPHABET[i]);
+    public Rotor() {
+        if (letterList == null) {
+            letterList = new ArrayList<Character>();
+            for (int i = 0; i < ALPHABET.length; i++) {
+                letterList.add(ALPHABET[i]);
+            }
         }
     }
 

@@ -9,10 +9,13 @@ public class Rotor {
 
     private static ArrayList<Character> letterList;
 
-    private char[] rotorKey;
+    private char[] originalKey;
+
+    private char[] rotatedKey;
 
     public Rotor() {
-        rotorKey = new char[ALPHABET.length];
+        originalKey = new char[ALPHABET.length];
+        rotatedKey = new char[ALPHABET.length];
         if (letterList == null) {
             letterList = new ArrayList<Character>();
             for (int i = 0; i < ALPHABET.length; i++) {
@@ -27,21 +30,47 @@ public class Rotor {
             while (alreadyUsed.contains(letterIndex)) {
                 letterIndex = rand.nextInt(alphabetLength);
             }
-            rotorKey[i] = letterList.get(letterIndex);
+            originalKey[i] = letterList.get(letterIndex);
             alreadyUsed.add(letterIndex);
         }
+        rotatedKey = originalKey.clone();
     }
 
-    public char[] getRotorKey() {
-        return rotorKey;
+    public char[] getKey() {
+        return rotatedKey;
     }
 
     public void rotate() {
-        char temp = rotorKey[0];
-        final int keyLength = rotorKey.length - 1;
+        char temp = rotatedKey[0];
+        final int keyLength = rotatedKey.length - 1;
         for (int i = 0; i < keyLength; i++) {
-            rotorKey[i] = rotorKey[i + 1];
+            rotatedKey[i] = rotatedKey[i + 1];
         }
-        rotorKey[keyLength] = temp;
+        rotatedKey[keyLength] = temp;
+    }
+
+    private void rotateBackwards() {
+        char temp = rotatedKey[rotatedKey.length - 1];
+        final int keyLength = rotatedKey.length - 1;
+        for (int i = keyLength; i >= 0; i--) {
+            rotatedKey[i] = rotatedKey[i - 1];
+        }
+        rotatedKey[0] = temp;
+    }
+
+    public void setRotation(int rotateSteps) {
+        if (rotateSteps == 0) {
+            return;
+        } else if (rotateSteps > 0) {
+            rotatedKey = originalKey.clone();
+            for (int i = 0; i < rotateSteps; i++) {
+                rotate();
+            }
+        } else {
+            rotatedKey = originalKey.clone();
+            for (int i = 0; i < Math.abs(rotateSteps); i++) {
+                rotateBackwards();
+            }
+        }
     }
 }

@@ -17,26 +17,12 @@ public class Enigma {
     }
 
     public String encode(String message) {
-        char[] messageLetters = message.toLowerCase().toCharArray();
-        char[] rotorKey = rotors[0].getRotorKey();
-        String response = "";
-        for (char letter : messageLetters) {
-            if (letter == ' ') {
-                response += letter;
-            } else {
-                for (int i = 0; i < ALPHABET.length; i++) {
-                    if (letter == ALPHABET[i]) {
-                        response += rotorKey[i];
-                    }
-                }
-            }
-        }
-        return response;
+        return thirdRotor(secondRotor(firstRotor(message)));
     }
 
     private String firstRotor(String message) {
         char[] messageLetters = message.toLowerCase().toCharArray();
-        char[] rotorKey = rotors[0].getRotorKey();
+        char[] rotorKey = rotors[0].getKey();
         String response = "";
         for (char letter : messageLetters) {
             if (letter == ' ') {
@@ -54,7 +40,7 @@ public class Enigma {
 
     private String secondRotor(String message) {
         char[] messageLetters = message.toLowerCase().toCharArray();
-        char[] rotorKey = rotors[1].getRotorKey();
+        char[] rotorKey = rotors[1].getKey();
         String response = "";
         for (char letter : messageLetters) {
             if (letter == ' ') {
@@ -72,7 +58,7 @@ public class Enigma {
 
     private String thirdRotor(String message) {
         char[] messageLetters = message.toLowerCase().toCharArray();
-        char[] rotorKey = rotors[2].getRotorKey();
+        char[] rotorKey = rotors[2].getKey();
         String response = "";
         for (char letter : messageLetters) {
             if (letter == ' ') {
@@ -90,7 +76,7 @@ public class Enigma {
 
     private String fourthRotor(String message) {
         char[] messageLetters = message.toLowerCase().toCharArray();
-        char[] rotorKey = rotors[3].getRotorKey();
+        char[] rotorKey = rotors[3].getKey();
         String response = "";
         for (char letter : messageLetters) {
             if (letter == ' ') {
@@ -108,7 +94,7 @@ public class Enigma {
 
     private String fifthRotor(String message) {
         char[] messageLetters = message.toLowerCase().toCharArray();
-        char[] rotorKey = rotors[4].getRotorKey();
+        char[] rotorKey = rotors[4].getKey();
         String response = "";
         for (char letter : messageLetters) {
             if (letter == ' ') {

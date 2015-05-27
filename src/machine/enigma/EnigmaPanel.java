@@ -4,12 +4,16 @@ import javax.swing.JPanel;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
-import javax.swing.SwingConstants;
+import javax.swing.JCheckBox;
+import javax.swing.JOptionPane;
 
 import java.awt.Graphics;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.util.Arrays;
 
 public class EnigmaPanel extends JPanel {
 
@@ -19,6 +23,13 @@ public class EnigmaPanel extends JPanel {
      * Serial ID for the Panel.
      */
     private static final long serialVersionUID = 7298201505806512569L;
+
+    private JCheckBox[] rotorCheckBox = { new JCheckBox("Rotor 1"),
+            new JCheckBox("Rotor 2"), new JCheckBox("Rotor 3"),
+            new JCheckBox("Rotor 4"), new JCheckBox("Rotor 5") };
+    private String rotorChangeDialog = "Please select three rotors";
+    private Object[] optionParams = { rotorCheckBox, rotorChangeDialog };
+    private Integer[] rotorsChosen = new Integer[3];
 
     private JButton rotorSwitch;
     private JButton rotorSet;
@@ -34,6 +45,7 @@ public class EnigmaPanel extends JPanel {
     private int[] rotorRotation = new int[3];
 
     public EnigmaPanel() {
+        chooseRotors();
         setLayout(null);
         enigma = new Enigma();
         rotors = enigma.getRotors();
@@ -153,12 +165,97 @@ public class EnigmaPanel extends JPanel {
                 }
                 rotorRotation[i] = 0;
             }
-            for (int j = 0; j < rotorRotation[i]; j++) {
-                rotors[i].rotate();
-            }
+            System.out.println(rotorRotation[i]);
+            rotors[i].setRotation(rotorRotation[i]);
         }
         rotor1.setText(String.valueOf(rotorRotation[0]));
         rotor2.setText(String.valueOf(rotorRotation[1]));
         rotor3.setText(String.valueOf(rotorRotation[2]));
+
+        // String test = "";
+        // char[] x = rotors[2].getKey();
+        // for (char letter : x) {
+        // test += letter;
+        // }
+        // System.out.println(test);
+    }
+
+    private void chooseRotors() {
+        boolean areThreeRotorsChosen = false;
+        CheckListener listener = new CheckListener();
+        for (JCheckBox check : rotorCheckBox) {
+            check.addItemListener(listener);
+        }
+        JOptionPane.showConfirmDialog(null, optionParams, "Rotor Selection",
+                JOptionPane.DEFAULT_OPTION);
+        while (!areThreeRotorsChosen) {
+            if (listener.getCurrentSelections() == 3) {
+                areThreeRotorsChosen = true;
+            } else {
+                JOptionPane.showConfirmDialog(null, optionParams,
+                        "Rotor Selection", JOptionPane.DEFAULT_OPTION);
+            }
+        }
+        for (JCheckBox check : rotorCheckBox) {
+            System.out.println(check.isSelected());
+        }
+    }
+
+    private class CheckListener implements ItemListener {
+
+        // rotorsChosen
+        private final int MAX_SELECTIONS = 3;
+        private int currentSelections = 0;
+
+        @Override
+        public void itemStateChanged(ItemEvent e) {
+            JCheckBox source = (JCheckBox) e.getSource();
+
+            if (source.isSelected()) {
+                currentSelections++;
+                for (int i = 0; i < rotorsChosen.length; i++) {
+                    if (rotorsChosen[i] == null) {
+                        rotorsChosen[i] = Arrays.asList(rotorCheckBox).indexOf(
+                                source);
+                        break;
+                    }
+                }
+                if (currentSelections == MAX_SELECTIONS) {
+                    for (JCheckBox check : rotorCheckBox) {
+                        if (!check.isSelected()) {
+                            check.setEnabled(false);
+                        }
+                    }
+                }
+            } else {
+                currentSelections--;
+                for (int i = 0; i < rotorsChosen.length; i++) {
+                    if (rotorsChosen[i] != null
+                            && rotorsChosen[i] == Arrays.asList(rotorCheckBox)
+                                    .indexOf(source)) {
+                        rotorsChosen[i] = null;
+
+                        Integer temp = rotorsChosen[0];
+                        final int rotorsChooseLength = rotorsChosen.length - 1;
+                        for (int j = 0; j < rotorsChooseLength; j++) {
+                            rotorsChosen[j] = rotorsChosen[j + 1];
+                        }
+                        rotorsChosen[rotorsChooseLength] = temp;
+
+                    }
+                }
+                if (currentSelections < MAX_SELECTIONS) {
+                    for (JCheckBox check : rotorCheckBox)
+                        check.setEnabled(true);
+                }
+            }
+            for (Integer choice : rotorsChosen) {
+                System.out.println(choice);
+            }
+        }
+
+        public int getCurrentSelections() {
+            return currentSelections;
+        }
     }
 }

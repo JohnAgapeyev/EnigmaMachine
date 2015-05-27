@@ -28,7 +28,11 @@ public class EnigmaPanel extends JPanel {
             new JCheckBox("Rotor 2"), new JCheckBox("Rotor 3"),
             new JCheckBox("Rotor 4"), new JCheckBox("Rotor 5") };
     private String rotorChangeDialog = "Please select three rotors";
-    private Object[] optionParams = { rotorCheckBox, rotorChangeDialog };
+    private JLabel selectedRotorsMessage = new JLabel(
+            "You have selected rotors: ");
+    private JLabel displayRotorsLabel = new JLabel("");
+    private Object[] optionParams = { rotorChangeDialog, rotorCheckBox,
+            selectedRotorsMessage, displayRotorsLabel };
     private Integer[] rotorsChosen = new Integer[3];
 
     private JButton rotorSwitch;
@@ -165,19 +169,11 @@ public class EnigmaPanel extends JPanel {
                 }
                 rotorRotation[i] = 0;
             }
-            System.out.println(rotorRotation[i]);
-            rotors[i].setRotation(rotorRotation[i]);
+            rotors[rotorsChosen[i]].setRotation(rotorRotation[i]);
         }
         rotor1.setText(String.valueOf(rotorRotation[0]));
         rotor2.setText(String.valueOf(rotorRotation[1]));
         rotor3.setText(String.valueOf(rotorRotation[2]));
-
-        // String test = "";
-        // char[] x = rotors[2].getKey();
-        // for (char letter : x) {
-        // test += letter;
-        // }
-        // System.out.println(test);
     }
 
     private void chooseRotors() {
@@ -186,6 +182,7 @@ public class EnigmaPanel extends JPanel {
         for (JCheckBox check : rotorCheckBox) {
             check.addItemListener(listener);
         }
+
         JOptionPane.showConfirmDialog(null, optionParams, "Rotor Selection",
                 JOptionPane.DEFAULT_OPTION);
         while (!areThreeRotorsChosen) {
@@ -196,21 +193,16 @@ public class EnigmaPanel extends JPanel {
                         "Rotor Selection", JOptionPane.DEFAULT_OPTION);
             }
         }
-        for (JCheckBox check : rotorCheckBox) {
-            System.out.println(check.isSelected());
-        }
     }
 
     private class CheckListener implements ItemListener {
 
-        // rotorsChosen
         private final int MAX_SELECTIONS = 3;
         private int currentSelections = 0;
 
         @Override
         public void itemStateChanged(ItemEvent e) {
             JCheckBox source = (JCheckBox) e.getSource();
-
             if (source.isSelected()) {
                 currentSelections++;
                 for (int i = 0; i < rotorsChosen.length; i++) {
@@ -235,13 +227,19 @@ public class EnigmaPanel extends JPanel {
                                     .indexOf(source)) {
                         rotorsChosen[i] = null;
 
-                        Integer temp = rotorsChosen[0];
+                        int firstNullIndex = 0;
+                        for (int j = 0; j < rotorsChosen.length; j++) {
+                            if (rotorsChosen[j] == null) {
+                                firstNullIndex = j;
+                                break;
+                            }
+                        }
+                        Integer temp = rotorsChosen[firstNullIndex];
                         final int rotorsChooseLength = rotorsChosen.length - 1;
-                        for (int j = 0; j < rotorsChooseLength; j++) {
+                        for (int j = firstNullIndex; j < rotorsChooseLength; j++) {
                             rotorsChosen[j] = rotorsChosen[j + 1];
                         }
                         rotorsChosen[rotorsChooseLength] = temp;
-
                     }
                 }
                 if (currentSelections < MAX_SELECTIONS) {
@@ -249,9 +247,15 @@ public class EnigmaPanel extends JPanel {
                         check.setEnabled(true);
                 }
             }
-            for (Integer choice : rotorsChosen) {
-                System.out.println(choice);
+            String display = "";
+            for (int i = 0; i < rotorsChosen.length; i++) {
+                if (rotorsChosen[i] == null) {
+                    display += "Empty   ";
+                } else {
+                    display += ((int) rotorsChosen[i] + 1) + "   ";
+                }
             }
+            displayRotorsLabel.setText(display);
         }
 
         public int getCurrentSelections() {

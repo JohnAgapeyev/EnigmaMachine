@@ -1,6 +1,9 @@
 package machine.enigma;
 
 import java.util.Random;
+import java.util.concurrent.Callable;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public class Enigma {
 
@@ -14,87 +17,25 @@ public class Enigma {
         for (int i = 0; i < rotorLength; i++) {
             rotors[i] = new Rotor();
         }
+
     }
 
-    public String encode(String message) {
-        return thirdRotor(secondRotor(firstRotor(message)));
-    }
-
-    private String firstRotor(String message) {
-        char[] messageLetters = message.toLowerCase().toCharArray();
-        char[] rotorKey = rotors[0].getKey();
-        String response = "";
-        for (char letter : messageLetters) {
-            if (letter == ' ') {
-                response += letter;
-            } else {
-                for (int i = 0; i < ALPHABET.length; i++) {
-                    if (letter == ALPHABET[i]) {
-                        response += rotorKey[i];
-                    }
-                }
-            }
+    public String encode(String userMessage, Integer[] rotorsChosen)
+            throws Exception {
+        String output = userMessage;
+        BiFunction<String, Integer, String> letterShift = (String message,
+                Integer rotorNumber) -> {
+            return rotorEncryption(message, rotorNumber);
+        };
+        for (Integer rotor : rotorsChosen) {
+            output = letterShift.apply(output, rotor);
         }
-        return response;
+        return output;
     }
 
-    private String secondRotor(String message) {
+    private String rotorEncryption(String message, int rotorNumber) {
         char[] messageLetters = message.toLowerCase().toCharArray();
-        char[] rotorKey = rotors[1].getKey();
-        String response = "";
-        for (char letter : messageLetters) {
-            if (letter == ' ') {
-                response += letter;
-            } else {
-                for (int i = 0; i < ALPHABET.length; i++) {
-                    if (letter == ALPHABET[i]) {
-                        response += rotorKey[i];
-                    }
-                }
-            }
-        }
-        return response;
-    }
-
-    private String thirdRotor(String message) {
-        char[] messageLetters = message.toLowerCase().toCharArray();
-        char[] rotorKey = rotors[2].getKey();
-        String response = "";
-        for (char letter : messageLetters) {
-            if (letter == ' ') {
-                response += letter;
-            } else {
-                for (int i = 0; i < ALPHABET.length; i++) {
-                    if (letter == ALPHABET[i]) {
-                        response += rotorKey[i];
-                    }
-                }
-            }
-        }
-        return response;
-    }
-
-    private String fourthRotor(String message) {
-        char[] messageLetters = message.toLowerCase().toCharArray();
-        char[] rotorKey = rotors[3].getKey();
-        String response = "";
-        for (char letter : messageLetters) {
-            if (letter == ' ') {
-                response += letter;
-            } else {
-                for (int i = 0; i < ALPHABET.length; i++) {
-                    if (letter == ALPHABET[i]) {
-                        response += rotorKey[i];
-                    }
-                }
-            }
-        }
-        return response;
-    }
-
-    private String fifthRotor(String message) {
-        char[] messageLetters = message.toLowerCase().toCharArray();
-        char[] rotorKey = rotors[4].getKey();
+        char[] rotorKey = rotors[rotorNumber].getKey();
         String response = "";
         for (char letter : messageLetters) {
             if (letter == ' ') {

@@ -117,7 +117,11 @@ public class EnigmaPanel extends JPanel {
         @Override
         public void actionPerformed(ActionEvent e) {
             if (e.getSource() == message) {
-                outputMessage.setText(enigma.encode(message.getText()));
+                try {
+                    outputMessage.setText(enigma.encode(message.getText(), rotorsChosen));
+                } catch (Exception e1) {
+                    e1.printStackTrace();
+                }
                 rotorRotation[2]++;
                 formatRotorSettings();
             } else if (e.getSource() == rotorSwitch) {

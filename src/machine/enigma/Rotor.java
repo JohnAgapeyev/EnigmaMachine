@@ -59,15 +59,14 @@ public class Rotor {
     }
 
     public void setRotation(int rotateSteps) {
+        rotatedKey = originalKey.clone();
         if (rotateSteps == 0) {
             return;
         } else if (rotateSteps > 0) {
-            rotatedKey = originalKey.clone();
             for (int i = 0; i < rotateSteps; i++) {
                 rotate();
             }
         } else {
-            rotatedKey = originalKey.clone();
             for (int i = 0; i < Math.abs(rotateSteps); i++) {
                 rotateBackwards();
             }

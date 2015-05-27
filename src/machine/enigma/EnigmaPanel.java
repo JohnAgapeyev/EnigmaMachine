@@ -118,7 +118,8 @@ public class EnigmaPanel extends JPanel {
         public void actionPerformed(ActionEvent e) {
             if (e.getSource() == message) {
                 try {
-                    outputMessage.setText(enigma.encode(message.getText(), rotorsChosen));
+                    outputMessage.setText(enigma.encode(message.getText(),
+                            rotorsChosen));
                 } catch (Exception e1) {
                     e1.printStackTrace();
                 }
@@ -164,7 +165,8 @@ public class EnigmaPanel extends JPanel {
     }
 
     public void formatRotorSettings() {
-        for (int i = 0; i < rotorRotation.length; i++) {
+        int length = rotorRotation.length - 1;
+        for (int i = length; i > -1; i--) {
             if (rotorRotation[i] < 0) {
                 rotorRotation[i] = 25;
             } else if (rotorRotation[i] > 25) {

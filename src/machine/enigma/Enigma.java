@@ -1,9 +1,7 @@
 package machine.enigma;
 
 import java.util.Random;
-import java.util.concurrent.Callable;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 
 public class Enigma {
 
@@ -29,6 +27,10 @@ public class Enigma {
         };
         for (Integer rotor : rotorsChosen) {
             output = letterShift.apply(output, rotor);
+        }
+        int length = rotorsChosen.length - 1;
+        for (int i = length; i > -1; i--) {
+            output = letterShift.apply(output, rotorsChosen[i]);
         }
         return output;
     }

@@ -21,14 +21,16 @@ public class Enigma {
     public String encode(String userMessage, Integer[] rotorsChosen)
             throws Exception {
         String output = userMessage;
+        int length = rotorsChosen.length - 1;
         BiFunction<String, Integer, String> letterShift = (String message,
                 Integer rotorNumber) -> {
             return rotorEncryption(message, rotorNumber);
         };
+        // Normal encryption
         for (Integer rotor : rotorsChosen) {
             output = letterShift.apply(output, rotor);
         }
-        int length = rotorsChosen.length - 1;
+        // Reflector
         for (int i = length; i > -1; i--) {
             output = letterShift.apply(output, rotorsChosen[i]);
         }

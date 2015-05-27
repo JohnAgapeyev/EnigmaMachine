@@ -35,13 +35,11 @@ public class EnigmaPanel extends JPanel {
             selectedRotorsMessage, displayRotorsLabel };
     private Integer[] rotorsChosen = new Integer[3];
 
-    private JButton rotorSwitch;
+    private JButton plugBoardButton;
     private JButton rotorSet;
     private JButton[] rotorPlusMinus = new JButton[6];
     private JLabel outputMessage;
-    private JLabel rotor1;
-    private JLabel rotor2;
-    private JLabel rotor3;
+    private JLabel[] rotorDisplay = new JLabel[3];
     private JTextField message;
     private Enigma enigma;
     private EnigmaActionListener enigmaActionListener;
@@ -56,34 +54,38 @@ public class EnigmaPanel extends JPanel {
         enigmaActionListener = new EnigmaActionListener();
         outputMessage = new JLabel(
                 "This is a test of the emergency broadcast system");
-        rotor1 = new JLabel("0");
-        rotor2 = new JLabel("0");
-        rotor3 = new JLabel("0");
+
+        for (int i = 0; i < rotorDisplay.length; i++) {
+            rotorDisplay[i] = new JLabel("0");
+        }
+
         message = new JTextField();
-        rotorSwitch = new JButton("Switch Rotors");
+        plugBoardButton = new JButton("Switch Rotors");
         rotorSet = new JButton("Set Rotors");
-        rotorPlusMinus[0] = new JButton("+");
-        rotorPlusMinus[1] = new JButton("-");
-        rotorPlusMinus[2] = new JButton("+");
-        rotorPlusMinus[3] = new JButton("-");
-        rotorPlusMinus[4] = new JButton("+");
-        rotorPlusMinus[5] = new JButton("-");
+
+        for (int i = 0; i < rotorPlusMinus.length; i++) {
+            if (i % 2 == 0) {
+                rotorPlusMinus[i] = new JButton("+");
+            } else {
+                rotorPlusMinus[i] = new JButton("-");
+            }
+        }
 
         changingRotors = false;
 
         message.addActionListener(enigmaActionListener);
-        rotorSwitch.addActionListener(enigmaActionListener);
+        plugBoardButton.addActionListener(enigmaActionListener);
         rotorSet.addActionListener(enigmaActionListener);
 
-        rotorSwitch.setBounds(170, 250, 115, 30);
+        plugBoardButton.setBounds(170, 250, 115, 30);
         rotorSet.setBounds(170, 210, 115, 30);
 
         message.setBounds(170, 40, 130, 24);
         outputMessage.setBounds(150, 80, 500, 20);
 
-        rotor1.setBounds(187, 130, 20, 20);
-        rotor2.setBounds(227, 130, 20, 20);
-        rotor3.setBounds(267, 130, 20, 20);
+        rotorDisplay[0].setBounds(187, 130, 20, 20);
+        rotorDisplay[1].setBounds(227, 130, 20, 20);
+        rotorDisplay[2].setBounds(267, 130, 20, 20);
 
         rotorPlusMinus[0].setBounds(180, 110, 20, 20);
         rotorPlusMinus[1].setBounds(180, 150, 20, 20);
@@ -101,11 +103,11 @@ public class EnigmaPanel extends JPanel {
 
         add(outputMessage);
         add(message);
-        add(rotorSwitch);
+        add(plugBoardButton);
         add(rotorSet);
-        add(rotor1);
-        add(rotor2);
-        add(rotor3);
+        add(rotorDisplay[0]);
+        add(rotorDisplay[1]);
+        add(rotorDisplay[2]);
     }
 
     @Override
@@ -125,8 +127,8 @@ public class EnigmaPanel extends JPanel {
                 }
                 rotorRotation[2]++;
                 formatRotorSettings();
-            } else if (e.getSource() == rotorSwitch) {
-                formatRotorSettings();
+            } else if (e.getSource() == plugBoardButton) {
+                // formatRotorSettings();
             } else if (e.getSource() == rotorSet) {
                 if (!changingRotors) {
                     rotorSet.setText("Done");
@@ -142,23 +144,20 @@ public class EnigmaPanel extends JPanel {
                     }
                     formatRotorSettings();
                 }
-            } else if (e.getSource() == rotorPlusMinus[0]) {
-                rotorRotation[0]++;
-                formatRotorSettings();
-            } else if (e.getSource() == rotorPlusMinus[1]) {
-                rotorRotation[0]--;
-                formatRotorSettings();
-            } else if (e.getSource() == rotorPlusMinus[2]) {
-                rotorRotation[1]++;
-                formatRotorSettings();
-            } else if (e.getSource() == rotorPlusMinus[3]) {
-                rotorRotation[1]--;
-                formatRotorSettings();
-            } else if (e.getSource() == rotorPlusMinus[4]) {
-                rotorRotation[2]++;
-                formatRotorSettings();
-            } else if (e.getSource() == rotorPlusMinus[5]) {
-                rotorRotation[2]--;
+            } else {
+                if (e.getSource() == rotorPlusMinus[0]) {
+                    rotorRotation[0]++;
+                } else if (e.getSource() == rotorPlusMinus[1]) {
+                    rotorRotation[0]--;
+                } else if (e.getSource() == rotorPlusMinus[2]) {
+                    rotorRotation[1]++;
+                } else if (e.getSource() == rotorPlusMinus[3]) {
+                    rotorRotation[1]--;
+                } else if (e.getSource() == rotorPlusMinus[4]) {
+                    rotorRotation[2]++;
+                } else if (e.getSource() == rotorPlusMinus[5]) {
+                    rotorRotation[2]--;
+                }
                 formatRotorSettings();
             }
         }
@@ -177,9 +176,9 @@ public class EnigmaPanel extends JPanel {
             }
             rotors[rotorsChosen[i]].setRotation(rotorRotation[i]);
         }
-        rotor1.setText(String.valueOf(rotorRotation[0]));
-        rotor2.setText(String.valueOf(rotorRotation[1]));
-        rotor3.setText(String.valueOf(rotorRotation[2]));
+        for (int i = 0; i < rotorDisplay.length; i++) {
+            rotorDisplay[i].setText(String.valueOf(rotorRotation[i]));
+        }
     }
 
     private void chooseRotors() {
@@ -209,9 +208,10 @@ public class EnigmaPanel extends JPanel {
         @Override
         public void itemStateChanged(ItemEvent e) {
             JCheckBox source = (JCheckBox) e.getSource();
+            final int length = rotorsChosen.length;
             if (source.isSelected()) {
                 currentSelections++;
-                for (int i = 0; i < rotorsChosen.length; i++) {
+                for (int i = 0; i < length; i++) {
                     if (rotorsChosen[i] == null) {
                         rotorsChosen[i] = Arrays.asList(rotorCheckBox).indexOf(
                                 source);
@@ -227,25 +227,24 @@ public class EnigmaPanel extends JPanel {
                 }
             } else {
                 currentSelections--;
-                for (int i = 0; i < rotorsChosen.length; i++) {
+                for (int i = 0; i < length; i++) {
                     if (rotorsChosen[i] != null
                             && rotorsChosen[i] == Arrays.asList(rotorCheckBox)
                                     .indexOf(source)) {
                         rotorsChosen[i] = null;
 
                         int firstNullIndex = 0;
-                        for (int j = 0; j < rotorsChosen.length; j++) {
+                        for (int j = 0; j < length; j++) {
                             if (rotorsChosen[j] == null) {
                                 firstNullIndex = j;
                                 break;
                             }
                         }
                         Integer temp = rotorsChosen[firstNullIndex];
-                        final int rotorsChooseLength = rotorsChosen.length - 1;
-                        for (int j = firstNullIndex; j < rotorsChooseLength; j++) {
+                        for (int j = firstNullIndex; j < length - 1; j++) {
                             rotorsChosen[j] = rotorsChosen[j + 1];
                         }
-                        rotorsChosen[rotorsChooseLength] = temp;
+                        rotorsChosen[length - 1] = temp;
                     }
                 }
                 if (currentSelections < MAX_SELECTIONS) {
@@ -254,7 +253,7 @@ public class EnigmaPanel extends JPanel {
                 }
             }
             String display = "";
-            for (int i = 0; i < rotorsChosen.length; i++) {
+            for (int i = 0; i < length; i++) {
                 if (rotorsChosen[i] == null) {
                     display += "Empty   ";
                 } else {

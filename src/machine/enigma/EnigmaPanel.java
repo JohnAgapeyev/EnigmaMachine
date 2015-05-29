@@ -44,6 +44,7 @@ public class EnigmaPanel extends JPanel {
     private JButton plugBoardButton;
     private JButton rotorSet;
     private JButton[] rotorPlusMinus = new JButton[6];
+    private JButton clearText;
 
     private JLabel outputMessage;
     private JTextArea originalMessage;
@@ -83,6 +84,7 @@ public class EnigmaPanel extends JPanel {
 
         plugBoardButton = new JButton("Plugboard");
         rotorSet = new JButton("Set Rotors");
+        clearText = new JButton("Clear Text");
 
         for (int i = 0; i < rotorPlusMinus.length; i++) {
             if (i % 2 == 0) {
@@ -97,9 +99,11 @@ public class EnigmaPanel extends JPanel {
         message.addActionListener(enigmaActionListener);
         plugBoardButton.addActionListener(enigmaActionListener);
         rotorSet.addActionListener(enigmaActionListener);
+        clearText.addActionListener(enigmaActionListener);
 
         plugBoardButton.setBounds(220, 340, 115, 30);
         rotorSet.setBounds(220, 300, 115, 30);
+        clearText.setBounds(220, 380, 115, 30);
 
         message.setBounds(275, 40, hgt, wth);
         outputMessage.setBounds(150, 80, 500, 20);
@@ -129,6 +133,7 @@ public class EnigmaPanel extends JPanel {
         add(message);
         add(plugBoardButton);
         add(rotorSet);
+        add(clearText);
         add(rotorDisplay[0]);
         add(rotorDisplay[1]);
         add(rotorDisplay[2]);
@@ -171,6 +176,9 @@ public class EnigmaPanel extends JPanel {
                     }
                     formatRotorSettings();
                 }
+            } else if (e.getSource() == clearText) {
+                originalMessage.setText("");
+                codedMessage.setText("");
             } else {
                 if (e.getSource() == rotorPlusMinus[0]) {
                     rotorRotation[0]++;
@@ -314,14 +322,22 @@ public class EnigmaPanel extends JPanel {
                     e1.printStackTrace();
                 }
 
-                System.out.println(originalMessage.getText().length());
+                String originText = originalMessage.getText();
+                String codeText = codedMessage.getText();
+                int length = originText.length();
 
-                if (originalMessage.getText().length() % 25 == 0) {
-                    originalMessage.setText(originalMessage.getText() + "\n");
-                    codedMessage.setText(codedMessage.getText() + "\n");
-                } else if (originalMessage.getText().length() % 5 == 0) {
-                    originalMessage.setText(originalMessage.getText() + " ");
-                    codedMessage.setText(codedMessage.getText() + " ");
+                for (int i = 0; i < length; i++) {
+                    if (originText.charAt(i) == ' ') {
+                        length--;
+                    }
+                }
+
+                if (length % 25 == 0) {
+                    originalMessage.setText(originText + "\n");
+                    codedMessage.setText(codeText + "\n");
+                } else if (length % 5 == 0) {
+                    originalMessage.setText(originText + " ");
+                    codedMessage.setText(codeText + " ");
                 }
             }
         }

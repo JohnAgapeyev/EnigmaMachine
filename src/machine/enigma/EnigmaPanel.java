@@ -322,6 +322,8 @@ public class EnigmaPanel extends JPanel {
                     e1.printStackTrace();
                 }
 
+                // new Reflector().showKey();
+
                 String originText = originalMessage.getText();
                 String codeText = codedMessage.getText();
                 int length = originText.length();

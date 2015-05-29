@@ -16,7 +16,7 @@ public class EnigmaFrame extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setContentPane(new EnigmaPanel());
         setSize(300, 300);
-        setMinimumSize(new Dimension(500,500));
+        setMinimumSize(new Dimension(580, 600));
         setVisible(true);
     }
 

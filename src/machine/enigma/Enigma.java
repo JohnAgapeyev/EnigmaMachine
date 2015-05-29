@@ -34,7 +34,7 @@ public class Enigma {
         for (int i = length; i > -1; i--) {
             output = letterShift.apply(output, rotorsChosen[i]);
         }
-        return output;
+        return output.toUpperCase();
     }
 
     private String rotorEncryption(String message, int rotorNumber) {

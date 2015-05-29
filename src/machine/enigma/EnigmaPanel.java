@@ -6,16 +6,22 @@ import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.JCheckBox;
 import javax.swing.JOptionPane;
+import javax.swing.JTextArea;
 
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.util.Arrays;
 
 public class EnigmaPanel extends JPanel {
+
+    FontMetrics metrics;
 
     private Rotor[] rotors;
 
@@ -38,13 +44,19 @@ public class EnigmaPanel extends JPanel {
     private JButton plugBoardButton;
     private JButton rotorSet;
     private JButton[] rotorPlusMinus = new JButton[6];
+
     private JLabel outputMessage;
+    private JTextArea originalMessage;
+    private JTextArea codedMessage;
+
     private JLabel[] rotorDisplay = new JLabel[3];
     private JTextField message;
     private Enigma enigma;
     private EnigmaActionListener enigmaActionListener;
     private boolean changingRotors;
     private int[] rotorRotation = new int[3];
+
+    private EnigmaKeyListener keyListen = new EnigmaKeyListener();
 
     public EnigmaPanel() {
         chooseRotors();
@@ -59,8 +71,17 @@ public class EnigmaPanel extends JPanel {
             rotorDisplay[i] = new JLabel("0");
         }
 
+        int textWidth = 10;
+        int textHeight = 5;
         message = new JTextField();
-        plugBoardButton = new JButton("Switch Rotors");
+        originalMessage = new JTextArea();
+        codedMessage = new JTextArea();
+
+        metrics = originalMessage.getFontMetrics(originalMessage.getFont());
+        int hgt = metrics.getHeight();
+        int wth = metrics.getMaxAdvance();
+
+        plugBoardButton = new JButton("Plugboard");
         rotorSet = new JButton("Set Rotors");
 
         for (int i = 0; i < rotorPlusMinus.length; i++) {
@@ -77,22 +98,25 @@ public class EnigmaPanel extends JPanel {
         plugBoardButton.addActionListener(enigmaActionListener);
         rotorSet.addActionListener(enigmaActionListener);
 
-        plugBoardButton.setBounds(170, 250, 115, 30);
-        rotorSet.setBounds(170, 210, 115, 30);
+        plugBoardButton.setBounds(220, 340, 115, 30);
+        rotorSet.setBounds(220, 300, 115, 30);
 
-        message.setBounds(170, 40, 130, 24);
+        message.setBounds(275, 40, hgt, wth);
         outputMessage.setBounds(150, 80, 500, 20);
 
-        rotorDisplay[0].setBounds(187, 130, 20, 20);
-        rotorDisplay[1].setBounds(227, 130, 20, 20);
-        rotorDisplay[2].setBounds(267, 130, 20, 20);
+        originalMessage.setBounds(30, 190, wth * textWidth, hgt * textHeight);
+        codedMessage.setBounds(300, 190, wth * textWidth, hgt * textHeight);
 
-        rotorPlusMinus[0].setBounds(180, 110, 20, 20);
-        rotorPlusMinus[1].setBounds(180, 150, 20, 20);
-        rotorPlusMinus[2].setBounds(220, 110, 20, 20);
-        rotorPlusMinus[3].setBounds(220, 150, 20, 20);
-        rotorPlusMinus[4].setBounds(260, 110, 20, 20);
-        rotorPlusMinus[5].setBounds(260, 150, 20, 20);
+        rotorDisplay[0].setBounds(242, 130, 20, 20);
+        rotorDisplay[1].setBounds(282, 130, 20, 20);
+        rotorDisplay[2].setBounds(322, 130, 20, 20);
+
+        rotorPlusMinus[0].setBounds(235, 110, 20, 20);
+        rotorPlusMinus[1].setBounds(235, 150, 20, 20);
+        rotorPlusMinus[2].setBounds(275, 110, 20, 20);
+        rotorPlusMinus[3].setBounds(275, 150, 20, 20);
+        rotorPlusMinus[4].setBounds(315, 110, 20, 20);
+        rotorPlusMinus[5].setBounds(315, 150, 20, 20);
 
         for (JButton button : rotorPlusMinus) {
             button.setMargin(new Insets(0, 0, 0, 0));
@@ -108,6 +132,9 @@ public class EnigmaPanel extends JPanel {
         add(rotorDisplay[0]);
         add(rotorDisplay[1]);
         add(rotorDisplay[2]);
+        add(originalMessage);
+        add(codedMessage);
+        message.addKeyListener(keyListen);
     }
 
     @Override
@@ -265,6 +292,38 @@ public class EnigmaPanel extends JPanel {
 
         public int getCurrentSelections() {
             return currentSelections;
+        }
+    }
+
+    private class EnigmaKeyListener extends KeyAdapter {
+
+        @Override
+        public void keyReleased(KeyEvent e) {
+            int keyCode = e.getKeyCode();
+            if (keyCode >= 65 && keyCode <= 90) {
+                message.setText("");
+                originalMessage.setText(originalMessage.getText()
+                        + Character.toUpperCase(e.getKeyChar()));
+                try {
+                    codedMessage.setText(codedMessage.getText()
+                            + enigma.encode(Character.toString(e.getKeyChar()),
+                                    rotorsChosen));
+                    rotorRotation[2]++;
+                    formatRotorSettings();
+                } catch (Exception e1) {
+                    e1.printStackTrace();
+                }
+
+                System.out.println(originalMessage.getText().length());
+
+                if (originalMessage.getText().length() % 25 == 0) {
+                    originalMessage.setText(originalMessage.getText() + "\n");
+                    codedMessage.setText(codedMessage.getText() + "\n");
+                } else if (originalMessage.getText().length() % 5 == 0) {
+                    originalMessage.setText(originalMessage.getText() + " ");
+                    codedMessage.setText(codedMessage.getText() + " ");
+                }
+            }
         }
     }
 }

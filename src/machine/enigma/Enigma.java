@@ -26,17 +26,19 @@ public class Enigma {
                 Integer rotorNumber) -> {
             return rotorEncryption(message, rotorNumber);
         };
-        // Normal encryption
-        for (Integer rotor : rotorsChosen) {
-            output = letterShift.apply(output, rotor);
-        }
-
-        output = letterShift.apply(output, REFLECTOR_CODE);
 
         // Return back through the rotors
         for (int i = length; i > -1; i--) {
             output = letterShift.apply(output, rotorsChosen[i]);
         }
+
+        output = letterShift.apply(output, REFLECTOR_CODE);
+
+        // Normal encryption
+        for (Integer rotor : rotorsChosen) {
+            output = letterShift.apply(output, rotor);
+        }
+
         return output.toUpperCase();
     }
 
@@ -48,6 +50,7 @@ public class Enigma {
         } else {
             rotorKey = rotors[rotorNumber].getKey();
         }
+
         String response = "";
         for (char letter : messageLetters) {
             if (letter == ' ') {
@@ -56,10 +59,24 @@ public class Enigma {
                 for (int i = 0; i < ALPHABET.length; i++) {
                     if (letter == ALPHABET[i]) {
                         response += rotorKey[i];
+                        break;
                     }
                 }
+                break;
             }
         }
+
+        // System.out.println(rotorNumber);
+
+        // System.out.println(message + "\t" + response);
+        // String one = "";
+        // String two = "";
+        // for (int i=0; i < 26; i++) {
+        // one += rotorKey[i];
+        // two += ALPHABET[i];
+        // }
+        // System.out.println(two + "\n" + one);
+
         return response;
     }
 

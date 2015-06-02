@@ -1,7 +1,6 @@
 package machine.enigma;
 
 import java.awt.Dimension;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import javax.swing.JFrame;

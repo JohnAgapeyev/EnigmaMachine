@@ -17,7 +17,6 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -153,14 +152,14 @@ public class EnigmaPanel extends JPanel {
         @Override
         public void actionPerformed(ActionEvent e) {
             if (e.getSource() == message) {
-                try {
-                    outputMessage.setText(enigma.encode(message.getText(),
-                            rotorsChosen));
-                } catch (Exception e1) {
-                    e1.printStackTrace();
-                }
-                rotorRotation[2]++;
-                formatRotorSettings();
+                // try {
+                // outputMessage.setText(enigma.encode(message.getText(),
+                // rotorsChosen));
+                // } catch (Exception e1) {
+                // e1.printStackTrace();
+                // }
+                // rotorRotation[2]++;
+                // formatRotorSettings();
             } else if (e.getSource() == plugBoardButton) {
                 // formatRotorSettings();
             } else if (e.getSource() == rotorSet) {
@@ -316,7 +315,8 @@ public class EnigmaPanel extends JPanel {
                         + Character.toUpperCase(e.getKeyChar()));
                 try {
                     codedMessage.setText(codedMessage.getText()
-                            + enigma.encode(Character.toString(e.getKeyChar()),
+                            + enigma.encode(
+                                    Character.toUpperCase(e.getKeyChar()),
                                     rotorsChosen));
                     rotorRotation[2]++;
                     formatRotorSettings();

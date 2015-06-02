@@ -1,17 +1,12 @@
 package machine.enigma;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 import java.util.function.BiFunction;
-import java.util.function.Consumer;
 
 public class Enigma {
 
@@ -19,7 +14,7 @@ public class Enigma {
     private Reflector reflector;
     private int rotorLength = rotors.length;
     private static final char[] ALPHABET = "abcdefghijklmnopqrstuvwxyz"
-            .toCharArray();
+            .toUpperCase().toCharArray();
     private final int REFLECTOR_CODE = 100;
 
     public Enigma() throws IOException {
@@ -30,7 +25,7 @@ public class Enigma {
 
         for (String[] line : options) {
             if (line[0].equals("default_rotor_rand")) {
-                if (line[1].equals("false")) {
+                if (!Boolean.getBoolean(line[1])) {
                     for (String[] findValue : options) {
                         switch (findValue[0]) {
                             case "rotor_1":
@@ -64,11 +59,12 @@ public class Enigma {
                 }
             }
             if (line[0].equals("default_reflector_rand")) {
-                if (line[1].equals("false")) {
+                if (!Boolean.getBoolean(line[1])) {
                     for (String[] findValue : options) {
                         if (findValue[0].equals("reflector")) {
                             reflector = new Reflector(
                                     findValue[1].toCharArray());
+                            break;
                         }
                     }
                 } else {
@@ -76,20 +72,15 @@ public class Enigma {
                 }
             }
         }
-
-        // for (int i = 0; i < rotorLength; i++) {
-        // rotors[i] = new Rotor();
-        // }
-        // reflector = new Reflector();
     }
 
-    public String encode(String userMessage, Integer[] rotorsChosen)
+    public char encode(char sentLetter, Integer[] rotorsChosen)
             throws Exception {
-        String output = userMessage;
+        char output = sentLetter;
         int length = rotorsChosen.length - 1;
-        BiFunction<String, Integer, String> letterShift = (String message,
-                Integer rotorNumber) -> {
-            return rotorEncryption(message, rotorNumber);
+        BiFunction<Character, Integer, Character> letterShift = (
+                Character letter, Integer rotorNumber) -> {
+            return rotorEncryption(letter, rotorNumber);
         };
 
         // Normal encryption
@@ -104,11 +95,12 @@ public class Enigma {
             output = letterShift.apply(output, rotor);
         }
 
-        return output.toUpperCase();
+        System.out.println("\n\n\n\n\n");
+
+        return output;
     }
 
-    private String rotorEncryption(String message, int rotorNumber) {
-        char[] messageLetters = message.toLowerCase().toCharArray();
+    private char rotorEncryption(char letter, int rotorNumber) {
         char[] rotorKey;
         if (rotorNumber == REFLECTOR_CODE) {
             rotorKey = reflector.getKey();
@@ -116,24 +108,17 @@ public class Enigma {
             rotorKey = rotors[rotorNumber].getKey();
         }
 
-        String response = "";
-        for (char letter : messageLetters) {
-            if (letter == ' ') {
-                response += letter;
-            } else {
-                for (int i = 0; i < ALPHABET.length; i++) {
-                    if (letter == ALPHABET[i]) {
-                        response += rotorKey[i];
-                        break;
-                    }
-                }
+        char response = letter;
+        for (int i = 0; i < ALPHABET.length; i++) {
+            if (response == ALPHABET[i]) {
+                response = rotorKey[i];
                 break;
             }
         }
 
         System.out.println(rotorNumber);
 
-        System.out.println(message + "\t" + response);
+        System.out.println(letter + "\t" + response);
         String one = "";
         String two = "";
         for (int i = 0; i < 26; i++) {

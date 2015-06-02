@@ -1,6 +1,7 @@
 package machine.enigma;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class Reflector {
@@ -8,12 +9,11 @@ public class Reflector {
     private static final char[] ALPHABET = "abcdefghijklmnopqrstuvwxyz"
             .toCharArray();
 
-    private static ArrayList<Character> letterList;
+    private static List<Character> letterList;
 
-    private Character[] key;
+    private Character[] key = new Character[ALPHABET.length];;
 
     public Reflector() {
-        key = new Character[ALPHABET.length];
         if (letterList == null) {
             letterList = new ArrayList<Character>();
             for (int i = 0; i < ALPHABET.length; i++) {
@@ -38,6 +38,12 @@ public class Reflector {
                     }
                 }
             }
+        }
+    }
+
+    public Reflector(char[] key) {
+        for (int i = 0; i < this.key.length; i++) {
+            this.key[i] = key[i];
         }
     }
 

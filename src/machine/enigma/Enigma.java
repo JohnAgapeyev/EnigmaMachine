@@ -1,6 +1,17 @@
 package machine.enigma;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 
 public class Enigma {
 
@@ -11,11 +22,65 @@ public class Enigma {
             .toCharArray();
     private final int REFLECTOR_CODE = 100;
 
-    public Enigma() {
-        for (int i = 0; i < rotorLength; i++) {
-            rotors[i] = new Rotor();
+    public Enigma() throws IOException {
+        Path configPath = FileSystems.getDefault().getPath("config.ini");
+        List<String[]> options = new ArrayList<String[]>();
+        Files.readAllLines(configPath).forEach(
+                line -> options.add(line.split("\\s+")));
+
+        for (String[] line : options) {
+            if (line[0].equals("default_rotor_rand")) {
+                if (line[1].equals("false")) {
+                    for (String[] findValue : options) {
+                        switch (findValue[0]) {
+                            case "rotor_1":
+                                rotors[0] = new Rotor(
+                                        findValue[1].toCharArray());
+                                break;
+                            case "rotor_2":
+                                rotors[1] = new Rotor(
+                                        findValue[1].toCharArray());
+                                break;
+                            case "rotor_3":
+                                rotors[2] = new Rotor(
+                                        findValue[1].toCharArray());
+                                break;
+                            case "rotor_4":
+                                rotors[3] = new Rotor(
+                                        findValue[1].toCharArray());
+                                break;
+                            case "rotor_5":
+                                rotors[4] = new Rotor(
+                                        findValue[1].toCharArray());
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                } else {
+                    for (int i = 0; i < rotorLength; i++) {
+                        rotors[i] = new Rotor();
+                    }
+                }
+            }
+            if (line[0].equals("default_reflector_rand")) {
+                if (line[1].equals("false")) {
+                    for (String[] findValue : options) {
+                        if (findValue[0].equals("reflector")) {
+                            reflector = new Reflector(
+                                    findValue[1].toCharArray());
+                        }
+                    }
+                } else {
+                    reflector = new Reflector();
+                }
+            }
         }
-        reflector = new Reflector();
+
+        // for (int i = 0; i < rotorLength; i++) {
+        // rotors[i] = new Rotor();
+        // }
+        // reflector = new Reflector();
     }
 
     public String encode(String userMessage, Integer[] rotorsChosen)
@@ -27,14 +92,14 @@ public class Enigma {
             return rotorEncryption(message, rotorNumber);
         };
 
-        // Return back through the rotors
+        // Normal encryption
         for (int i = length; i > -1; i--) {
             output = letterShift.apply(output, rotorsChosen[i]);
         }
 
         output = letterShift.apply(output, REFLECTOR_CODE);
 
-        // Normal encryption
+        // Return back through the rotors
         for (Integer rotor : rotorsChosen) {
             output = letterShift.apply(output, rotor);
         }
@@ -66,16 +131,16 @@ public class Enigma {
             }
         }
 
-        // System.out.println(rotorNumber);
+        System.out.println(rotorNumber);
 
-        // System.out.println(message + "\t" + response);
-        // String one = "";
-        // String two = "";
-        // for (int i=0; i < 26; i++) {
-        // one += rotorKey[i];
-        // two += ALPHABET[i];
-        // }
-        // System.out.println(two + "\n" + one);
+        System.out.println(message + "\t" + response);
+        String one = "";
+        String two = "";
+        for (int i = 0; i < 26; i++) {
+            one += rotorKey[i];
+            two += ALPHABET[i];
+        }
+        System.out.println(two + "\n" + one);
 
         return response;
     }

@@ -1,13 +1,14 @@
 package machine.enigma;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class Rotor {
     private static final char[] ALPHABET = "abcdefghijklmnopqrstuvwxyz"
-            .toCharArray();
+            .toUpperCase().toCharArray();
 
-    private static ArrayList<Character> letterList;
+    private static List<Character> letterList;
 
     private char[] originalKey;
 
@@ -34,6 +35,11 @@ public class Rotor {
             alreadyUsed.add(letterIndex);
         }
         rotatedKey = originalKey.clone();
+    }
+
+    public Rotor(char[] key) {
+        originalKey = key;
+        rotatedKey = key;
     }
 
     public char[] getKey() {

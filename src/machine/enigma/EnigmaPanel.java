@@ -17,6 +17,8 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Arrays;
 
 public class EnigmaPanel extends JPanel {
@@ -59,7 +61,7 @@ public class EnigmaPanel extends JPanel {
 
     private EnigmaKeyListener keyListen = new EnigmaKeyListener();
 
-    public EnigmaPanel() {
+    public EnigmaPanel() throws IOException {
         chooseRotors();
         setLayout(null);
         enigma = new Enigma();

@@ -14,9 +14,13 @@ public class Rotor {
 
     private char[] rotatedKey;
 
+    private char[] rotatedAlphabet;
+
     public Rotor() {
         originalKey = new char[ALPHABET.length];
         rotatedKey = new char[ALPHABET.length];
+        rotatedAlphabet = ALPHABET.clone();
+
         if (letterList == null) {
             letterList = new ArrayList<Character>();
             for (int i = 0; i < ALPHABET.length; i++) {
@@ -40,32 +44,54 @@ public class Rotor {
     public Rotor(char[] key) {
         originalKey = key;
         rotatedKey = key;
+        rotatedAlphabet = ALPHABET.clone();
     }
 
     public char[] getKey() {
         return rotatedKey;
     }
 
+    public char[] getAlphabet() {
+        return rotatedAlphabet;
+    }
+
     public void rotate() {
+        // Shifting the key
         char temp = rotatedKey[0];
         final int keyLength = rotatedKey.length - 1;
         for (int i = 0; i < keyLength; i++) {
             rotatedKey[i] = rotatedKey[i + 1];
         }
         rotatedKey[keyLength] = temp;
+
+        // Shifting the alphabet the key is compared to
+        temp = rotatedAlphabet[0];
+        for (int i = 0; i < keyLength; i++) {
+            rotatedAlphabet[i] = rotatedAlphabet[i + 1];
+        }
+        rotatedAlphabet[keyLength] = temp;
     }
 
     private void rotateBackwards() {
-        char temp = rotatedKey[rotatedKey.length - 1];
+        // Shifting the key
         final int keyLength = rotatedKey.length - 1;
+        char temp = rotatedKey[keyLength];
         for (int i = keyLength; i >= 0; i--) {
             rotatedKey[i] = rotatedKey[i - 1];
         }
         rotatedKey[0] = temp;
+
+        // Shifting the alphabet the key is compared to
+        temp = rotatedAlphabet[keyLength];
+        for (int i = keyLength; i >= 0; i--) {
+            rotatedAlphabet[i] = rotatedAlphabet[i - 1];
+        }
+        rotatedAlphabet[0] = temp;
     }
 
     public void setRotation(int rotateSteps) {
         rotatedKey = originalKey.clone();
+        rotatedAlphabet = ALPHABET.clone();
         if (rotateSteps == 0) {
             return;
         } else if (rotateSteps > 0) {

@@ -10,6 +10,11 @@ import java.util.function.BiFunction;
 
 public class Enigma {
 
+    /**
+     * http://stackoverflow.com/questions/28712506/enigma-replica-not-yielding-
+     * expected-result
+     */
+
     private Rotor[] rotors = new Rotor[5];
     private Reflector reflector;
     private int rotorLength = rotors.length;
@@ -102,15 +107,26 @@ public class Enigma {
 
     private char rotorEncryption(char letter, int rotorNumber) {
         char[] rotorKey;
+        char[] alphabetKey;
+
         if (rotorNumber == REFLECTOR_CODE) {
             rotorKey = reflector.getKey();
+            alphabetKey = ALPHABET.clone();
         } else {
             rotorKey = rotors[rotorNumber].getKey();
+            alphabetKey = rotors[rotorNumber].getAlphabet();
         }
 
         char response = letter;
-        for (int i = 0; i < ALPHABET.length; i++) {
-            if (response == ALPHABET[i]) {
+
+        for (int i = 0; i < alphabetKey.length; i++) {
+            if (response == alphabetKey[i]) {
+                response = ALPHABET[i];
+            }
+        }
+
+        for (int i = 0; i < alphabetKey.length; i++) {
+            if (response == alphabetKey[i]) {
                 response = rotorKey[i];
                 break;
             }
@@ -121,11 +137,13 @@ public class Enigma {
         System.out.println(letter + "\t" + response);
         String one = "";
         String two = "";
+        String three = "";
         for (int i = 0; i < 26; i++) {
             one += rotorKey[i];
             two += ALPHABET[i];
+            three += alphabetKey[i];
         }
-        System.out.println(two + "\n" + one);
+        System.out.println(two + "\n" + three + "\n" + one);
 
         return response;
     }

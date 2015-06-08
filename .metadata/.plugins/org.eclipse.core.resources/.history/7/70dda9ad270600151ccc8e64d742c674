@@ -1,0 +1,41 @@
+package machine.enigma;
+
+import java.util.ArrayList;
+import java.util.Random;
+
+public class Reflector {
+
+    private static final char[] ALPHABET = "abcdefghijklmnopqrstuvwxyz"
+            .toCharArray();
+
+    private static ArrayList<Character> letterList;
+
+    private char[] key;
+
+    public Reflector() {
+        key = new char[ALPHABET.length];
+        if (letterList == null) {
+            letterList = new ArrayList<Character>();
+            for (int i = 0; i < ALPHABET.length; i++) {
+                letterList.add(ALPHABET[i]);
+            }
+        }
+        final Random rand = new Random();
+        int halfAlphabetLength = letterList.size() / 2;
+        ArrayList<Integer> alreadyUsed = new ArrayList<Integer>();
+        for (int i = 0; i < halfAlphabetLength; i++) {
+            int letterIndex = rand.nextInt(halfAlphabetLength);
+            while (alreadyUsed.contains(letterIndex)) {
+                letterIndex = rand.nextInt(halfAlphabetLength);
+            }
+            key[i] = letterList.get(letterIndex);
+            alreadyUsed.add(letterIndex);
+        }
+    }
+
+    public void getKey() {
+        for (char letter : key) {
+            System.out.print(letter);
+        }
+    }
+}

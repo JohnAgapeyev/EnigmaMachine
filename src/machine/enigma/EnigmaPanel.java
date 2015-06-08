@@ -314,12 +314,12 @@ public class EnigmaPanel extends JPanel {
                 originalMessage.setText(originalMessage.getText()
                         + Character.toUpperCase(e.getKeyChar()));
                 try {
+                    rotorRotation[2]++;
+                    formatRotorSettings();
                     codedMessage.setText(codedMessage.getText()
                             + enigma.encode(
                                     Character.toUpperCase(e.getKeyChar()),
                                     rotorsChosen));
-                    rotorRotation[2]++;
-                    formatRotorSettings();
                 } catch (Exception e1) {
                     e1.printStackTrace();
                 }

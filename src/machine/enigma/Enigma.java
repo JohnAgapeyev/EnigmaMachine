@@ -10,8 +10,8 @@ import java.util.List;
 public class Enigma {
 
     /*
-     * FIXED MY MASSIVE LOGIC ERROR
-     * FEEL SO HAPPY HAPPY
+     * FIXED MY MASSIVE LOGIC ERROR FEEL SO HAPPY HAPPY
+     * Still need to comment stuff
      */
 
     private Rotor[] rotors = new Rotor[5];
@@ -29,7 +29,7 @@ public class Enigma {
 
         for (String[] line : options) {
             if (line[0].equals("default_rotor_rand")) {
-                if (!Boolean.getBoolean(line[1])) {
+                if (!Boolean.valueOf(line[1])) {
                     for (String[] findValue : options) {
                         switch (findValue[0]) {
                             case "rotor_1":
@@ -57,12 +57,13 @@ public class Enigma {
                         }
                     }
                 } else {
+                    System.out.println("FUCK");
                     for (int i = 0; i < rotorLength; i++) {
                         rotors[i] = new Rotor();
                     }
                 }
             } else if (line[0].equals("default_reflector_rand")) {
-                if (!Boolean.getBoolean(line[1])) {
+                if (!Boolean.valueOf(line[1])) {
                     for (String[] findValue : options) {
                         if (findValue[0].equals("reflector")) {
                             reflector = new Reflector(
@@ -115,7 +116,11 @@ public class Enigma {
         }
 
         if (!isReverse) {
+            
+            
             System.out.println(response);
+            
+            
             // External alphabet gets turned into internal alphabet
             for (int i = 0; i < alphabetKey.length; i++) {
                 if (response == alphabetKey[i]) {
@@ -146,7 +151,6 @@ public class Enigma {
             }
 
             System.out.println(response);
-            // System.out.println("\n\n\n\n\n");
 
         } else {
             System.out.println(response);

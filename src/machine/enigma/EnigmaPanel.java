@@ -150,9 +150,8 @@ public class EnigmaPanel extends JPanel {
     private class EnigmaActionListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            if (e.getSource() == message) {
-
-            } else if (e.getSource() == plugBoardButton) {
+            if (e.getSource() == plugBoardButton) {
+                
             } else if (e.getSource() == rotorSet) {
                 if (!changingRotors) {
                     rotorSet.setText("Done");

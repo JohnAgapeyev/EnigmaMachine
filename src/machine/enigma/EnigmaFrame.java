@@ -1,6 +1,5 @@
 package machine.enigma;
 
-import java.awt.Dimension;
 import java.io.IOException;
 
 import javax.swing.JFrame;
@@ -15,7 +14,7 @@ public class EnigmaFrame extends JFrame {
     public EnigmaFrame() throws IOException {
         super("Enigma Machine");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setContentPane(new EnigmaPanel());
+        setContentPane(new MainPanel());
         setSize(580, 600);
         setResizable(false);
         setVisible(true);

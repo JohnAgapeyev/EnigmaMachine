@@ -6,16 +6,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BiFunction;
 
 public class Enigma {
 
     /*
-     * Encoding the message a second time when I should be decoding Instead of
-     * turning input from alphabet to wiring on the reverse journey, I should
-     * turn the wiring into the alphabet For key beginning EKM..., E becomes A
-     * as the reverse would have happened on the way before the reflector Now to
-     * figure out how to fix that...
+     * FIXED MY MASSIVE LOGIC ERROR
+     * FEEL SO HAPPY HAPPY
      */
 
     private Rotor[] rotors = new Rotor[5];
@@ -85,21 +81,19 @@ public class Enigma {
             throws Exception {
         char output = sentLetter;
         int length = rotorsChosen.length - 1;
-        BiFunction<Character, Integer, Character> letterShift = (
-                Character letter, Integer rotorNumber) -> {
-            return rotorEncryption(letter, rotorNumber);
-        };
+        boolean isReverse = false;
 
         // Normal encryption
         for (int i = length; i > -1; i--) {
-            output = letterShift.apply(output, rotorsChosen[i]);
+            output = rotorEncryption(output, rotorsChosen[i], isReverse);
         }
 
-        output = letterShift.apply(output, REFLECTOR_CODE);
+        output = rotorEncryption(output, REFLECTOR_CODE, isReverse);
 
+        isReverse = true;
         // Return back through the rotors
         for (Integer rotor : rotorsChosen) {
-            output = letterShift.apply(output, rotor);
+            output = rotorEncryption(output, rotor, isReverse);
         }
 
         System.out.println("\n\n\n\n\n");
@@ -107,63 +101,82 @@ public class Enigma {
         return output;
     }
 
-    private char rotorEncryption(char letter, int rotorNumber) {
+    private char rotorEncryption(char letter, int rotorNumber, boolean isReverse) {
         char[] rotorKey;
         char[] alphabetKey;
+        char response = letter;
 
         if (rotorNumber == REFLECTOR_CODE) {
             rotorKey = reflector.getKey();
             alphabetKey = ALPHABET.clone();
         } else {
-            rotorKey = rotors[rotorNumber].getKey();
-            alphabetKey = rotors[rotorNumber].getAlphabet();
+            rotorKey = rotors[Math.abs(rotorNumber)].getKey();
+            alphabetKey = rotors[Math.abs(rotorNumber)].getAlphabet();
         }
 
-        char response = letter;
-        //
-        // System.out.println(response);
-        //
-        // // Internal alphabet gets turned into rotor wiring
-        // for (int i = 0; i < ALPHABET.length; i++) {
-        // if (response == ALPHABET[i]) {
-        // response = rotorKey[i];
-        // break;
-        // }
-        // }
-
-        System.out.println(response);
-
-        // External alphabet gets turned into internal alphabet
-        for (int i = 0; i < alphabetKey.length; i++) {
-            if (response == alphabetKey[i]) {
-                response = ALPHABET[i];
-                break;
+        if (!isReverse) {
+            System.out.println(response);
+            // External alphabet gets turned into internal alphabet
+            for (int i = 0; i < alphabetKey.length; i++) {
+                if (response == alphabetKey[i]) {
+                    response = ALPHABET[i];
+                    break;
+                }
             }
-        }
 
-        System.out.println(response);
+            System.out.println(response);
 
-        // Internal alphabet gets turned into rotor wiring
-        for (int i = 0; i < alphabetKey.length; i++) {
-            if (response == alphabetKey[i]) {
-                response = rotorKey[i];
-                break;
+            // Internal alphabet gets turned into rotor wiring
+            for (int i = 0; i < alphabetKey.length; i++) {
+                if (response == alphabetKey[i]) {
+                    response = rotorKey[i];
+                    break;
+                }
             }
-        }
 
-        System.out.println(response);
+            System.out.println(response);
 
-        // Need to change rotor wiring on the internal alphabet to the external
-        // non-changing one
-        for (int i = 0; i < ALPHABET.length; i++) {
-            if (response == ALPHABET[i]) {
-                response = alphabetKey[i];
-                break;
+            // Rotor output is returned through the shifted alphabet key once
+            // again on its way out
+            for (int i = 0; i < ALPHABET.length; i++) {
+                if (response == ALPHABET[i]) {
+                    response = alphabetKey[i];
+                    break;
+                }
             }
-        }
 
-        System.out.println(response);
-        // System.out.println("\n\n\n\n\n");
+            System.out.println(response);
+            // System.out.println("\n\n\n\n\n");
+
+        } else {
+            System.out.println(response);
+
+            for (int i = 0; i < alphabetKey.length; i++) {
+                if (response == alphabetKey[i]) {
+                    response = ALPHABET[i];
+                    break;
+                }
+            }
+
+            System.out.println(response);
+
+            for (int i = 0; i < rotorKey.length; i++) {
+                if (response == rotorKey[i]) {
+                    response = alphabetKey[i];
+                    break;
+                }
+            }
+            System.out.println(response);
+
+            for (int i = 0; i < ALPHABET.length; i++) {
+                if (response == ALPHABET[i]) {
+                    response = alphabetKey[i];
+                    break;
+                }
+            }
+            System.out.println(response);
+
+        }
 
         System.out.println(rotorNumber);
 

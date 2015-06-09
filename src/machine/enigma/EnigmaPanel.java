@@ -22,7 +22,7 @@ import java.util.Arrays;
 
 public class EnigmaPanel extends JPanel {
 
-    FontMetrics metrics;
+    private FontMetrics metrics;
 
     private Rotor[] rotors;
 
@@ -34,6 +34,7 @@ public class EnigmaPanel extends JPanel {
     private JCheckBox[] rotorCheckBox = { new JCheckBox("Rotor 1"),
             new JCheckBox("Rotor 2"), new JCheckBox("Rotor 3"),
             new JCheckBox("Rotor 4"), new JCheckBox("Rotor 5") };
+
     private String rotorChangeDialog = "Please select three rotors";
     private JLabel selectedRotorsMessage = new JLabel(
             "You have selected rotors: ");
@@ -47,7 +48,6 @@ public class EnigmaPanel extends JPanel {
     private JButton[] rotorPlusMinus = new JButton[6];
     private JButton clearText;
 
-    private JLabel outputMessage;
     private JTextArea originalMessage;
     private JTextArea codedMessage;
 
@@ -66,8 +66,6 @@ public class EnigmaPanel extends JPanel {
         enigma = new Enigma();
         rotors = enigma.getRotors();
         enigmaActionListener = new EnigmaActionListener();
-        outputMessage = new JLabel(
-                "This is a test of the emergency broadcast system");
 
         for (int i = 0; i < rotorDisplay.length; i++) {
             rotorDisplay[i] = new JLabel("0");
@@ -80,8 +78,8 @@ public class EnigmaPanel extends JPanel {
         codedMessage = new JTextArea();
 
         metrics = originalMessage.getFontMetrics(originalMessage.getFont());
-        int hgt = metrics.getHeight();
-        int wth = metrics.getMaxAdvance();
+        int fontHeight = metrics.getHeight();
+        int fontWidth = metrics.getMaxAdvance();
 
         plugBoardButton = new JButton("Plugboard");
         rotorSet = new JButton("Set Rotors");
@@ -106,11 +104,12 @@ public class EnigmaPanel extends JPanel {
         rotorSet.setBounds(220, 300, 115, 30);
         clearText.setBounds(220, 380, 115, 30);
 
-        message.setBounds(275, 40, hgt, wth);
-        outputMessage.setBounds(150, 80, 500, 20);
+        message.setBounds(275, 40, fontWidth, fontHeight);
 
-        originalMessage.setBounds(30, 190, wth * textWidth, hgt * textHeight);
-        codedMessage.setBounds(300, 190, wth * textWidth, hgt * textHeight);
+        originalMessage.setBounds(30, 190, fontWidth * textWidth, fontHeight
+                * textHeight);
+        codedMessage.setBounds(300, 190, fontWidth * textWidth, fontHeight
+                * textHeight);
 
         rotorDisplay[0].setBounds(242, 130, 20, 20);
         rotorDisplay[1].setBounds(282, 130, 20, 20);
@@ -130,7 +129,6 @@ public class EnigmaPanel extends JPanel {
             button.setVisible(false);
         }
 
-        add(outputMessage);
         add(message);
         add(plugBoardButton);
         add(rotorSet);
@@ -140,6 +138,7 @@ public class EnigmaPanel extends JPanel {
         add(rotorDisplay[2]);
         add(originalMessage);
         add(codedMessage);
+
         message.addKeyListener(keyListen);
     }
 
@@ -152,16 +151,8 @@ public class EnigmaPanel extends JPanel {
         @Override
         public void actionPerformed(ActionEvent e) {
             if (e.getSource() == message) {
-                // try {
-                // outputMessage.setText(enigma.encode(message.getText(),
-                // rotorsChosen));
-                // } catch (Exception e1) {
-                // e1.printStackTrace();
-                // }
-                // rotorRotation[2]++;
-                // formatRotorSettings();
+
             } else if (e.getSource() == plugBoardButton) {
-                // formatRotorSettings();
             } else if (e.getSource() == rotorSet) {
                 if (!changingRotors) {
                     rotorSet.setText("Done");
@@ -323,8 +314,6 @@ public class EnigmaPanel extends JPanel {
                 } catch (Exception e1) {
                     e1.printStackTrace();
                 }
-
-                // new Reflector().showKey();
 
                 String originText = originalMessage.getText();
                 String codeText = codedMessage.getText();

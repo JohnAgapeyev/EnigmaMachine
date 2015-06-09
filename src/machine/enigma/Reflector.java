@@ -7,7 +7,7 @@ import java.util.Random;
 public class Reflector {
 
     private static final char[] ALPHABET = "abcdefghijklmnopqrstuvwxyz"
-            .toCharArray();
+            .toUpperCase().toCharArray();
 
     private static List<Character> letterList;
 

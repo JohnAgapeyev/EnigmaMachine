@@ -8,7 +8,7 @@ import javax.swing.JFrame;
 public class EnigmaFrame extends JFrame {
 
     /**
-     * Serial ID for the panel.
+     * Serial ID for the frame.
      */
     private static final long serialVersionUID = -4908457653373357661L;
 
@@ -16,8 +16,8 @@ public class EnigmaFrame extends JFrame {
         super("Enigma Machine");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setContentPane(new EnigmaPanel());
-        setSize(300, 300);
-        setMinimumSize(new Dimension(580, 600));
+        setSize(580, 600);
+        setResizable(false);
         setVisible(true);
     }
 

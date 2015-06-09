@@ -10,9 +10,12 @@ import java.util.function.BiFunction;
 
 public class Enigma {
 
-    /**
-     * http://stackoverflow.com/questions/28712506/enigma-replica-not-yielding-
-     * expected-result
+    /*
+     * Encoding the message a second time when I should be decoding Instead of
+     * turning input from alphabet to wiring on the reverse journey, I should
+     * turn the wiring into the alphabet For key beginning EKM..., E becomes A
+     * as the reverse would have happened on the way before the reflector Now to
+     * figure out how to fix that...
      */
 
     private Rotor[] rotors = new Rotor[5];
@@ -62,8 +65,7 @@ public class Enigma {
                         rotors[i] = new Rotor();
                     }
                 }
-            }
-            if (line[0].equals("default_reflector_rand")) {
+            } else if (line[0].equals("default_reflector_rand")) {
                 if (!Boolean.getBoolean(line[1])) {
                     for (String[] findValue : options) {
                         if (findValue[0].equals("reflector")) {
@@ -118,16 +120,16 @@ public class Enigma {
         }
 
         char response = letter;
-
-        System.out.println(response);
-
-        // Internal alphabet gets turned into rotor wiring
-        for (int i = 0; i < ALPHABET.length; i++) {
-            if (response == ALPHABET[i]) {
-                response = rotorKey[i];
-                break;
-            }
-        }
+        //
+        // System.out.println(response);
+        //
+        // // Internal alphabet gets turned into rotor wiring
+        // for (int i = 0; i < ALPHABET.length; i++) {
+        // if (response == ALPHABET[i]) {
+        // response = rotorKey[i];
+        // break;
+        // }
+        // }
 
         System.out.println(response);
 
@@ -161,7 +163,7 @@ public class Enigma {
         }
 
         System.out.println(response);
-        System.out.println("\n\n\n\n\n");
+        // System.out.println("\n\n\n\n\n");
 
         System.out.println(rotorNumber);
 

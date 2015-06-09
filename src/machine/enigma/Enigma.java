@@ -119,18 +119,49 @@ public class Enigma {
 
         char response = letter;
 
-        for (int i = 0; i < alphabetKey.length; i++) {
-            if (response == alphabetKey[i]) {
-                response = ALPHABET[i];
+        System.out.println(response);
+
+        // Internal alphabet gets turned into rotor wiring
+        for (int i = 0; i < ALPHABET.length; i++) {
+            if (response == ALPHABET[i]) {
+                response = rotorKey[i];
+                break;
             }
         }
 
+        System.out.println(response);
+
+        // External alphabet gets turned into internal alphabet
+        for (int i = 0; i < alphabetKey.length; i++) {
+            if (response == alphabetKey[i]) {
+                response = ALPHABET[i];
+                break;
+            }
+        }
+
+        System.out.println(response);
+
+        // Internal alphabet gets turned into rotor wiring
         for (int i = 0; i < alphabetKey.length; i++) {
             if (response == alphabetKey[i]) {
                 response = rotorKey[i];
                 break;
             }
         }
+
+        System.out.println(response);
+
+        // Need to change rotor wiring on the internal alphabet to the external
+        // non-changing one
+        for (int i = 0; i < ALPHABET.length; i++) {
+            if (response == ALPHABET[i]) {
+                response = alphabetKey[i];
+                break;
+            }
+        }
+
+        System.out.println(response);
+        System.out.println("\n\n\n\n\n");
 
         System.out.println(rotorNumber);
 
@@ -143,7 +174,9 @@ public class Enigma {
             two += ALPHABET[i];
             three += alphabetKey[i];
         }
-        System.out.println(two + "\n" + three + "\n" + one);
+
+        System.out.println(two + "\n" + three + "\n" + one + "\n" + three
+                + "\n" + two + "\n\n");
 
         return response;
     }

@@ -31,6 +31,9 @@ public class EnigmaPanel extends JPanel {
      */
     private static final long serialVersionUID = 7298201505806512569L;
 
+    private static final char[] ALPHABET = "abcdefghijklmnopqrstuvwxyz"
+            .toUpperCase().toCharArray();
+
     private JCheckBox[] rotorCheckBox = { new JCheckBox("Rotor 1"),
             new JCheckBox("Rotor 2"), new JCheckBox("Rotor 3"),
             new JCheckBox("Rotor 4"), new JCheckBox("Rotor 5") };
@@ -58,10 +61,13 @@ public class EnigmaPanel extends JPanel {
     private boolean changingRotors;
     private int[] rotorRotation = new int[3];
 
+    private JTextField[] plugs = new JTextField[26];
+    private JLabel[] plugLabels = new JLabel[26];
+
     private EnigmaKeyListener keyListen = new EnigmaKeyListener();
 
     public EnigmaPanel() throws IOException {
-        chooseRotors();
+        // chooseRotors();
         setLayout(null);
         enigma = new Enigma();
         rotors = enigma.getRotors();
@@ -74,12 +80,19 @@ public class EnigmaPanel extends JPanel {
         int textWidth = 10;
         int textHeight = 5;
         message = new JTextField();
-        originalMessage = new JTextArea();
-        codedMessage = new JTextArea();
+        originalMessage = new JTextArea(10, 5);
+        originalMessage.setWrapStyleWord(true);
+        codedMessage = new JTextArea(10, 5);
+        codedMessage.setWrapStyleWord(true);
 
         metrics = originalMessage.getFontMetrics(originalMessage.getFont());
         int fontHeight = metrics.getHeight();
         int fontWidth = metrics.getMaxAdvance();
+
+        for (int i = 0; i < plugs.length; i++) {
+            plugs[i] = new JTextField();
+            plugLabels[i] = new JLabel(String.valueOf(ALPHABET[i]));
+        }
 
         plugBoardButton = new JButton("Plugboard");
         rotorSet = new JButton("Set Rotors");
@@ -100,27 +113,64 @@ public class EnigmaPanel extends JPanel {
         rotorSet.addActionListener(enigmaActionListener);
         clearText.addActionListener(enigmaActionListener);
 
-        plugBoardButton.setBounds(220, 340, 115, 30);
-        rotorSet.setBounds(220, 300, 115, 30);
-        clearText.setBounds(220, 380, 115, 30);
+        plugBoardButton.setBounds(220, 280, 115, 30);
+        rotorSet.setBounds(220, 240, 115, 30);
+        clearText.setBounds(220, 320, 115, 30);
 
-        message.setBounds(275, 40, fontWidth, fontHeight);
+        message.setBounds(275, 20, fontWidth, fontHeight);
 
-        originalMessage.setBounds(30, 190, fontWidth * textWidth, fontHeight
+        originalMessage.setBounds(30, 130, fontWidth * textWidth, fontHeight
                 * textHeight);
-        codedMessage.setBounds(300, 190, fontWidth * textWidth, fontHeight
+        codedMessage.setBounds(300, 130, fontWidth * textWidth, fontHeight
                 * textHeight);
 
-        rotorDisplay[0].setBounds(242, 130, 20, 20);
-        rotorDisplay[1].setBounds(282, 130, 20, 20);
-        rotorDisplay[2].setBounds(322, 130, 20, 20);
+        rotorDisplay[0].setBounds(242, 70, 20, 20);
+        rotorDisplay[1].setBounds(282, 70, 20, 20);
+        rotorDisplay[2].setBounds(322, 70, 20, 20);
 
-        rotorPlusMinus[0].setBounds(235, 110, 20, 20);
-        rotorPlusMinus[1].setBounds(235, 150, 20, 20);
-        rotorPlusMinus[2].setBounds(275, 110, 20, 20);
-        rotorPlusMinus[3].setBounds(275, 150, 20, 20);
-        rotorPlusMinus[4].setBounds(315, 110, 20, 20);
-        rotorPlusMinus[5].setBounds(315, 150, 20, 20);
+        rotorPlusMinus[0].setBounds(235, 50, 20, 20);
+        rotorPlusMinus[1].setBounds(235, 90, 20, 20);
+        rotorPlusMinus[2].setBounds(275, 50, 20, 20);
+        rotorPlusMinus[3].setBounds(275, 90, 20, 20);
+        rotorPlusMinus[4].setBounds(315, 50, 20, 20);
+        rotorPlusMinus[5].setBounds(315, 90, 20, 20);
+
+        plugs[0].setBounds(20, 410, fontWidth, fontHeight);
+        plugs[1].setBounds(20, 490, fontWidth, fontHeight);
+        plugs[2].setBounds(70, 410, fontWidth, fontHeight);
+        plugs[3].setBounds(70, 490, fontWidth, fontHeight);
+        plugs[4].setBounds(120, 410, fontWidth, fontHeight);
+        plugs[5].setBounds(120, 490, fontWidth, fontHeight);
+        plugs[6].setBounds(170, 410, fontWidth, fontHeight);
+        plugs[7].setBounds(170, 490, fontWidth, fontHeight);
+        plugs[8].setBounds(220, 410, fontWidth, fontHeight);
+        plugs[9].setBounds(220, 490, fontWidth, fontHeight);
+        plugs[10].setBounds(270, 410, fontWidth, fontHeight);
+        plugs[11].setBounds(270, 490, fontWidth, fontHeight);
+        plugs[12].setBounds(320, 410, fontWidth, fontHeight);
+        plugs[13].setBounds(320, 490, fontWidth, fontHeight);
+        plugs[14].setBounds(370, 410, fontWidth, fontHeight);
+        plugs[15].setBounds(370, 490, fontWidth, fontHeight);
+        plugs[16].setBounds(420, 410, fontWidth, fontHeight);
+        plugs[17].setBounds(420, 490, fontWidth, fontHeight);
+        plugs[18].setBounds(470, 410, fontWidth, fontHeight);
+        plugs[19].setBounds(470, 490, fontWidth, fontHeight);
+        plugs[20].setBounds(520, 410, fontWidth, fontHeight);
+        plugs[21].setBounds(520, 490, fontWidth, fontHeight);
+        plugs[22].setBounds(570, 410, fontWidth, fontHeight);
+        plugs[23].setBounds(570, 490, fontWidth, fontHeight);
+        plugs[24].setBounds(620, 410, fontWidth, fontHeight);
+        plugs[25].setBounds(620, 490, fontWidth, fontHeight);
+
+        for (JTextField plug : plugs) {
+            add(plug);
+        }
+
+        for (int i = 0; i < plugLabels.length; i++) {
+            plugLabels[i].setBounds(plugs[i].getX() + (fontWidth / 3),
+                    plugs[i].getY() - 20, fontWidth, fontHeight);
+            add(plugLabels[i]);
+        }
 
         for (JButton button : rotorPlusMinus) {
             button.setMargin(new Insets(0, 0, 0, 0));
@@ -151,7 +201,7 @@ public class EnigmaPanel extends JPanel {
         @Override
         public void actionPerformed(ActionEvent e) {
             if (e.getSource() == plugBoardButton) {
-                
+
             } else if (e.getSource() == rotorSet) {
                 if (!changingRotors) {
                     rotorSet.setText("Done");

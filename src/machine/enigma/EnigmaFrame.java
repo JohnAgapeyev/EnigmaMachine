@@ -14,8 +14,8 @@ public class EnigmaFrame extends JFrame {
     public EnigmaFrame() throws IOException {
         super("Enigma Machine");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setContentPane(new MainPanel());
-        setSize(580, 600);
+        setContentPane(new EnigmaPanel());
+        setSize(675, 600);
         setResizable(false);
         setVisible(true);
     }

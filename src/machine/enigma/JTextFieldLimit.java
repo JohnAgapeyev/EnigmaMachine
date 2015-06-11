@@ -33,7 +33,7 @@ public class JTextFieldLimit extends PlainDocument {
         match = alpha.matcher(str);
 
         if ((getLength() + str.length()) <= limit && match.matches()) {
-            super.insertString(offset, str, attr);
+            super.insertString(offset, str.toUpperCase(), attr);
         }
     }
 }

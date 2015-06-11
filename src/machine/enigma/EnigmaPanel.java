@@ -1,5 +1,6 @@
 package machine.enigma;
 
+import javax.swing.AbstractButton;
 import javax.swing.JPanel;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -35,8 +36,7 @@ public class EnigmaPanel extends JPanel {
      */
     private static final long serialVersionUID = 7298201505806512569L;
 
-    private static final char[] ALPHABET = "abcdefghijklmnopqrstuvwxyz"
-            .toUpperCase().toCharArray();
+    private static final List<Character> ALPHABET = new ArrayList<Character>();
 
     private JCheckBox[] rotorCheckBox = { new JCheckBox("Rotor 1"),
             new JCheckBox("Rotor 2"), new JCheckBox("Rotor 3"),
@@ -75,6 +75,13 @@ public class EnigmaPanel extends JPanel {
     };
 
     public EnigmaPanel() throws IOException {
+
+        char[] tempAlphabet = "abcdefghijklmnopqrstuvwxyz".toUpperCase()
+                .toCharArray();
+        for (char letter : tempAlphabet) {
+            ALPHABET.add(new Character(letter));
+        }
+
         chooseRotors();
         setLayout(null);
         enigma = new Enigma();
@@ -101,7 +108,7 @@ public class EnigmaPanel extends JPanel {
             temp.setDocument(new JTextFieldLimit(1));
             temp.addKeyListener(listener);
             plugs.add(temp);
-            plugLabels[i] = new JLabel(String.valueOf(ALPHABET[i]));
+            plugLabels[i] = new JLabel(String.valueOf(ALPHABET.get(i)));
         }
 
         message.setDocument(new JTextFieldLimit(1));
@@ -249,7 +256,7 @@ public class EnigmaPanel extends JPanel {
     private class EnigmaListener extends KeyAdapter implements ItemListener,
             ActionListener {
 
-        private Pattern alpha = Pattern.compile("[a-zA-Z]");
+        private Pattern alpha = Pattern.compile("[a-zA-Z\b]");
         private Matcher match;
 
         private final int MAX_SELECTIONS = 3;
@@ -257,40 +264,72 @@ public class EnigmaPanel extends JPanel {
 
         @Override
         public void keyReleased(KeyEvent e) {
-            match = alpha.matcher(Character.toString(e.getKeyChar()));
+            char letter = Character.toUpperCase(e.getKeyChar());
+            match = alpha.matcher(Character.toString(letter));
             if (!match.matches()) {
                 return;
             } else {
                 if (e.getComponent() == message) {
-                    message.setText("");
-                    originalMessage.setText(originalMessage.getText()
-                            + Character.toUpperCase(e.getKeyChar()));
-                    rotorRotation[2]++;
-                    formatRotorSettings();
-                    codedMessage.setText(codedMessage.getText()
-                            + enigma.encode(
-                                    Character.toUpperCase(e.getKeyChar()),
-                                    rotorsChosen));
+                    // Backspace character
+                    if (e.getKeyCode() == 8) {
+                        return;
+                    } else {
+                        message.setText("");
+                        originalMessage.setText(originalMessage.getText()
+                                + letter);
+                        rotorRotation[2]++;
+                        formatRotorSettings();
+                        codedMessage.setText(codedMessage.getText()
+                                + enigma.encode(letter, rotorsChosen));
 
-                    String originText = originalMessage.getText();
-                    String codeText = codedMessage.getText();
-                    int length = originText.length();
+                        String originText = originalMessage.getText();
+                        String codeText = codedMessage.getText();
+                        int length = originText.length();
 
-                    for (int i = 0; i < length; i++) {
-                        if (originText.charAt(i) == ' ') {
-                            length--;
+                        for (int i = 0; i < length; i++) {
+                            if (originText.charAt(i) == ' ') {
+                                length--;
+                            }
+                        }
+
+                        if (length % 25 == 0) {
+                            originalMessage.setText(originText + "\n");
+                            codedMessage.setText(codeText + "\n");
+                        } else if (length % 5 == 0) {
+                            originalMessage.setText(originText + " ");
+                            codedMessage.setText(codeText + " ");
                         }
                     }
-
-                    if (length % 25 == 0) {
-                        originalMessage.setText(originText + "\n");
-                        codedMessage.setText(codeText + "\n");
-                    } else if (length % 5 == 0) {
-                        originalMessage.setText(originText + " ");
-                        codedMessage.setText(codeText + " ");
-                    }
                 } else if (plugs.contains(e.getComponent())) {
-                    System.out.println(plugs.indexOf(e.getComponent()));
+                    if (e.getKeyCode() == 8) {
+                        if (!((JTextField) e.getComponent()).getText().equals("")) {
+                            System.out.println("Backspace on non-empty plug");
+                        }
+                        System.out.println("Backspace on empty plug");
+                    } else {
+                        int letterIndex = ALPHABET.indexOf(letter);
+
+                        if (!plugs.get(letterIndex).getText().equals("")
+                                && !plugs
+                                        .get(letterIndex)
+                                        .getText()
+                                        .equals(String.valueOf(ALPHABET
+                                                .get(plugs.indexOf(e
+                                                        .getComponent()))))) {
+
+                            JOptionPane.showMessageDialog(null, letter
+                                    + " is already taken. Please "
+                                    + "choose another plug or delete its"
+                                    + " value first.");
+
+                            ((JTextField) e.getComponent()).setText("");
+
+                        } else {
+                            plugs.get(letterIndex).setText(
+                                    String.valueOf(ALPHABET.get(plugs.indexOf(e
+                                            .getComponent()))));
+                        }
+                    }
                 }
             }
         }

@@ -61,16 +61,13 @@ public class EnigmaPanel extends JPanel {
     private JLabel[] rotorDisplay = new JLabel[3];
     private JTextField message;
     private Enigma enigma;
-    private EnigmaActionListener enigmaActionListener;
+    private EnigmaListener listener = new EnigmaListener();
     private boolean changingRotors;
     private int[] rotorRotation = new int[3];
 
-    // private JTextField[] plugs = new JTextField[26];
     private List<JTextField> plugs = new ArrayList<JTextField>(26);
     private JLabel[] plugLabels = new JLabel[26];
     private boolean changingPlugs;
-
-    private MessageKeyListener keyListen = new MessageKeyListener();
 
     private Runnable clearText = () -> {
         originalMessage.setText("");
@@ -82,7 +79,6 @@ public class EnigmaPanel extends JPanel {
         setLayout(null);
         enigma = new Enigma();
         rotors = enigma.getRotors();
-        enigmaActionListener = new EnigmaActionListener();
 
         for (int i = 0; i < rotorDisplay.length; i++) {
             rotorDisplay[i] = new JLabel("0");
@@ -103,7 +99,7 @@ public class EnigmaPanel extends JPanel {
             temp = new JTextField();
             temp.setEnabled(false);
             temp.setDocument(new JTextFieldLimit(1));
-            temp.addKeyListener(keyListen);
+            temp.addKeyListener(listener);
             plugs.add(temp);
             plugLabels[i] = new JLabel(String.valueOf(ALPHABET[i]));
         }
@@ -125,10 +121,10 @@ public class EnigmaPanel extends JPanel {
         changingRotors = false;
         changingPlugs = false;
 
-        message.addActionListener(enigmaActionListener);
-        plugBoardButton.addActionListener(enigmaActionListener);
-        rotorSet.addActionListener(enigmaActionListener);
-        clearTextButton.addActionListener(enigmaActionListener);
+        message.addActionListener(listener);
+        plugBoardButton.addActionListener(listener);
+        rotorSet.addActionListener(listener);
+        clearTextButton.addActionListener(listener);
 
         plugBoardButton.setBounds(270, 280, 115, 30);
         rotorSet.setBounds(270, 240, 115, 30);
@@ -191,7 +187,7 @@ public class EnigmaPanel extends JPanel {
 
         for (JButton button : rotorPlusMinus) {
             button.setMargin(new Insets(0, 0, 0, 0));
-            button.addActionListener(enigmaActionListener);
+            button.addActionListener(listener);
             add(button);
             button.setVisible(false);
         }
@@ -206,7 +202,7 @@ public class EnigmaPanel extends JPanel {
         add(originalMessage);
         add(codedMessage);
 
-        message.addKeyListener(keyListen);
+        message.addKeyListener(listener);
     }
 
     @Override
@@ -214,7 +210,90 @@ public class EnigmaPanel extends JPanel {
         super.paintComponent(g);
     }
 
-    private class EnigmaActionListener implements ActionListener {
+    public void formatRotorSettings() {
+        int length = rotorRotation.length - 1;
+        for (int i = length; i > -1; i--) {
+            if (rotorRotation[i] < 0) {
+                rotorRotation[i] = 25;
+            } else if (rotorRotation[i] > 25) {
+                if (i > 0) {
+                    rotorRotation[i - 1]++;
+                }
+                rotorRotation[i] = 0;
+            }
+            rotors[rotorsChosen[i]].setRotation(rotorRotation[i]);
+        }
+        for (int i = 0; i < rotorDisplay.length; i++) {
+            rotorDisplay[i].setText(String.valueOf(rotorRotation[i]));
+        }
+    }
+
+    private void chooseRotors() {
+        boolean areThreeRotorsChosen = false;
+        for (JCheckBox check : rotorCheckBox) {
+            check.addItemListener(listener);
+        }
+
+        JOptionPane.showConfirmDialog(null, optionParams, "Rotor Selection",
+                JOptionPane.DEFAULT_OPTION);
+        while (!areThreeRotorsChosen) {
+            if (listener.getCurrentSelections() == 3) {
+                areThreeRotorsChosen = true;
+            } else {
+                JOptionPane.showConfirmDialog(null, optionParams,
+                        "Rotor Selection", JOptionPane.DEFAULT_OPTION);
+            }
+        }
+    }
+
+    private class EnigmaListener extends KeyAdapter implements ItemListener,
+            ActionListener {
+
+        private Pattern alpha = Pattern.compile("[a-zA-Z]");
+        private Matcher match;
+
+        private final int MAX_SELECTIONS = 3;
+        private int currentSelections = 0;
+
+        @Override
+        public void keyReleased(KeyEvent e) {
+            match = alpha.matcher(Character.toString(e.getKeyChar()));
+            if (!match.matches()) {
+                return;
+            } else {
+                if (e.getComponent() == message) {
+                    message.setText("");
+                    originalMessage.setText(originalMessage.getText()
+                            + Character.toUpperCase(e.getKeyChar()));
+                    rotorRotation[2]++;
+                    formatRotorSettings();
+                    codedMessage.setText(codedMessage.getText()
+                            + enigma.encode(
+                                    Character.toUpperCase(e.getKeyChar()),
+                                    rotorsChosen));
+
+                    String originText = originalMessage.getText();
+                    String codeText = codedMessage.getText();
+                    int length = originText.length();
+
+                    for (int i = 0; i < length; i++) {
+                        if (originText.charAt(i) == ' ') {
+                            length--;
+                        }
+                    }
+
+                    if (length % 25 == 0) {
+                        originalMessage.setText(originText + "\n");
+                        codedMessage.setText(codeText + "\n");
+                    } else if (length % 5 == 0) {
+                        originalMessage.setText(originText + " ");
+                        codedMessage.setText(codeText + " ");
+                    }
+                } else if (plugs.contains(e.getComponent())) {
+                    System.out.println(plugs.indexOf(e.getComponent()));
+                }
+            }
+        }
 
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -266,49 +345,6 @@ public class EnigmaPanel extends JPanel {
                 formatRotorSettings();
             }
         }
-    }
-
-    public void formatRotorSettings() {
-        int length = rotorRotation.length - 1;
-        for (int i = length; i > -1; i--) {
-            if (rotorRotation[i] < 0) {
-                rotorRotation[i] = 25;
-            } else if (rotorRotation[i] > 25) {
-                if (i > 0) {
-                    rotorRotation[i - 1]++;
-                }
-                rotorRotation[i] = 0;
-            }
-            rotors[rotorsChosen[i]].setRotation(rotorRotation[i]);
-        }
-        for (int i = 0; i < rotorDisplay.length; i++) {
-            rotorDisplay[i].setText(String.valueOf(rotorRotation[i]));
-        }
-    }
-
-    private void chooseRotors() {
-        boolean areThreeRotorsChosen = false;
-        CheckListener listener = new CheckListener();
-        for (JCheckBox check : rotorCheckBox) {
-            check.addItemListener(listener);
-        }
-
-        JOptionPane.showConfirmDialog(null, optionParams, "Rotor Selection",
-                JOptionPane.DEFAULT_OPTION);
-        while (!areThreeRotorsChosen) {
-            if (listener.getCurrentSelections() == 3) {
-                areThreeRotorsChosen = true;
-            } else {
-                JOptionPane.showConfirmDialog(null, optionParams,
-                        "Rotor Selection", JOptionPane.DEFAULT_OPTION);
-            }
-        }
-    }
-
-    private class CheckListener implements ItemListener {
-
-        private final int MAX_SELECTIONS = 3;
-        private int currentSelections = 0;
 
         @Override
         public void itemStateChanged(ItemEvent e) {
@@ -371,51 +407,6 @@ public class EnigmaPanel extends JPanel {
         public int getCurrentSelections() {
             return currentSelections;
         }
-    }
 
-    private class MessageKeyListener extends KeyAdapter {
-
-        private Pattern alpha = Pattern.compile("[a-zA-Z]");
-        private Matcher match;
-
-        @Override
-        public void keyReleased(KeyEvent e) {
-            match = alpha.matcher(Character.toString(e.getKeyChar()));
-            if (!match.matches()) {
-                return;
-            } else {
-                if (e.getComponent() == message) {
-                    message.setText("");
-                    originalMessage.setText(originalMessage.getText()
-                            + Character.toUpperCase(e.getKeyChar()));
-                    rotorRotation[2]++;
-                    formatRotorSettings();
-                    codedMessage.setText(codedMessage.getText()
-                            + enigma.encode(
-                                    Character.toUpperCase(e.getKeyChar()),
-                                    rotorsChosen));
-
-                    String originText = originalMessage.getText();
-                    String codeText = codedMessage.getText();
-                    int length = originText.length();
-
-                    for (int i = 0; i < length; i++) {
-                        if (originText.charAt(i) == ' ') {
-                            length--;
-                        }
-                    }
-
-                    if (length % 25 == 0) {
-                        originalMessage.setText(originText + "\n");
-                        codedMessage.setText(codeText + "\n");
-                    } else if (length % 5 == 0) {
-                        originalMessage.setText(originText + " ");
-                        codedMessage.setText(codeText + " ");
-                    }
-                } else if (plugs.contains(e.getComponent())) {
-                    System.out.println(plugs.indexOf(e.getComponent()));
-                }
-            }
-        }
     }
 }

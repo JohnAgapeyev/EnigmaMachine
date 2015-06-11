@@ -7,9 +7,6 @@ import javax.swing.JTextField;
 import javax.swing.JCheckBox;
 import javax.swing.JOptionPane;
 import javax.swing.JTextArea;
-import javax.swing.text.AttributeSet;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.PlainDocument;
 
 import java.awt.FontMetrics;
 import java.awt.Graphics;
@@ -21,7 +18,9 @@ import java.awt.event.ItemListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -54,7 +53,7 @@ public class EnigmaPanel extends JPanel {
     private JButton plugBoardButton;
     private JButton rotorSet;
     private JButton[] rotorPlusMinus = new JButton[6];
-    private JButton clearText;
+    private JButton clearTextButton;
 
     private JTextArea originalMessage;
     private JTextArea codedMessage;
@@ -66,11 +65,17 @@ public class EnigmaPanel extends JPanel {
     private boolean changingRotors;
     private int[] rotorRotation = new int[3];
 
-    private JTextField[] plugs = new JTextField[26];
+    // private JTextField[] plugs = new JTextField[26];
+    private List<JTextField> plugs = new ArrayList<JTextField>(26);
     private JLabel[] plugLabels = new JLabel[26];
     private boolean changingPlugs;
 
-    private EnigmaKeyListener keyListen = new EnigmaKeyListener();
+    private MessageKeyListener keyListen = new MessageKeyListener();
+
+    private Runnable clearText = () -> {
+        originalMessage.setText("");
+        codedMessage.setText("");
+    };
 
     public EnigmaPanel() throws IOException {
         chooseRotors();
@@ -93,10 +98,13 @@ public class EnigmaPanel extends JPanel {
         int fontHeight = metrics.getHeight();
         int fontWidth = metrics.getMaxAdvance();
 
-        for (int i = 0; i < plugs.length; i++) {
-            plugs[i] = new JTextField();
-            plugs[i].setEnabled(false);
-            plugs[i].setDocument(new JTextFieldLimit(1));
+        JTextField temp;
+        for (int i = 0; i < 26; i++) {
+            temp = new JTextField();
+            temp.setEnabled(false);
+            temp.setDocument(new JTextFieldLimit(1));
+            temp.addKeyListener(keyListen);
+            plugs.add(temp);
             plugLabels[i] = new JLabel(String.valueOf(ALPHABET[i]));
         }
 
@@ -104,7 +112,7 @@ public class EnigmaPanel extends JPanel {
 
         plugBoardButton = new JButton("Set Plugboard");
         rotorSet = new JButton("Set Rotors");
-        clearText = new JButton("Clear Text");
+        clearTextButton = new JButton("Clear Text");
 
         for (int i = 0; i < rotorPlusMinus.length; i++) {
             if (i % 2 == 0) {
@@ -120,11 +128,11 @@ public class EnigmaPanel extends JPanel {
         message.addActionListener(enigmaActionListener);
         plugBoardButton.addActionListener(enigmaActionListener);
         rotorSet.addActionListener(enigmaActionListener);
-        clearText.addActionListener(enigmaActionListener);
+        clearTextButton.addActionListener(enigmaActionListener);
 
         plugBoardButton.setBounds(270, 280, 115, 30);
         rotorSet.setBounds(270, 240, 115, 30);
-        clearText.setBounds(270, 320, 115, 30);
+        clearTextButton.setBounds(270, 320, 115, 30);
 
         message.setBounds(320, 20, fontWidth, fontHeight);
 
@@ -144,40 +152,40 @@ public class EnigmaPanel extends JPanel {
         rotorPlusMinus[4].setBounds(365, 50, 20, 20);
         rotorPlusMinus[5].setBounds(365, 90, 20, 20);
 
-        plugs[0].setBounds(20, 410, fontWidth, fontHeight);
-        plugs[1].setBounds(20, 490, fontWidth, fontHeight);
-        plugs[2].setBounds(70, 410, fontWidth, fontHeight);
-        plugs[3].setBounds(70, 490, fontWidth, fontHeight);
-        plugs[4].setBounds(120, 410, fontWidth, fontHeight);
-        plugs[5].setBounds(120, 490, fontWidth, fontHeight);
-        plugs[6].setBounds(170, 410, fontWidth, fontHeight);
-        plugs[7].setBounds(170, 490, fontWidth, fontHeight);
-        plugs[8].setBounds(220, 410, fontWidth, fontHeight);
-        plugs[9].setBounds(220, 490, fontWidth, fontHeight);
-        plugs[10].setBounds(270, 410, fontWidth, fontHeight);
-        plugs[11].setBounds(270, 490, fontWidth, fontHeight);
-        plugs[12].setBounds(320, 410, fontWidth, fontHeight);
-        plugs[13].setBounds(320, 490, fontWidth, fontHeight);
-        plugs[14].setBounds(370, 410, fontWidth, fontHeight);
-        plugs[15].setBounds(370, 490, fontWidth, fontHeight);
-        plugs[16].setBounds(420, 410, fontWidth, fontHeight);
-        plugs[17].setBounds(420, 490, fontWidth, fontHeight);
-        plugs[18].setBounds(470, 410, fontWidth, fontHeight);
-        plugs[19].setBounds(470, 490, fontWidth, fontHeight);
-        plugs[20].setBounds(520, 410, fontWidth, fontHeight);
-        plugs[21].setBounds(520, 490, fontWidth, fontHeight);
-        plugs[22].setBounds(570, 410, fontWidth, fontHeight);
-        plugs[23].setBounds(570, 490, fontWidth, fontHeight);
-        plugs[24].setBounds(620, 410, fontWidth, fontHeight);
-        plugs[25].setBounds(620, 490, fontWidth, fontHeight);
+        plugs.get(0).setBounds(20, 410, fontWidth, fontHeight);
+        plugs.get(1).setBounds(20, 490, fontWidth, fontHeight);
+        plugs.get(2).setBounds(70, 410, fontWidth, fontHeight);
+        plugs.get(3).setBounds(70, 490, fontWidth, fontHeight);
+        plugs.get(4).setBounds(120, 410, fontWidth, fontHeight);
+        plugs.get(5).setBounds(120, 490, fontWidth, fontHeight);
+        plugs.get(6).setBounds(170, 410, fontWidth, fontHeight);
+        plugs.get(7).setBounds(170, 490, fontWidth, fontHeight);
+        plugs.get(8).setBounds(220, 410, fontWidth, fontHeight);
+        plugs.get(9).setBounds(220, 490, fontWidth, fontHeight);
+        plugs.get(10).setBounds(270, 410, fontWidth, fontHeight);
+        plugs.get(11).setBounds(270, 490, fontWidth, fontHeight);
+        plugs.get(12).setBounds(320, 410, fontWidth, fontHeight);
+        plugs.get(13).setBounds(320, 490, fontWidth, fontHeight);
+        plugs.get(14).setBounds(370, 410, fontWidth, fontHeight);
+        plugs.get(15).setBounds(370, 490, fontWidth, fontHeight);
+        plugs.get(16).setBounds(420, 410, fontWidth, fontHeight);
+        plugs.get(17).setBounds(420, 490, fontWidth, fontHeight);
+        plugs.get(18).setBounds(470, 410, fontWidth, fontHeight);
+        plugs.get(19).setBounds(470, 490, fontWidth, fontHeight);
+        plugs.get(20).setBounds(520, 410, fontWidth, fontHeight);
+        plugs.get(21).setBounds(520, 490, fontWidth, fontHeight);
+        plugs.get(22).setBounds(570, 410, fontWidth, fontHeight);
+        plugs.get(23).setBounds(570, 490, fontWidth, fontHeight);
+        plugs.get(24).setBounds(620, 410, fontWidth, fontHeight);
+        plugs.get(25).setBounds(620, 490, fontWidth, fontHeight);
 
         for (JTextField plug : plugs) {
             add(plug);
         }
 
         for (int i = 0; i < plugLabels.length; i++) {
-            plugLabels[i].setBounds(plugs[i].getX() + (fontWidth / 3),
-                    plugs[i].getY() - 20, fontWidth, fontHeight);
+            plugLabels[i].setBounds(plugs.get(i).getX() + (fontWidth / 3),
+                    plugs.get(i).getY() - 20, fontWidth, fontHeight);
             add(plugLabels[i]);
         }
 
@@ -191,7 +199,7 @@ public class EnigmaPanel extends JPanel {
         add(message);
         add(plugBoardButton);
         add(rotorSet);
-        add(clearText);
+        add(clearTextButton);
         add(rotorDisplay[0]);
         add(rotorDisplay[1]);
         add(rotorDisplay[2]);
@@ -207,6 +215,7 @@ public class EnigmaPanel extends JPanel {
     }
 
     private class EnigmaActionListener implements ActionListener {
+
         @Override
         public void actionPerformed(ActionEvent e) {
             if (e.getSource() == plugBoardButton) {
@@ -216,6 +225,7 @@ public class EnigmaPanel extends JPanel {
                     for (JTextField plug : plugs) {
                         plug.setEnabled(false);
                     }
+                    clearText.run();
                 } else {
                     plugBoardButton.setText("Done");
                     changingPlugs = true;
@@ -237,9 +247,8 @@ public class EnigmaPanel extends JPanel {
                         button.setVisible(true);
                     }
                 }
-            } else if (e.getSource() == clearText) {
-                originalMessage.setText("");
-                codedMessage.setText("");
+            } else if (e.getSource() == clearTextButton) {
+                clearText.run();
             } else {
                 if (e.getSource() == rotorPlusMinus[0]) {
                     rotorRotation[0]++;
@@ -364,74 +373,48 @@ public class EnigmaPanel extends JPanel {
         }
     }
 
-    private class EnigmaKeyListener extends KeyAdapter {
+    private class MessageKeyListener extends KeyAdapter {
+
+        private Pattern alpha = Pattern.compile("[a-zA-Z]");
+        private Matcher match;
 
         @Override
         public void keyReleased(KeyEvent e) {
-            int keyCode = e.getKeyCode();
-            if (keyCode >= 65 && keyCode <= 90) {
-                message.setText("");
-                originalMessage.setText(originalMessage.getText()
-                        + Character.toUpperCase(e.getKeyChar()));
-                try {
+            match = alpha.matcher(Character.toString(e.getKeyChar()));
+            if (!match.matches()) {
+                return;
+            } else {
+                if (e.getComponent() == message) {
+                    message.setText("");
+                    originalMessage.setText(originalMessage.getText()
+                            + Character.toUpperCase(e.getKeyChar()));
                     rotorRotation[2]++;
                     formatRotorSettings();
                     codedMessage.setText(codedMessage.getText()
                             + enigma.encode(
                                     Character.toUpperCase(e.getKeyChar()),
                                     rotorsChosen));
-                } catch (Exception e1) {
-                    e1.printStackTrace();
-                }
 
-                String originText = originalMessage.getText();
-                String codeText = codedMessage.getText();
-                int length = originText.length();
+                    String originText = originalMessage.getText();
+                    String codeText = codedMessage.getText();
+                    int length = originText.length();
 
-                for (int i = 0; i < length; i++) {
-                    if (originText.charAt(i) == ' ') {
-                        length--;
+                    for (int i = 0; i < length; i++) {
+                        if (originText.charAt(i) == ' ') {
+                            length--;
+                        }
                     }
+
+                    if (length % 25 == 0) {
+                        originalMessage.setText(originText + "\n");
+                        codedMessage.setText(codeText + "\n");
+                    } else if (length % 5 == 0) {
+                        originalMessage.setText(originText + " ");
+                        codedMessage.setText(codeText + " ");
+                    }
+                } else if (plugs.contains(e.getComponent())) {
+                    System.out.println(plugs.indexOf(e.getComponent()));
                 }
-
-                if (length % 25 == 0) {
-                    originalMessage.setText(originText + "\n");
-                    codedMessage.setText(codeText + "\n");
-                } else if (length % 5 == 0) {
-                    originalMessage.setText(originText + " ");
-                    codedMessage.setText(codeText + " ");
-                }
-            }
-        }
-    }
-
-    private class JTextFieldLimit extends PlainDocument {
-
-        /**
-         * Serial ID for the PlainDocument.
-         */
-        private static final long serialVersionUID = -7389064483330913826L;
-
-        private int limit;
-
-        private Pattern alpha = Pattern.compile("[a-zA-Z]");
-        private Matcher match;
-
-        public JTextFieldLimit(int limit) {
-            super();
-            this.limit = limit;
-        }
-
-        @Override
-        public void insertString(int offset, String str, AttributeSet attr)
-                throws BadLocationException {
-            if (str == null)
-                return;
-
-            match = alpha.matcher(str);
-
-            if ((getLength() + str.length()) <= limit && match.matches()) {
-                super.insertString(offset, str, attr);
             }
         }
     }

@@ -77,8 +77,7 @@ public class Enigma {
         }
     }
 
-    public char encode(char sentLetter, Integer[] rotorsChosen)
-            throws Exception {
+    public char encode(char sentLetter, Integer[] rotorsChosen) {
         char output = sentLetter;
         int length = rotorsChosen.length - 1;
         boolean isReverse = false;

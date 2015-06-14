@@ -1,6 +1,5 @@
 package machine.enigma;
 
-import javax.swing.AbstractButton;
 import javax.swing.JPanel;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -8,6 +7,8 @@ import javax.swing.JTextField;
 import javax.swing.JCheckBox;
 import javax.swing.JOptionPane;
 import javax.swing.JTextArea;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 import java.awt.FontMetrics;
 import java.awt.Graphics;
@@ -36,7 +37,7 @@ public class EnigmaPanel extends JPanel {
      */
     private static final long serialVersionUID = 7298201505806512569L;
 
-    private static final List<Character> ALPHABET = new ArrayList<Character>();
+    private static final List<Character> ALPHABET = new ArrayList<Character>(26);
 
     private JCheckBox[] rotorCheckBox = { new JCheckBox("Rotor 1"),
             new JCheckBox("Rotor 2"), new JCheckBox("Rotor 3"),
@@ -106,6 +107,8 @@ public class EnigmaPanel extends JPanel {
             temp = new JTextField();
             temp.setEnabled(false);
             temp.setDocument(new JTextFieldLimit(1));
+            temp.getDocument().putProperty("sourceIndex", i);
+            temp.getDocument().addDocumentListener(listener);
             temp.addKeyListener(listener);
             plugs.add(temp);
             plugLabels[i] = new JLabel(String.valueOf(ALPHABET.get(i)));
@@ -254,13 +257,21 @@ public class EnigmaPanel extends JPanel {
     }
 
     private class EnigmaListener extends KeyAdapter implements ItemListener,
-            ActionListener {
+            ActionListener, DocumentListener {
 
         private Pattern alpha = Pattern.compile("[a-zA-Z\b]");
         private Matcher match;
 
         private final int MAX_SELECTIONS = 3;
         private int currentSelections = 0;
+
+        private List<char[]> textChangeCache = new ArrayList<char[]>();
+
+        public EnigmaListener() {
+            for (int i = 0; i < 26; i++) {
+                textChangeCache.add(new char[2]);
+            }
+        }
 
         @Override
         public void keyReleased(KeyEvent e) {
@@ -302,10 +313,23 @@ public class EnigmaPanel extends JPanel {
                     }
                 } else if (plugs.contains(e.getComponent())) {
                     if (e.getKeyCode() == 8) {
-                        if (!((JTextField) e.getComponent()).getText().equals("")) {
-                            System.out.println("Backspace on non-empty plug");
-                        }
-                        System.out.println("Backspace on empty plug");
+
+                        textChangeCache.get(plugs.indexOf(e.getComponent()))[0] = textChangeCache
+                                .get(plugs.indexOf(e.getComponent()))[1];
+                        textChangeCache.get(plugs.indexOf(e.getComponent()))[1] = ' ';
+
+                        plugs.get(
+                                ALPHABET.indexOf(textChangeCache.get(plugs
+                                        .indexOf(e.getComponent()))[0]))
+                                .setText("");
+
+                        textChangeCache.get(ALPHABET.indexOf(textChangeCache
+                                .get(plugs.indexOf(e.getComponent()))[0]))[0] = textChangeCache
+                                .get(ALPHABET.indexOf(textChangeCache.get(plugs
+                                        .indexOf(e.getComponent()))[0]))[1];
+                        textChangeCache.get(ALPHABET.indexOf(textChangeCache
+                                .get(plugs.indexOf(e.getComponent()))[0]))[1] = ' ';
+
                     } else {
                         int letterIndex = ALPHABET.indexOf(letter);
 
@@ -325,9 +349,30 @@ public class EnigmaPanel extends JPanel {
                             ((JTextField) e.getComponent()).setText("");
 
                         } else {
+                            textChangeCache
+                                    .get(plugs.indexOf(e.getComponent()))[0] = textChangeCache
+                                    .get(plugs.indexOf(e.getComponent()))[1];
+                            textChangeCache
+                                    .get(plugs.indexOf(e.getComponent()))[1] = letter;
+
+                            System.out.println(textChangeCache.get(plugs
+                                    .indexOf(e.getComponent()))[0]);
+                            System.out.println(textChangeCache.get(plugs
+                                    .indexOf(e.getComponent()))[1]);
+                            System.out.println(plugs.indexOf(e.getComponent()));
+
                             plugs.get(letterIndex).setText(
                                     String.valueOf(ALPHABET.get(plugs.indexOf(e
                                             .getComponent()))));
+
+                            textChangeCache.get(letterIndex)[0] = textChangeCache
+                                    .get(letterIndex)[1];
+                            textChangeCache.get(letterIndex)[1] = ALPHABET
+                                    .get(plugs.indexOf(e.getComponent()));
+
+                            // System.out.println(textChangeCache.get(letterIndex)[0]);
+                            // System.out.println(textChangeCache.get(letterIndex)[1]);
+                            // System.out.println(letterIndex);
                         }
                     }
                 }
@@ -447,5 +492,23 @@ public class EnigmaPanel extends JPanel {
             return currentSelections;
         }
 
+        @Override
+        public void insertUpdate(DocumentEvent e) {
+            changedUpdate(e);
+        }
+
+        @Override
+        public void removeUpdate(DocumentEvent e) {
+            changedUpdate(e);
+        }
+
+        @Override
+        public void changedUpdate(DocumentEvent e) {
+            // System.out
+            // .println(plugs.get(
+            // (int) e.getDocument().getProperty("sourceIndex"))
+            // .getText());
+            // System.out.println(e.getDocument().getProperty("sourceIndex"));
+        }
     }
 }

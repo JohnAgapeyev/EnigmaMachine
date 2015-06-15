@@ -13,11 +13,11 @@ public class Rotor {
             .asList("abcdefghijklmnopqrstuvwxyz".toUpperCase().chars()
                     .mapToObj(c -> (char) c).toArray(Character[]::new));
 
-    private List<Character> originalKey;
+    private final List<Character> originalKey;
 
     private List<Character> rotatedKey;
 
-    private List<Character> rotatedAlphabet = new ArrayList<>();
+    private List<Character> rotatedAlphabet = new ArrayList<>(26);
 
     private final BiFunction<List<Character>, List<Character>, List<Character>> clone = (
             parent, child) -> {
@@ -27,9 +27,10 @@ public class Rotor {
     };
 
     public Rotor() {
-        originalKey = new ArrayList<>();
-        rotatedKey = new ArrayList<>();
-        ALPHABET.forEach(rotatedAlphabet::add);
+        originalKey = new ArrayList<>(26);
+        rotatedKey = new ArrayList<>(26);
+        clone.apply(ALPHABET, rotatedAlphabet);
+        // ALPHABET.forEach(rotatedAlphabet::add);
         for (int i = 0; i < 26; i++) {
             originalKey.add(null);
             rotatedKey.add(null);

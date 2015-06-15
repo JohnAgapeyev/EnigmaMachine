@@ -11,7 +11,7 @@ public class Reflector {
             .asList("abcdefghijklmnopqrstuvwxyz".toUpperCase().chars()
                     .mapToObj(c -> (char) c).toArray(Character[]::new));
 
-    private List<Character> key = new ArrayList<>();
+    private List<Character> key = new ArrayList<>(26);
 
     public Reflector() {
         for (int i = 0; i < 26; i++) {

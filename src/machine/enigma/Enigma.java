@@ -40,10 +40,8 @@ public class Enigma {
                     for (final String[] findValue : options) {
                         switch (findValue[0]) {
                             case "rotor_1":
-                                System.out.println("WOO");
                                 rotors.set(
                                         0,
-
                                         new Rotor(Arrays.asList(findValue[1]
                                                 .toUpperCase().chars()
                                                 .mapToObj(c -> (char) c)
@@ -52,7 +50,6 @@ public class Enigma {
                             case "rotor_2":
                                 rotors.set(
                                         1,
-
                                         new Rotor(Arrays.asList(findValue[1]
                                                 .toUpperCase().chars()
                                                 .mapToObj(c -> (char) c)
@@ -61,7 +58,6 @@ public class Enigma {
                             case "rotor_3":
                                 rotors.set(
                                         2,
-
                                         new Rotor(Arrays.asList(findValue[1]
                                                 .toUpperCase().chars()
                                                 .mapToObj(c -> (char) c)
@@ -70,7 +66,6 @@ public class Enigma {
                             case "rotor_4":
                                 rotors.set(
                                         3,
-
                                         new Rotor(Arrays.asList(findValue[1]
                                                 .toUpperCase().chars()
                                                 .mapToObj(c -> (char) c)
@@ -79,7 +74,6 @@ public class Enigma {
                             case "rotor_5":
                                 rotors.set(
                                         4,
-
                                         new Rotor(Arrays.asList(findValue[1]
                                                 .toUpperCase().chars()
                                                 .mapToObj(c -> (char) c)
@@ -137,8 +131,8 @@ public class Enigma {
 
     private char rotorEncryption(final char letter, final int rotorNumber,
             final boolean isReverse) {
-        List<Character> rotorKey = new ArrayList<>();
-        List<Character> alphabetKey = new ArrayList<>();
+        List<Character> rotorKey = new ArrayList<>(26);
+        List<Character> alphabetKey = new ArrayList<>(26);
         char response = letter;
 
         if (rotorNumber == REFLECTOR_CODE) {
@@ -236,7 +230,6 @@ public class Enigma {
     }
 
     public List<Rotor> getRotors() {
-        System.out.println(rotors);
         return rotors;
     }
 }

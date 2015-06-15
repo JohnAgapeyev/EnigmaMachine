@@ -54,7 +54,7 @@ public class EnigmaPanel extends JPanel {
 
     private final JButton plugBoardButton;
     private final JButton rotorSet;
-    private final JButton[] rotorPlusMinus = new JButton[6];
+    private final List<JButton> rotorPlusMinus = new ArrayList<>(6);
     private final JButton clearTextButton;
 
     private JTextArea originalMessage;
@@ -68,7 +68,7 @@ public class EnigmaPanel extends JPanel {
     private final int[] rotorRotation = new int[3];
 
     private final List<JTextField> plugs = new ArrayList<>(26);
-    private final JLabel[] plugLabels = new JLabel[26];
+    private final List<JLabel> plugLabels = new ArrayList<>(26);
     private boolean changingPlugs;
 
     private final Runnable clearText = () -> {
@@ -79,6 +79,10 @@ public class EnigmaPanel extends JPanel {
     public EnigmaPanel() throws IOException {
         for (int i = 0; i < 3; i++) {
             rotorsChosen.add(null);
+        }
+
+        for (int i = 0; i < 6; i++) {
+            rotorPlusMinus.add(null);
         }
 
         chooseRotors();
@@ -107,7 +111,7 @@ public class EnigmaPanel extends JPanel {
             temp.setDocument(new JTextFieldLimit(1));
             temp.addKeyListener(listener);
             plugs.add(temp);
-            plugLabels[i] = new JLabel(String.valueOf(ALPHABET.get(i)));
+            plugLabels.add(new JLabel(String.valueOf(ALPHABET.get(i))));
         }
 
         message.setDocument(new JTextFieldLimit(1));
@@ -116,11 +120,11 @@ public class EnigmaPanel extends JPanel {
         rotorSet = new JButton("Set Rotors");
         clearTextButton = new JButton("Clear Text");
 
-        for (int i = 0; i < rotorPlusMinus.length; i++) {
+        for (int i = 0; i < 6; i++) {
             if (i % 2 == 0) {
-                rotorPlusMinus[i] = new JButton("+");
+                rotorPlusMinus.set(i, new JButton("+"));
             } else {
-                rotorPlusMinus[i] = new JButton("-");
+                rotorPlusMinus.set(i, new JButton("-"));
             }
         }
 
@@ -147,12 +151,12 @@ public class EnigmaPanel extends JPanel {
         rotorDisplay[1].setBounds(332, 70, 20, 20);
         rotorDisplay[2].setBounds(372, 70, 20, 20);
 
-        rotorPlusMinus[0].setBounds(285, 50, 20, 20);
-        rotorPlusMinus[1].setBounds(285, 90, 20, 20);
-        rotorPlusMinus[2].setBounds(325, 50, 20, 20);
-        rotorPlusMinus[3].setBounds(325, 90, 20, 20);
-        rotorPlusMinus[4].setBounds(365, 50, 20, 20);
-        rotorPlusMinus[5].setBounds(365, 90, 20, 20);
+        rotorPlusMinus.get(0).setBounds(285, 50, 20, 20);
+        rotorPlusMinus.get(1).setBounds(285, 90, 20, 20);
+        rotorPlusMinus.get(2).setBounds(325, 50, 20, 20);
+        rotorPlusMinus.get(3).setBounds(325, 90, 20, 20);
+        rotorPlusMinus.get(4).setBounds(365, 50, 20, 20);
+        rotorPlusMinus.get(5).setBounds(365, 90, 20, 20);
 
         plugs.get(0).setBounds(20, 410, fontWidth, fontHeight);
         plugs.get(1).setBounds(20, 490, fontWidth, fontHeight);
@@ -185,10 +189,10 @@ public class EnigmaPanel extends JPanel {
             add(plug);
         }
 
-        for (int i = 0; i < plugLabels.length; i++) {
-            plugLabels[i].setBounds(plugs.get(i).getX() + (fontWidth / 3),
+        for (int i = 0; i < plugLabels.size(); i++) {
+            plugLabels.get(i).setBounds(plugs.get(i).getX() + (fontWidth / 3),
                     plugs.get(i).getY() - 20, fontWidth, fontHeight);
-            add(plugLabels[i]);
+            add(plugLabels.get(i));
         }
 
         for (final JButton button : rotorPlusMinus) {
@@ -418,17 +422,17 @@ public class EnigmaPanel extends JPanel {
             } else if (e.getSource() == clearTextButton) {
                 clearText.run();
             } else {
-                if (e.getSource() == rotorPlusMinus[0]) {
+                if (e.getSource() == rotorPlusMinus.get(0)) {
                     rotorRotation[0]++;
-                } else if (e.getSource() == rotorPlusMinus[1]) {
+                } else if (e.getSource() == rotorPlusMinus.get(1)) {
                     rotorRotation[0]--;
-                } else if (e.getSource() == rotorPlusMinus[2]) {
+                } else if (e.getSource() == rotorPlusMinus.get(2)) {
                     rotorRotation[1]++;
-                } else if (e.getSource() == rotorPlusMinus[3]) {
+                } else if (e.getSource() == rotorPlusMinus.get(3)) {
                     rotorRotation[1]--;
-                } else if (e.getSource() == rotorPlusMinus[4]) {
+                } else if (e.getSource() == rotorPlusMinus.get(4)) {
                     rotorRotation[2]++;
-                } else if (e.getSource() == rotorPlusMinus[5]) {
+                } else if (e.getSource() == rotorPlusMinus.get(5)) {
                     rotorRotation[2]--;
                 }
                 formatRotorSettings();

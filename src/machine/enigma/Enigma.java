@@ -5,6 +5,7 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Enigma {
@@ -14,14 +15,20 @@ public class Enigma {
      * stuff
      */
 
-    private final Rotor[] rotors = new Rotor[5];
+    private final List<Rotor> rotors = new ArrayList<>(5);
     private Reflector reflector;
-    private final int rotorLength = rotors.length;
-    private static final char[] ALPHABET = "abcdefghijklmnopqrstuvwxyz"
-            .toUpperCase().toCharArray();
+    private final int rotorLength = 5;
+
+    private static final List<Character> ALPHABET = Arrays
+            .asList("abcdefghijklmnopqrstuvwxyz".toUpperCase().chars()
+                    .mapToObj(c -> (char) c).toArray(Character[]::new));
+
     private final int REFLECTOR_CODE = 100;
 
     public Enigma() throws IOException {
+        for (int i = 0; i < 5; i++) {
+            rotors.add(null);
+        }
         final Path configPath = FileSystems.getDefault().getPath("config.ini");
         final List<String[]> options = new ArrayList<>();
         Files.readAllLines(configPath).forEach(
@@ -33,24 +40,50 @@ public class Enigma {
                     for (final String[] findValue : options) {
                         switch (findValue[0]) {
                             case "rotor_1":
-                                rotors[0] = new Rotor(
-                                        findValue[1].toCharArray());
+                                System.out.println("WOO");
+                                rotors.set(
+                                        0,
+
+                                        new Rotor(Arrays.asList(findValue[1]
+                                                .toUpperCase().chars()
+                                                .mapToObj(c -> (char) c)
+                                                .toArray(Character[]::new))));
                                 break;
                             case "rotor_2":
-                                rotors[1] = new Rotor(
-                                        findValue[1].toCharArray());
+                                rotors.set(
+                                        1,
+
+                                        new Rotor(Arrays.asList(findValue[1]
+                                                .toUpperCase().chars()
+                                                .mapToObj(c -> (char) c)
+                                                .toArray(Character[]::new))));
                                 break;
                             case "rotor_3":
-                                rotors[2] = new Rotor(
-                                        findValue[1].toCharArray());
+                                rotors.set(
+                                        2,
+
+                                        new Rotor(Arrays.asList(findValue[1]
+                                                .toUpperCase().chars()
+                                                .mapToObj(c -> (char) c)
+                                                .toArray(Character[]::new))));
                                 break;
                             case "rotor_4":
-                                rotors[3] = new Rotor(
-                                        findValue[1].toCharArray());
+                                rotors.set(
+                                        3,
+
+                                        new Rotor(Arrays.asList(findValue[1]
+                                                .toUpperCase().chars()
+                                                .mapToObj(c -> (char) c)
+                                                .toArray(Character[]::new))));
                                 break;
                             case "rotor_5":
-                                rotors[4] = new Rotor(
-                                        findValue[1].toCharArray());
+                                rotors.set(
+                                        4,
+
+                                        new Rotor(Arrays.asList(findValue[1]
+                                                .toUpperCase().chars()
+                                                .mapToObj(c -> (char) c)
+                                                .toArray(Character[]::new))));
                                 break;
                             default:
                                 break;
@@ -58,7 +91,7 @@ public class Enigma {
                     }
                 } else {
                     for (int i = 0; i < rotorLength; i++) {
-                        rotors[i] = new Rotor();
+                        rotors.set(i, new Rotor());
                     }
                 }
             } else if (line[0].equals("default_reflector_rand")) {
@@ -66,7 +99,9 @@ public class Enigma {
                     for (final String[] findValue : options) {
                         if (findValue[0].equals("reflector")) {
                             reflector = new Reflector(
-                                    findValue[1].toCharArray());
+                                    Arrays.asList(findValue[1].toUpperCase()
+                                            .chars().mapToObj(c -> (char) c)
+                                            .toArray(Character[]::new)));
                             break;
                         }
                     }
@@ -77,14 +112,14 @@ public class Enigma {
         }
     }
 
-    public char encode(final char sentLetter, final Integer[] rotorsChosen) {
+    public char encode(final char sentLetter, final List<Integer> rotorsChosen) {
         char output = sentLetter;
-        final int length = rotorsChosen.length - 1;
+        final int length = rotorsChosen.size() - 1;
         boolean isReverse = false;
 
         // Normal encryption
         for (int i = length; i > -1; i--) {
-            output = rotorEncryption(output, rotorsChosen[i], isReverse);
+            output = rotorEncryption(output, rotorsChosen.get(i), isReverse);
         }
 
         output = rotorEncryption(output, REFLECTOR_CODE, isReverse);
@@ -102,16 +137,19 @@ public class Enigma {
 
     private char rotorEncryption(final char letter, final int rotorNumber,
             final boolean isReverse) {
-        char[] rotorKey;
-        char[] alphabetKey;
+        List<Character> rotorKey = new ArrayList<>();
+        List<Character> alphabetKey = new ArrayList<>();
         char response = letter;
 
         if (rotorNumber == REFLECTOR_CODE) {
             rotorKey = reflector.getKey();
-            alphabetKey = ALPHABET.clone();
+
+            alphabetKey.clear();
+            ALPHABET.forEach(alphabetKey::add);
+
         } else {
-            rotorKey = rotors[Math.abs(rotorNumber)].getKey();
-            alphabetKey = rotors[Math.abs(rotorNumber)].getAlphabet();
+            rotorKey = rotors.get(Math.abs(rotorNumber)).getKey();
+            alphabetKey = rotors.get(Math.abs(rotorNumber)).getAlphabet();
         }
 
         if (!isReverse) {
@@ -119,9 +157,9 @@ public class Enigma {
             System.out.println(response);
 
             // External alphabet gets turned into internal alphabet
-            for (int i = 0; i < alphabetKey.length; i++) {
-                if (response == alphabetKey[i]) {
-                    response = ALPHABET[i];
+            for (int i = 0; i < alphabetKey.size(); i++) {
+                if (response == alphabetKey.get(i)) {
+                    response = ALPHABET.get(i);
                     break;
                 }
             }
@@ -129,9 +167,9 @@ public class Enigma {
             System.out.println(response);
 
             // Internal alphabet gets turned into rotor wiring
-            for (int i = 0; i < alphabetKey.length; i++) {
-                if (response == alphabetKey[i]) {
-                    response = rotorKey[i];
+            for (int i = 0; i < alphabetKey.size(); i++) {
+                if (response == alphabetKey.get(i)) {
+                    response = rotorKey.get(i);
                     break;
                 }
             }
@@ -140,9 +178,9 @@ public class Enigma {
 
             // Rotor output is returned through the shifted alphabet key once
             // again on its way out
-            for (int i = 0; i < ALPHABET.length; i++) {
-                if (response == ALPHABET[i]) {
-                    response = alphabetKey[i];
+            for (int i = 0; i < ALPHABET.size(); i++) {
+                if (response == ALPHABET.get(i)) {
+                    response = alphabetKey.get(i);
                     break;
                 }
             }
@@ -152,26 +190,26 @@ public class Enigma {
         } else {
             System.out.println(response);
 
-            for (int i = 0; i < alphabetKey.length; i++) {
-                if (response == alphabetKey[i]) {
-                    response = ALPHABET[i];
+            for (int i = 0; i < alphabetKey.size(); i++) {
+                if (response == alphabetKey.get(i)) {
+                    response = ALPHABET.get(i);
                     break;
                 }
             }
 
             System.out.println(response);
 
-            for (int i = 0; i < rotorKey.length; i++) {
-                if (response == rotorKey[i]) {
-                    response = alphabetKey[i];
+            for (int i = 0; i < rotorKey.size(); i++) {
+                if (response == rotorKey.get(i)) {
+                    response = alphabetKey.get(i);
                     break;
                 }
             }
             System.out.println(response);
 
-            for (int i = 0; i < ALPHABET.length; i++) {
-                if (response == ALPHABET[i]) {
-                    response = alphabetKey[i];
+            for (int i = 0; i < ALPHABET.size(); i++) {
+                if (response == ALPHABET.get(i)) {
+                    response = alphabetKey.get(i);
                     break;
                 }
             }
@@ -186,9 +224,9 @@ public class Enigma {
         String two = "";
         String three = "";
         for (int i = 0; i < 26; i++) {
-            one += rotorKey[i];
-            two += ALPHABET[i];
-            three += alphabetKey[i];
+            one += rotorKey.get(i);
+            two += ALPHABET.get(i);
+            three += alphabetKey.get(i);
         }
 
         System.out.println(two + "\n" + three + "\n" + one + "\n" + three
@@ -197,7 +235,8 @@ public class Enigma {
         return response;
     }
 
-    public Rotor[] getRotors() {
+    public List<Rotor> getRotors() {
+        System.out.println(rotors);
         return rotors;
     }
 }

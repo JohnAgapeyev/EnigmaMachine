@@ -1,39 +1,37 @@
 package machine.enigma;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
 public class Reflector {
 
-    private static final char[] ALPHABET = "abcdefghijklmnopqrstuvwxyz"
-            .toUpperCase().toCharArray();
+    private static final List<Character> ALPHABET = Arrays
+            .asList("abcdefghijklmnopqrstuvwxyz".toUpperCase().chars()
+                    .mapToObj(c -> (char) c).toArray(Character[]::new));
 
-    private static List<Character> letterList;
-
-    private final Character[] key = new Character[ALPHABET.length];;
+    private List<Character> key = new ArrayList<>();
 
     public Reflector() {
-        if (letterList == null) {
-            letterList = new ArrayList<>();
-            for (final char element : ALPHABET) {
-                letterList.add(element);
-            }
+        for (int i = 0; i < 26; i++) {
+            key.add(i, null);
         }
+
         final Random rand = new Random();
-        final int alphabetLength = letterList.size();
+        final int alphabetLength = ALPHABET.size();
         final ArrayList<Integer> alreadyUsed = new ArrayList<>();
         for (int i = 0; i < alphabetLength; i++) {
-            if (key[i] == null) {
+            if (key.get(i) == null) {
                 int letterIndex = rand.nextInt(alphabetLength);
                 while (alreadyUsed.contains(letterIndex) || letterIndex == i) {
                     letterIndex = rand.nextInt(alphabetLength);
                 }
-                key[i] = letterList.get(letterIndex);
+                key.set(i, ALPHABET.get(letterIndex));
                 alreadyUsed.add(letterIndex);
-                for (final Character letter : letterList) {
-                    if (letter == key[i]) {
-                        key[letterList.indexOf(letter)] = letterList.get(i);
+                for (final Character letter : ALPHABET) {
+                    if (letter == key.get(i)) {
+                        key.set(ALPHABET.indexOf(letter), ALPHABET.get(i));
                         alreadyUsed.add(i);
                     }
                 }
@@ -41,18 +39,12 @@ public class Reflector {
         }
     }
 
-    public Reflector(final char[] key) {
-        for (int i = 0; i < this.key.length; i++) {
-            this.key[i] = key[i];
-        }
+    public Reflector(final List<Character> key) {
+        this.key = key;
     }
 
-    public char[] getKey() {
-        final char[] returnKey = new char[key.length];
-        for (int i = 0; i < key.length; i++) {
-            returnKey[i] = key[i];
-        }
-        return returnKey;
+    public List<Character> getKey() {
+        return key;
     }
 
     public void showKey() {

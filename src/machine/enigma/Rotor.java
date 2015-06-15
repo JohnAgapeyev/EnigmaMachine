@@ -2,117 +2,74 @@ package machine.enigma;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.function.BiFunction;
 
 public class Rotor {
-    private static final char[] ALPHABET = "abcdefghijklmnopqrstuvwxyz"
-            .toUpperCase().toCharArray();
-    
-    private static final List<Character> alpha = Arrays.asList("abcdefghijklmnopqrstuvwxyz"
-            .toUpperCase().chars().mapToObj(c -> (char) c)
-            .toArray(Character[]::new));
 
-    private static List<Character> letterList;
+    private static final List<Character> ALPHABET = Arrays
+            .asList("abcdefghijklmnopqrstuvwxyz".toUpperCase().chars()
+                    .mapToObj(c -> (char) c).toArray(Character[]::new));
 
-    private final char[] originalKey;
-    
-    private final List<Character> origKey = new ArrayList<>();
+    private List<Character> originalKey;
 
-    private char[] rotatedKey;
-    
-    private final List<Character> rotKey = new ArrayList<>();
+    private List<Character> rotatedKey;
 
-    private char[] rotatedAlphabet;
-    
-    private final List<Character> rotAlpha = new ArrayList<>();
+    private List<Character> rotatedAlphabet = new ArrayList<>();
+
+    private final BiFunction<List<Character>, List<Character>, List<Character>> clone = (
+            parent, child) -> {
+        child.clear();
+        parent.forEach(child::add);
+        return child;
+    };
 
     public Rotor() {
-        originalKey = new char[ALPHABET.length];
-        rotatedKey = new char[ALPHABET.length];
-        rotatedAlphabet = ALPHABET.clone();
-
-        if (letterList == null) {
-            letterList = new ArrayList<>();
-            for (final char element : ALPHABET) {
-                letterList.add(element);
-            }
+        originalKey = new ArrayList<>();
+        rotatedKey = new ArrayList<>();
+        ALPHABET.forEach(rotatedAlphabet::add);
+        for (int i = 0; i < 26; i++) {
+            originalKey.add(null);
+            rotatedKey.add(null);
         }
+
         final Random rand = new Random();
-        final int alphabetLength = letterList.size();
+        final int alphabetLength = ALPHABET.size();
         final ArrayList<Integer> alreadyUsed = new ArrayList<>();
         for (int i = 0; i < alphabetLength; i++) {
             int letterIndex = rand.nextInt(alphabetLength);
             while (alreadyUsed.contains(letterIndex)) {
                 letterIndex = rand.nextInt(alphabetLength);
             }
-            originalKey[i] = letterList.get(letterIndex);
+            originalKey.set(i, ALPHABET.get(letterIndex));
             alreadyUsed.add(letterIndex);
         }
-        rotatedKey = originalKey.clone();
+        rotatedKey = clone.apply(originalKey, rotatedAlphabet);
+        ;
     }
 
-    public Rotor(final char[] key) {
+    public Rotor(final List<Character> key) {
         originalKey = key;
         rotatedKey = key;
-        rotatedAlphabet = ALPHABET.clone();
+        rotatedAlphabet = clone.apply(ALPHABET, rotatedAlphabet);
     }
 
-    public char[] getKey() {
+    public List<Character> getKey() {
         return rotatedKey;
     }
 
-    public char[] getAlphabet() {
+    public List<Character> getAlphabet() {
         return rotatedAlphabet;
     }
 
-    public void rotate() {
-        // Shifting the key
-        char temp = rotatedKey[0];
-        final int keyLength = rotatedKey.length - 1;
-        for (int i = 0; i < keyLength; i++) {
-            rotatedKey[i] = rotatedKey[i + 1];
-        }
-        rotatedKey[keyLength] = temp;
-
-        // Shifting the alphabet the key is compared to
-        temp = rotatedAlphabet[0];
-        for (int i = 0; i < keyLength; i++) {
-            rotatedAlphabet[i] = rotatedAlphabet[i + 1];
-        }
-        rotatedAlphabet[keyLength] = temp;
-    }
-
-    private void rotateBackwards() {
-        // Shifting the key
-        final int keyLength = rotatedKey.length - 1;
-        char temp = rotatedKey[keyLength];
-        for (int i = keyLength; i >= 0; i--) {
-            rotatedKey[i] = rotatedKey[i - 1];
-        }
-        rotatedKey[0] = temp;
-
-        // Shifting the alphabet the key is compared to
-        temp = rotatedAlphabet[keyLength];
-        for (int i = keyLength; i >= 0; i--) {
-            rotatedAlphabet[i] = rotatedAlphabet[i - 1];
-        }
-        rotatedAlphabet[0] = temp;
-    }
-
     public void setRotation(final int rotateSteps) {
-        rotatedKey = originalKey.clone();
-        rotatedAlphabet = ALPHABET.clone();
         if (rotateSteps == 0) {
             return;
-        } else if (rotateSteps > 0) {
-            for (int i = 0; i < rotateSteps; i++) {
-                rotate();
-            }
         } else {
-            for (int i = 0; i < Math.abs(rotateSteps); i++) {
-                rotateBackwards();
-            }
+            Collections.rotate(rotatedKey, -rotateSteps);
+            Collections.rotate(rotatedAlphabet, -rotateSteps);
         }
     }
 }

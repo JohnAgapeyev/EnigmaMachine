@@ -14,23 +14,23 @@ public class Enigma {
      * stuff
      */
 
-    private Rotor[] rotors = new Rotor[5];
+    private final Rotor[] rotors = new Rotor[5];
     private Reflector reflector;
-    private int rotorLength = rotors.length;
+    private final int rotorLength = rotors.length;
     private static final char[] ALPHABET = "abcdefghijklmnopqrstuvwxyz"
             .toUpperCase().toCharArray();
     private final int REFLECTOR_CODE = 100;
 
     public Enigma() throws IOException {
-        Path configPath = FileSystems.getDefault().getPath("config.ini");
-        List<String[]> options = new ArrayList<String[]>();
+        final Path configPath = FileSystems.getDefault().getPath("config.ini");
+        final List<String[]> options = new ArrayList<>();
         Files.readAllLines(configPath).forEach(
                 line -> options.add(line.split("\\s+")));
 
-        for (String[] line : options) {
+        for (final String[] line : options) {
             if (line[0].equals("default_rotor_rand")) {
                 if (!Boolean.valueOf(line[1])) {
-                    for (String[] findValue : options) {
+                    for (final String[] findValue : options) {
                         switch (findValue[0]) {
                             case "rotor_1":
                                 rotors[0] = new Rotor(
@@ -63,7 +63,7 @@ public class Enigma {
                 }
             } else if (line[0].equals("default_reflector_rand")) {
                 if (!Boolean.valueOf(line[1])) {
-                    for (String[] findValue : options) {
+                    for (final String[] findValue : options) {
                         if (findValue[0].equals("reflector")) {
                             reflector = new Reflector(
                                     findValue[1].toCharArray());
@@ -77,9 +77,9 @@ public class Enigma {
         }
     }
 
-    public char encode(char sentLetter, Integer[] rotorsChosen) {
+    public char encode(final char sentLetter, final Integer[] rotorsChosen) {
         char output = sentLetter;
-        int length = rotorsChosen.length - 1;
+        final int length = rotorsChosen.length - 1;
         boolean isReverse = false;
 
         // Normal encryption
@@ -91,7 +91,7 @@ public class Enigma {
 
         isReverse = true;
         // Return back through the rotors
-        for (Integer rotor : rotorsChosen) {
+        for (final Integer rotor : rotorsChosen) {
             output = rotorEncryption(output, rotor, isReverse);
         }
 
@@ -100,7 +100,8 @@ public class Enigma {
         return output;
     }
 
-    private char rotorEncryption(char letter, int rotorNumber, boolean isReverse) {
+    private char rotorEncryption(final char letter, final int rotorNumber,
+            final boolean isReverse) {
         char[] rotorKey;
         char[] alphabetKey;
         char response = letter;

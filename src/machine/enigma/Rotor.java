@@ -1,20 +1,31 @@
 package machine.enigma;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
 public class Rotor {
     private static final char[] ALPHABET = "abcdefghijklmnopqrstuvwxyz"
             .toUpperCase().toCharArray();
+    
+    private static final List<Character> alpha = Arrays.asList("abcdefghijklmnopqrstuvwxyz"
+            .toUpperCase().chars().mapToObj(c -> (char) c)
+            .toArray(Character[]::new));
 
     private static List<Character> letterList;
 
-    private char[] originalKey;
+    private final char[] originalKey;
+    
+    private final List<Character> origKey = new ArrayList<>();
 
     private char[] rotatedKey;
+    
+    private final List<Character> rotKey = new ArrayList<>();
 
     private char[] rotatedAlphabet;
+    
+    private final List<Character> rotAlpha = new ArrayList<>();
 
     public Rotor() {
         originalKey = new char[ALPHABET.length];
@@ -22,14 +33,14 @@ public class Rotor {
         rotatedAlphabet = ALPHABET.clone();
 
         if (letterList == null) {
-            letterList = new ArrayList<Character>();
-            for (int i = 0; i < ALPHABET.length; i++) {
-                letterList.add(ALPHABET[i]);
+            letterList = new ArrayList<>();
+            for (final char element : ALPHABET) {
+                letterList.add(element);
             }
         }
         final Random rand = new Random();
-        int alphabetLength = letterList.size();
-        ArrayList<Integer> alreadyUsed = new ArrayList<Integer>();
+        final int alphabetLength = letterList.size();
+        final ArrayList<Integer> alreadyUsed = new ArrayList<>();
         for (int i = 0; i < alphabetLength; i++) {
             int letterIndex = rand.nextInt(alphabetLength);
             while (alreadyUsed.contains(letterIndex)) {
@@ -41,7 +52,7 @@ public class Rotor {
         rotatedKey = originalKey.clone();
     }
 
-    public Rotor(char[] key) {
+    public Rotor(final char[] key) {
         originalKey = key;
         rotatedKey = key;
         rotatedAlphabet = ALPHABET.clone();
@@ -89,7 +100,7 @@ public class Rotor {
         rotatedAlphabet[0] = temp;
     }
 
-    public void setRotation(int rotateSteps) {
+    public void setRotation(final int rotateSteps) {
         rotatedKey = originalKey.clone();
         rotatedAlphabet = ALPHABET.clone();
         if (rotateSteps == 0) {

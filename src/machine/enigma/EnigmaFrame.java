@@ -20,7 +20,7 @@ public class EnigmaFrame extends JFrame {
         setVisible(true);
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(final String[] args) throws IOException {
         new EnigmaFrame();
     }
 }

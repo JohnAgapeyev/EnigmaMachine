@@ -1,15 +1,5 @@
 package machine.enigma;
 
-import javax.swing.JPanel;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JTextField;
-import javax.swing.JCheckBox;
-import javax.swing.JOptionPane;
-import javax.swing.JTextArea;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Insets;
@@ -26,63 +16,66 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+
 public class EnigmaPanel extends JPanel {
 
-    private FontMetrics metrics;
+    private final FontMetrics metrics;
 
-    private Rotor[] rotors;
+    private final Rotor[] rotors;
 
     /**
      * Serial ID for the Panel.
      */
     private static final long serialVersionUID = 7298201505806512569L;
 
-    private static final List<Character> ALPHABET = new ArrayList<Character>(26);
+    private static final List<Character> ALPHABET = Arrays
+            .asList("abcdefghijklmnopqrstuvwxyz".toUpperCase().chars()
+                    .mapToObj(c -> (char) c).toArray(Character[]::new));
 
-    private JCheckBox[] rotorCheckBox = { new JCheckBox("Rotor 1"),
+    private final JCheckBox[] rotorCheckBox = { new JCheckBox("Rotor 1"),
             new JCheckBox("Rotor 2"), new JCheckBox("Rotor 3"),
             new JCheckBox("Rotor 4"), new JCheckBox("Rotor 5") };
 
-    private String rotorChangeDialog = "Please select three rotors";
-    private JLabel selectedRotorsMessage = new JLabel(
+    private final String rotorChangeDialog = "Please select three rotors";
+    private final JLabel selectedRotorsMessage = new JLabel(
             "You have selected rotors: ");
-    private JLabel displayRotorsLabel = new JLabel("");
-    private Object[] optionParams = { rotorChangeDialog, rotorCheckBox,
+    private final JLabel displayRotorsLabel = new JLabel("");
+    private final Object[] optionParams = { rotorChangeDialog, rotorCheckBox,
             selectedRotorsMessage, displayRotorsLabel };
-    private Integer[] rotorsChosen = new Integer[3];
+    private final Integer[] rotorsChosen = new Integer[3];
 
-    private JButton plugBoardButton;
-    private JButton rotorSet;
-    private JButton[] rotorPlusMinus = new JButton[6];
-    private JButton clearTextButton;
+    private final JButton plugBoardButton;
+    private final JButton rotorSet;
+    private final JButton[] rotorPlusMinus = new JButton[6];
+    private final JButton clearTextButton;
 
     private JTextArea originalMessage;
     private JTextArea codedMessage;
 
-    private JLabel[] rotorDisplay = new JLabel[3];
-    private JTextField message;
-    private Enigma enigma;
-    private EnigmaListener listener = new EnigmaListener();
+    private final JLabel[] rotorDisplay = new JLabel[3];
+    private final JTextField message;
+    private final Enigma enigma;
+    private final EnigmaListener listener = new EnigmaListener();
     private boolean changingRotors;
-    private int[] rotorRotation = new int[3];
+    private final int[] rotorRotation = new int[3];
 
-    private List<JTextField> plugs = new ArrayList<JTextField>(26);
-    private JLabel[] plugLabels = new JLabel[26];
+    private final List<JTextField> plugs = new ArrayList<>(26);
+    private final JLabel[] plugLabels = new JLabel[26];
     private boolean changingPlugs;
 
-    private Runnable clearText = () -> {
+    private final Runnable clearText = () -> {
         originalMessage.setText("");
         codedMessage.setText("");
     };
 
     public EnigmaPanel() throws IOException {
-
-        char[] tempAlphabet = "abcdefghijklmnopqrstuvwxyz".toUpperCase()
-                .toCharArray();
-        for (char letter : tempAlphabet) {
-            ALPHABET.add(new Character(letter));
-        }
-
         chooseRotors();
         setLayout(null);
         enigma = new Enigma();
@@ -92,23 +85,21 @@ public class EnigmaPanel extends JPanel {
             rotorDisplay[i] = new JLabel("0");
         }
 
-        int textWidth = 10;
-        int textHeight = 5;
+        final int textWidth = 10;
+        final int textHeight = 5;
         message = new JTextField();
         originalMessage = new JTextArea(10, 5);
         codedMessage = new JTextArea(10, 5);
 
         metrics = originalMessage.getFontMetrics(originalMessage.getFont());
-        int fontHeight = metrics.getHeight();
-        int fontWidth = metrics.getMaxAdvance();
+        final int fontHeight = metrics.getHeight();
+        final int fontWidth = metrics.getMaxAdvance();
 
         JTextField temp;
         for (int i = 0; i < 26; i++) {
             temp = new JTextField();
             temp.setEnabled(false);
             temp.setDocument(new JTextFieldLimit(1));
-            temp.getDocument().putProperty("sourceIndex", i);
-            temp.getDocument().addDocumentListener(listener);
             temp.addKeyListener(listener);
             plugs.add(temp);
             plugLabels[i] = new JLabel(String.valueOf(ALPHABET.get(i)));
@@ -185,7 +176,7 @@ public class EnigmaPanel extends JPanel {
         plugs.get(24).setBounds(620, 410, fontWidth, fontHeight);
         plugs.get(25).setBounds(620, 490, fontWidth, fontHeight);
 
-        for (JTextField plug : plugs) {
+        for (final JTextField plug : plugs) {
             add(plug);
         }
 
@@ -195,7 +186,7 @@ public class EnigmaPanel extends JPanel {
             add(plugLabels[i]);
         }
 
-        for (JButton button : rotorPlusMinus) {
+        for (final JButton button : rotorPlusMinus) {
             button.setMargin(new Insets(0, 0, 0, 0));
             button.addActionListener(listener);
             add(button);
@@ -216,12 +207,12 @@ public class EnigmaPanel extends JPanel {
     }
 
     @Override
-    public void paintComponent(Graphics g) {
+    public void paintComponent(final Graphics g) {
         super.paintComponent(g);
     }
 
     public void formatRotorSettings() {
-        int length = rotorRotation.length - 1;
+        final int length = rotorRotation.length - 1;
         for (int i = length; i > -1; i--) {
             if (rotorRotation[i] < 0) {
                 rotorRotation[i] = 25;
@@ -240,7 +231,7 @@ public class EnigmaPanel extends JPanel {
 
     private void chooseRotors() {
         boolean areThreeRotorsChosen = false;
-        for (JCheckBox check : rotorCheckBox) {
+        for (final JCheckBox check : rotorCheckBox) {
             check.addItemListener(listener);
         }
 
@@ -257,15 +248,15 @@ public class EnigmaPanel extends JPanel {
     }
 
     private class EnigmaListener extends KeyAdapter implements ItemListener,
-            ActionListener, DocumentListener {
+            ActionListener {
 
-        private Pattern alpha = Pattern.compile("[a-zA-Z\b]");
+        private final Pattern alpha = Pattern.compile("[a-zA-Z\b]");
         private Matcher match;
 
         private final int MAX_SELECTIONS = 3;
         private int currentSelections = 0;
 
-        private List<char[]> textChangeCache = new ArrayList<char[]>();
+        private final List<char[]> textChangeCache = new ArrayList<>();
 
         public EnigmaListener() {
             for (int i = 0; i < 26; i++) {
@@ -274,8 +265,8 @@ public class EnigmaPanel extends JPanel {
         }
 
         @Override
-        public void keyReleased(KeyEvent e) {
-            char letter = Character.toUpperCase(e.getKeyChar());
+        public void keyReleased(final KeyEvent e) {
+            final char letter = Character.toUpperCase(e.getKeyChar());
             match = alpha.matcher(Character.toString(letter));
             if (!match.matches()) {
                 return;
@@ -293,8 +284,8 @@ public class EnigmaPanel extends JPanel {
                         codedMessage.setText(codedMessage.getText()
                                 + enigma.encode(letter, rotorsChosen));
 
-                        String originText = originalMessage.getText();
-                        String codeText = codedMessage.getText();
+                        final String originText = originalMessage.getText();
+                        final String codeText = codedMessage.getText();
                         int length = originText.length();
 
                         for (int i = 0; i < length; i++) {
@@ -314,6 +305,15 @@ public class EnigmaPanel extends JPanel {
                 } else if (plugs.contains(e.getComponent())) {
                     if (e.getKeyCode() == 8) {
 
+                        /*
+                         * This works, but it's SO ugly. I want to fix/simplify
+                         * it somehow. Not sure how though.
+                         * 
+                         * Also alphabet will throw index out of bounds
+                         * exception when given the empty char. Not sure how to
+                         * fix that.
+                         */
+
                         textChangeCache.get(plugs.indexOf(e.getComponent()))[0] = textChangeCache
                                 .get(plugs.indexOf(e.getComponent()))[1];
                         textChangeCache.get(plugs.indexOf(e.getComponent()))[1] = ' ';
@@ -331,7 +331,7 @@ public class EnigmaPanel extends JPanel {
                                 .get(plugs.indexOf(e.getComponent()))[0]))[1] = ' ';
 
                     } else {
-                        int letterIndex = ALPHABET.indexOf(letter);
+                        final int letterIndex = ALPHABET.indexOf(letter);
 
                         if (!plugs.get(letterIndex).getText().equals("")
                                 && !plugs
@@ -380,19 +380,19 @@ public class EnigmaPanel extends JPanel {
         }
 
         @Override
-        public void actionPerformed(ActionEvent e) {
+        public void actionPerformed(final ActionEvent e) {
             if (e.getSource() == plugBoardButton) {
                 if (changingPlugs) {
                     changingPlugs = false;
                     plugBoardButton.setText("Set Plugboard");
-                    for (JTextField plug : plugs) {
+                    for (final JTextField plug : plugs) {
                         plug.setEnabled(false);
                     }
                     clearText.run();
                 } else {
                     plugBoardButton.setText("Done");
                     changingPlugs = true;
-                    for (JTextField plug : plugs) {
+                    for (final JTextField plug : plugs) {
                         plug.setEnabled(true);
                     }
                 }
@@ -400,13 +400,13 @@ public class EnigmaPanel extends JPanel {
                 if (changingRotors) {
                     rotorSet.setText("Set Rotors");
                     changingRotors = false;
-                    for (JButton button : rotorPlusMinus) {
+                    for (final JButton button : rotorPlusMinus) {
                         button.setVisible(false);
                     }
                 } else {
                     rotorSet.setText("Done");
                     changingRotors = true;
-                    for (JButton button : rotorPlusMinus) {
+                    for (final JButton button : rotorPlusMinus) {
                         button.setVisible(true);
                     }
                 }
@@ -431,8 +431,8 @@ public class EnigmaPanel extends JPanel {
         }
 
         @Override
-        public void itemStateChanged(ItemEvent e) {
-            JCheckBox source = (JCheckBox) e.getSource();
+        public void itemStateChanged(final ItemEvent e) {
+            final JCheckBox source = (JCheckBox) e.getSource();
             final int length = rotorsChosen.length;
             if (source.isSelected()) {
                 currentSelections++;
@@ -444,7 +444,7 @@ public class EnigmaPanel extends JPanel {
                     }
                 }
                 if (currentSelections == MAX_SELECTIONS) {
-                    for (JCheckBox check : rotorCheckBox) {
+                    for (final JCheckBox check : rotorCheckBox) {
                         if (!check.isSelected()) {
                             check.setEnabled(false);
                         }
@@ -465,7 +465,7 @@ public class EnigmaPanel extends JPanel {
                                 break;
                             }
                         }
-                        Integer temp = rotorsChosen[firstNullIndex];
+                        final Integer temp = rotorsChosen[firstNullIndex];
                         for (int j = firstNullIndex; j < length - 1; j++) {
                             rotorsChosen[j] = rotorsChosen[j + 1];
                         }
@@ -473,8 +473,9 @@ public class EnigmaPanel extends JPanel {
                     }
                 }
                 if (currentSelections < MAX_SELECTIONS) {
-                    for (JCheckBox check : rotorCheckBox)
+                    for (final JCheckBox check : rotorCheckBox) {
                         check.setEnabled(true);
+                    }
                 }
             }
             String display = "";
@@ -482,7 +483,7 @@ public class EnigmaPanel extends JPanel {
                 if (rotorsChosen[i] == null) {
                     display += "Empty   ";
                 } else {
-                    display += ((int) rotorsChosen[i] + 1) + "   ";
+                    display += (rotorsChosen[i] + 1) + "   ";
                 }
             }
             displayRotorsLabel.setText(display);
@@ -490,25 +491,6 @@ public class EnigmaPanel extends JPanel {
 
         public int getCurrentSelections() {
             return currentSelections;
-        }
-
-        @Override
-        public void insertUpdate(DocumentEvent e) {
-            changedUpdate(e);
-        }
-
-        @Override
-        public void removeUpdate(DocumentEvent e) {
-            changedUpdate(e);
-        }
-
-        @Override
-        public void changedUpdate(DocumentEvent e) {
-            // System.out
-            // .println(plugs.get(
-            // (int) e.getDocument().getProperty("sourceIndex"))
-            // .getText());
-            // System.out.println(e.getDocument().getProperty("sourceIndex"));
         }
     }
 }

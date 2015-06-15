@@ -15,21 +15,22 @@ public class JTextFieldLimit extends PlainDocument {
      */
     private static final long serialVersionUID = -7389064483330913826L;
 
-    private int limit;
+    private final int limit;
 
-    private Pattern alpha = Pattern.compile("[a-zA-Z]");
+    private final Pattern alpha = Pattern.compile("[a-zA-Z]");
     private Matcher match;
 
-    public JTextFieldLimit(int limit) {
+    public JTextFieldLimit(final int limit) {
         super();
         this.limit = limit;
     }
 
     @Override
-    public void insertString(int offset, String str, AttributeSet attr)
-            throws BadLocationException {
-        if (str == null)
+    public void insertString(final int offset, final String str,
+            final AttributeSet attr) throws BadLocationException {
+        if (str == null) {
             return;
+        }
 
         match = alpha.matcher(str);
 

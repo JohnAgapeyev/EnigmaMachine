@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 public class Enigma {
@@ -30,6 +31,13 @@ public class Enigma {
         for (int i = 0; i < 5; i++) {
             rotors.add(null);
         }
+
+        BiConsumer<Integer, String> setRotorFromFile = (index, key) -> {
+            rotors.set(index,
+                    new Rotor(key.toUpperCase().chars().mapToObj(c -> (char) c)
+                            .collect(Collectors.toList())));
+        };
+
         final Path configPath = FileSystems.getDefault().getPath("config.ini");
         final List<String[]> options = new ArrayList<>();
         Files.readAllLines(configPath).forEach(
@@ -38,16 +46,26 @@ public class Enigma {
         for (final String[] line : options) {
             if (line[0].equals("default_rotor_rand")) {
                 if (!Boolean.valueOf(line[1])) {
+
                     for (final String[] findValue : options) {
                         switch (findValue[0]) {
                             case "rotor_1":
-                                rotors.set(0,
-                                        new Rotor(findValue[1].toUpperCase()
-                                                .chars()
-                                                .mapToObj(c -> (char) c)
-                                                .collect(Collectors.toList())));
+                                setRotorFromFile
+                                        .accept(Integer.valueOf(findValue[0]
+                                                .replaceAll("[\\D]", "")) - 1,
+                                                findValue[1]);
+
+                                // rotors.set(0,
+                                // new Rotor(findValue[1].toUpperCase()
+                                // .chars()
+                                // .mapToObj(c -> (char) c)
+                                // .collect(Collectors.toList())));
+
                                 break;
                             case "rotor_2":
+                                System.out.println(Integer
+                                        .parseInt(findValue[0].replaceAll(
+                                                "[\\D]", "")));
                                 rotors.set(1,
                                         new Rotor(findValue[1].toUpperCase()
                                                 .chars()
@@ -108,6 +126,8 @@ public class Enigma {
         final int length = rotorsChosen.size() - 1;
         boolean isReverse = false;
 
+        output = plugBoardSwap(plugBoard, output);
+
         // Normal encryption
         for (int i = length; i > -1; i--) {
             output = rotorEncryption(output, rotorsChosen.get(i), isReverse);
@@ -116,10 +136,13 @@ public class Enigma {
         output = rotorEncryption(output, REFLECTOR_CODE, isReverse);
 
         isReverse = true;
+
         // Return back through the rotors
         for (final Integer rotor : rotorsChosen) {
             output = rotorEncryption(output, rotor, isReverse);
         }
+
+        output = plugBoardSwap(plugBoard, output);
 
         System.out.println("\n\n\n\n\n");
 
@@ -139,8 +162,8 @@ public class Enigma {
             ALPHABET.forEach(alphabetKey::add);
 
         } else {
-            rotorKey = rotors.get(Math.abs(rotorNumber)).getKey();
-            alphabetKey = rotors.get(Math.abs(rotorNumber)).getAlphabet();
+            rotorKey = rotors.get(rotorNumber).getKey();
+            alphabetKey = rotors.get(rotorNumber).getAlphabet();
         }
 
         if (!isReverse) {
@@ -191,23 +214,21 @@ public class Enigma {
                 }
             }
         }
+        return response;
+    }
 
-        System.out.println(rotorNumber);
+    private char plugBoardSwap(final List<List<Character>> plugBoard,
+            final char letter) {
 
-        System.out.println(letter + "\t" + response);
-        String one = "";
-        String two = "";
-        String three = "";
-        for (int i = 0; i < 26; i++) {
-            one += rotorKey.get(i);
-            two += ALPHABET.get(i);
-            three += alphabetKey.get(i);
+        char output = letter;
+
+        for (final List<Character> pair : plugBoard) {
+            if (pair.contains(letter)) {
+                output = (output == pair.get(0)) ? pair.get(1) : pair.get(0);
+            }
         }
 
-        System.out.println(two + "\n" + three + "\n" + one + "\n" + three
-                + "\n" + two + "\n\n");
-
-        return response;
+        return output;
     }
 
     public List<Rotor> getRotors() {

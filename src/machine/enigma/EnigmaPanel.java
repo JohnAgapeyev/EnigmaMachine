@@ -266,14 +266,14 @@ public class EnigmaPanel extends JPanel {
         }
     }
 
-    private void updatePlugBoard(char first, int secondIndex) {
-        List<Character> pair = new ArrayList<>(2);
+    private void updatePlugBoard(final char first, final int secondIndex) {
+        final List<Character> pair = new ArrayList<>(2);
         pair.add(first);
         pair.add(ALPHABET.get(secondIndex));
         plugBoard.add(pair);
     }
 
-    private void removePlug(char firstHalf) {
+    private void removePlug(final char firstHalf) {
         plugBoard = plugBoard.stream()
                 .filter(plug -> !(plug.contains(firstHalf)))
                 .collect(Collectors.toList());
@@ -396,12 +396,6 @@ public class EnigmaPanel extends JPanel {
                             textChangeCache
                                     .get(plugs.indexOf(e.getComponent()))[1] = letter;
 
-                            // System.out.println(textChangeCache.get(plugs
-                            // .indexOf(e.getComponent()))[0]);
-                            // System.out.println(textChangeCache.get(plugs
-                            // .indexOf(e.getComponent()))[1]);
-                            // System.out.println(plugs.indexOf(e.getComponent()));
-
                             plugs.get(letterIndex).setText(
                                     String.valueOf(ALPHABET.get(plugs.indexOf(e
                                             .getComponent()))));
@@ -411,9 +405,6 @@ public class EnigmaPanel extends JPanel {
                             textChangeCache.get(letterIndex)[1] = ALPHABET
                                     .get(plugs.indexOf(e.getComponent()));
 
-                            // System.out.println(textChangeCache.get(letterIndex)[0]);
-                            // System.out.println(textChangeCache.get(letterIndex)[1]);
-                            // System.out.println(letterIndex);
                         }
                     }
                 }

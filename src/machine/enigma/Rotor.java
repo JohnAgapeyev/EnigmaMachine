@@ -13,11 +13,11 @@ public class Rotor {
             .asList("abcdefghijklmnopqrstuvwxyz".toUpperCase().chars()
                     .mapToObj(c -> (char) c).toArray(Character[]::new));
 
-    private List<Character> originalKey = new ArrayList<>(26);;
+    private final List<Character> originalKey = new ArrayList<>(26);;
 
     private List<Character> rotatedKey = new ArrayList<>(26);;
 
-    private List<Character> rotatedAlphabet = new ArrayList<>(26);
+    private final List<Character> rotatedAlphabet = new ArrayList<>(26);
 
     private final BinaryOperator<List<Character>> clone = (parent, child) -> {
         child.clear();

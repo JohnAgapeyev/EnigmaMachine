@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Enigma {
 
@@ -40,44 +41,39 @@ public class Enigma {
                     for (final String[] findValue : options) {
                         switch (findValue[0]) {
                             case "rotor_1":
-                                rotors.set(
-                                        0,
-                                        new Rotor(Arrays.asList(findValue[1]
-                                                .toUpperCase().chars()
+                                rotors.set(0,
+                                        new Rotor(findValue[1].toUpperCase()
+                                                .chars()
                                                 .mapToObj(c -> (char) c)
-                                                .toArray(Character[]::new))));
+                                                .collect(Collectors.toList())));
                                 break;
                             case "rotor_2":
-                                rotors.set(
-                                        1,
-                                        new Rotor(Arrays.asList(findValue[1]
-                                                .toUpperCase().chars()
+                                rotors.set(1,
+                                        new Rotor(findValue[1].toUpperCase()
+                                                .chars()
                                                 .mapToObj(c -> (char) c)
-                                                .toArray(Character[]::new))));
+                                                .collect(Collectors.toList())));
                                 break;
                             case "rotor_3":
-                                rotors.set(
-                                        2,
-                                        new Rotor(Arrays.asList(findValue[1]
-                                                .toUpperCase().chars()
+                                rotors.set(2,
+                                        new Rotor(findValue[1].toUpperCase()
+                                                .chars()
                                                 .mapToObj(c -> (char) c)
-                                                .toArray(Character[]::new))));
+                                                .collect(Collectors.toList())));
                                 break;
                             case "rotor_4":
-                                rotors.set(
-                                        3,
-                                        new Rotor(Arrays.asList(findValue[1]
-                                                .toUpperCase().chars()
+                                rotors.set(3,
+                                        new Rotor(findValue[1].toUpperCase()
+                                                .chars()
                                                 .mapToObj(c -> (char) c)
-                                                .toArray(Character[]::new))));
+                                                .collect(Collectors.toList())));
                                 break;
                             case "rotor_5":
-                                rotors.set(
-                                        4,
-                                        new Rotor(Arrays.asList(findValue[1]
-                                                .toUpperCase().chars()
+                                rotors.set(4,
+                                        new Rotor(findValue[1].toUpperCase()
+                                                .chars()
                                                 .mapToObj(c -> (char) c)
-                                                .toArray(Character[]::new))));
+                                                .collect(Collectors.toList())));
                                 break;
                             default:
                                 break;
@@ -106,7 +102,8 @@ public class Enigma {
         }
     }
 
-    public char encode(final char sentLetter, final List<Integer> rotorsChosen) {
+    public char encode(final char sentLetter, final List<Integer> rotorsChosen,
+            final List<List<Character>> plugBoard) {
         char output = sentLetter;
         final int length = rotorsChosen.size() - 1;
         boolean isReverse = false;
@@ -148,8 +145,6 @@ public class Enigma {
 
         if (!isReverse) {
 
-            System.out.println(response);
-
             // External alphabet gets turned into internal alphabet
             for (int i = 0; i < alphabetKey.size(); i++) {
                 if (response == alphabetKey.get(i)) {
@@ -158,8 +153,6 @@ public class Enigma {
                 }
             }
 
-            System.out.println(response);
-
             // Internal alphabet gets turned into rotor wiring
             for (int i = 0; i < alphabetKey.size(); i++) {
                 if (response == alphabetKey.get(i)) {
@@ -167,8 +160,6 @@ public class Enigma {
                     break;
                 }
             }
-
-            System.out.println(response);
 
             // Rotor output is returned through the shifted alphabet key once
             // again on its way out
@@ -179,11 +170,7 @@ public class Enigma {
                 }
             }
 
-            System.out.println(response);
-
         } else {
-            System.out.println(response);
-
             for (int i = 0; i < alphabetKey.size(); i++) {
                 if (response == alphabetKey.get(i)) {
                     response = ALPHABET.get(i);
@@ -191,24 +178,18 @@ public class Enigma {
                 }
             }
 
-            System.out.println(response);
-
             for (int i = 0; i < rotorKey.size(); i++) {
                 if (response == rotorKey.get(i)) {
                     response = alphabetKey.get(i);
                     break;
                 }
             }
-            System.out.println(response);
-
             for (int i = 0; i < ALPHABET.size(); i++) {
                 if (response == ALPHABET.get(i)) {
                     response = alphabetKey.get(i);
                     break;
                 }
             }
-            System.out.println(response);
-
         }
 
         System.out.println(rotorNumber);

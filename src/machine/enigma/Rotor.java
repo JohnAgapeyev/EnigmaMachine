@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
-import java.util.function.BiFunction;
+import java.util.function.BinaryOperator;
 
 public class Rotor {
 
@@ -13,24 +13,20 @@ public class Rotor {
             .asList("abcdefghijklmnopqrstuvwxyz".toUpperCase().chars()
                     .mapToObj(c -> (char) c).toArray(Character[]::new));
 
-    private final List<Character> originalKey;
+    private List<Character> originalKey = new ArrayList<>(26);;
 
-    private List<Character> rotatedKey;
+    private List<Character> rotatedKey = new ArrayList<>(26);;
 
     private List<Character> rotatedAlphabet = new ArrayList<>(26);
 
-    private final BiFunction<List<Character>, List<Character>, List<Character>> clone = (
-            parent, child) -> {
+    private final BinaryOperator<List<Character>> clone = (parent, child) -> {
         child.clear();
         parent.forEach(child::add);
         return child;
     };
 
     public Rotor() {
-        originalKey = new ArrayList<>(26);
-        rotatedKey = new ArrayList<>(26);
         clone.apply(ALPHABET, rotatedAlphabet);
-        // ALPHABET.forEach(rotatedAlphabet::add);
         for (int i = 0; i < 26; i++) {
             originalKey.add(null);
             rotatedKey.add(null);
@@ -47,14 +43,14 @@ public class Rotor {
             originalKey.set(i, ALPHABET.get(letterIndex));
             alreadyUsed.add(letterIndex);
         }
-        rotatedKey = clone.apply(originalKey, rotatedAlphabet);
+        rotatedKey = clone.apply(originalKey, rotatedKey);
         ;
     }
 
     public Rotor(final List<Character> key) {
-        originalKey = key;
-        rotatedKey = key;
-        rotatedAlphabet = clone.apply(ALPHABET, rotatedAlphabet);
+        clone.apply(ALPHABET, rotatedAlphabet);
+        clone.apply(key, originalKey);
+        clone.apply(key, rotatedKey);
     }
 
     public List<Character> getKey() {
@@ -66,6 +62,8 @@ public class Rotor {
     }
 
     public void setRotation(final int rotateSteps) {
+        clone.apply(originalKey, rotatedKey);
+        clone.apply(ALPHABET, rotatedAlphabet);
         if (rotateSteps == 0) {
             return;
         } else {

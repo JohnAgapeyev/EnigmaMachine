@@ -1,5 +1,6 @@
 package machine.enigma;
 
+import java.awt.Color;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Insets;
@@ -15,6 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -67,6 +69,7 @@ public class EnigmaPanel extends JPanel {
     private boolean changingRotors;
     private final int[] rotorRotation = new int[3];
 
+    private List<List<Character>> plugBoard = new ArrayList<>(26);
     private final List<JTextField> plugs = new ArrayList<>(26);
     private final List<JLabel> plugLabels = new ArrayList<>(26);
     private boolean changingPlugs;
@@ -97,8 +100,14 @@ public class EnigmaPanel extends JPanel {
         final int textWidth = 10;
         final int textHeight = 5;
         message = new JTextField();
+
         originalMessage = new JTextArea(10, 5);
+        originalMessage.setEnabled(false);
+        originalMessage.setDisabledTextColor(Color.black);
+
         codedMessage = new JTextArea(10, 5);
+        codedMessage.setEnabled(false);
+        codedMessage.setDisabledTextColor(Color.black);
 
         metrics = originalMessage.getFontMetrics(originalMessage.getFont());
         final int fontHeight = metrics.getHeight();
@@ -110,6 +119,7 @@ public class EnigmaPanel extends JPanel {
             temp.setEnabled(false);
             temp.setDocument(new JTextFieldLimit(1));
             temp.addKeyListener(listener);
+            temp.setDisabledTextColor(Color.black);
             plugs.add(temp);
             plugLabels.add(new JLabel(String.valueOf(ALPHABET.get(i))));
         }
@@ -256,6 +266,19 @@ public class EnigmaPanel extends JPanel {
         }
     }
 
+    private void updatePlugBoard(char first, int secondIndex) {
+        List<Character> pair = new ArrayList<>(2);
+        pair.add(first);
+        pair.add(ALPHABET.get(secondIndex));
+        plugBoard.add(pair);
+    }
+
+    private void removePlug(char firstHalf) {
+        plugBoard = plugBoard.stream()
+                .filter(plug -> !(plug.contains(firstHalf)))
+                .collect(Collectors.toList());
+    }
+
     private class EnigmaListener extends KeyAdapter implements ItemListener,
             ActionListener {
 
@@ -265,7 +288,7 @@ public class EnigmaPanel extends JPanel {
         private final int MAX_SELECTIONS = 3;
         private int currentSelections = 0;
 
-        private final List<char[]> textChangeCache = new ArrayList<>();
+        private final List<char[]> textChangeCache = new ArrayList<>(26);
 
         public EnigmaListener() {
             for (int i = 0; i < 26; i++) {
@@ -290,8 +313,10 @@ public class EnigmaPanel extends JPanel {
                                 + letter);
                         rotorRotation[2]++;
                         formatRotorSettings();
-                        codedMessage.setText(codedMessage.getText()
-                                + enigma.encode(letter, rotorsChosen));
+                        codedMessage
+                                .setText(codedMessage.getText()
+                                        + enigma.encode(letter, rotorsChosen,
+                                                plugBoard));
 
                         final String originText = originalMessage.getText();
                         final String codeText = codedMessage.getText();
@@ -332,6 +357,9 @@ public class EnigmaPanel extends JPanel {
                                         .indexOf(e.getComponent()))[0]))
                                 .setText("");
 
+                        removePlug(textChangeCache.get(plugs.indexOf(e
+                                .getComponent()))[0]);
+
                         textChangeCache.get(ALPHABET.indexOf(textChangeCache
                                 .get(plugs.indexOf(e.getComponent()))[0]))[0] = textChangeCache
                                 .get(ALPHABET.indexOf(textChangeCache.get(plugs
@@ -358,17 +386,21 @@ public class EnigmaPanel extends JPanel {
                             ((JTextField) e.getComponent()).setText("");
 
                         } else {
+
+                            updatePlugBoard(letter,
+                                    plugs.indexOf(e.getComponent()));
+
                             textChangeCache
                                     .get(plugs.indexOf(e.getComponent()))[0] = textChangeCache
                                     .get(plugs.indexOf(e.getComponent()))[1];
                             textChangeCache
                                     .get(plugs.indexOf(e.getComponent()))[1] = letter;
 
-                            System.out.println(textChangeCache.get(plugs
-                                    .indexOf(e.getComponent()))[0]);
-                            System.out.println(textChangeCache.get(plugs
-                                    .indexOf(e.getComponent()))[1]);
-                            System.out.println(plugs.indexOf(e.getComponent()));
+                            // System.out.println(textChangeCache.get(plugs
+                            // .indexOf(e.getComponent()))[0]);
+                            // System.out.println(textChangeCache.get(plugs
+                            // .indexOf(e.getComponent()))[1]);
+                            // System.out.println(plugs.indexOf(e.getComponent()));
 
                             plugs.get(letterIndex).setText(
                                     String.valueOf(ALPHABET.get(plugs.indexOf(e

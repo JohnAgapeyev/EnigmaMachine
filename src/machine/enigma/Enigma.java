@@ -5,7 +5,6 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
@@ -21,18 +20,19 @@ public class Enigma {
     private Reflector reflector;
     private final int rotorLength = 5;
 
-    private static final List<Character> ALPHABET = Arrays
-            .asList("abcdefghijklmnopqrstuvwxyz".toUpperCase().chars()
-                    .mapToObj(c -> (char) c).toArray(Character[]::new));
+    private static final List<Character> ALPHABET = "abcdefghijklmnopqrstuvwxyz"
+            .toUpperCase().chars().mapToObj(c -> (char) c)
+            .collect(Collectors.toList());
 
-    private final int REFLECTOR_CODE = 100;
+    private final byte REFLECTOR_CODE = 100;
 
     public Enigma() throws IOException {
+
         for (int i = 0; i < 5; i++) {
             rotors.add(null);
         }
 
-        BiConsumer<Integer, String> setRotorFromFile = (index, key) -> {
+        final BiConsumer<Integer, String> setRotorFromFile = (index, key) -> {
             rotors.set(index,
                     new Rotor(key.toUpperCase().chars().mapToObj(c -> (char) c)
                             .collect(Collectors.toList())));
@@ -46,55 +46,11 @@ public class Enigma {
         for (final String[] line : options) {
             if (line[0].equals("default_rotor_rand")) {
                 if (!Boolean.valueOf(line[1])) {
-
                     for (final String[] findValue : options) {
-                        switch (findValue[0]) {
-                            case "rotor_1":
-                                setRotorFromFile
-                                        .accept(Integer.valueOf(findValue[0]
-                                                .replaceAll("[\\D]", "")) - 1,
-                                                findValue[1]);
-
-                                // rotors.set(0,
-                                // new Rotor(findValue[1].toUpperCase()
-                                // .chars()
-                                // .mapToObj(c -> (char) c)
-                                // .collect(Collectors.toList())));
-
-                                break;
-                            case "rotor_2":
-                                System.out.println(Integer
-                                        .parseInt(findValue[0].replaceAll(
-                                                "[\\D]", "")));
-                                rotors.set(1,
-                                        new Rotor(findValue[1].toUpperCase()
-                                                .chars()
-                                                .mapToObj(c -> (char) c)
-                                                .collect(Collectors.toList())));
-                                break;
-                            case "rotor_3":
-                                rotors.set(2,
-                                        new Rotor(findValue[1].toUpperCase()
-                                                .chars()
-                                                .mapToObj(c -> (char) c)
-                                                .collect(Collectors.toList())));
-                                break;
-                            case "rotor_4":
-                                rotors.set(3,
-                                        new Rotor(findValue[1].toUpperCase()
-                                                .chars()
-                                                .mapToObj(c -> (char) c)
-                                                .collect(Collectors.toList())));
-                                break;
-                            case "rotor_5":
-                                rotors.set(4,
-                                        new Rotor(findValue[1].toUpperCase()
-                                                .chars()
-                                                .mapToObj(c -> (char) c)
-                                                .collect(Collectors.toList())));
-                                break;
-                            default:
-                                break;
+                        if (findValue[0].startsWith("rotor_")) {
+                            setRotorFromFile.accept(Integer
+                                    .valueOf(findValue[0].replaceAll("[\\D]",
+                                            "")) - 1, findValue[1]);
                         }
                     }
                 } else {
@@ -106,10 +62,10 @@ public class Enigma {
                 if (!Boolean.valueOf(line[1])) {
                     for (final String[] findValue : options) {
                         if (findValue[0].equals("reflector")) {
-                            reflector = new Reflector(
-                                    Arrays.asList(findValue[1].toUpperCase()
-                                            .chars().mapToObj(c -> (char) c)
-                                            .toArray(Character[]::new)));
+                            reflector = new Reflector(findValue[1]
+                                    .toUpperCase().chars()
+                                    .mapToObj(c -> (char) c)
+                                    .collect(Collectors.toList()));
                             break;
                         }
                     }
@@ -120,7 +76,7 @@ public class Enigma {
         }
     }
 
-    public char encode(final char sentLetter, final List<Integer> rotorsChosen,
+    public char encode(final char sentLetter, final List<Byte> rotorsChosen,
             final List<List<Character>> plugBoard) {
         char output = sentLetter;
         final int length = rotorsChosen.size() - 1;
@@ -138,7 +94,7 @@ public class Enigma {
         isReverse = true;
 
         // Return back through the rotors
-        for (final Integer rotor : rotorsChosen) {
+        for (final Byte rotor : rotorsChosen) {
             output = rotorEncryption(output, rotor, isReverse);
         }
 
@@ -149,10 +105,10 @@ public class Enigma {
         return output;
     }
 
-    private char rotorEncryption(final char letter, final int rotorNumber,
+    private char rotorEncryption(final char letter, final byte rotorNumber,
             final boolean isReverse) {
-        List<Character> rotorKey = new ArrayList<>(26);
-        List<Character> alphabetKey = new ArrayList<>(26);
+        List<Character> rotorKey = new ArrayList<>(ALPHABET.size());
+        List<Character> alphabetKey = new ArrayList<>(ALPHABET.size());
         char response = letter;
 
         if (rotorNumber == REFLECTOR_CODE) {

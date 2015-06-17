@@ -1,31 +1,32 @@
 package machine.enigma;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 public class Reflector {
 
-    private static final List<Character> ALPHABET = Arrays
-            .asList("abcdefghijklmnopqrstuvwxyz".toUpperCase().chars()
-                    .mapToObj(c -> (char) c).toArray(Character[]::new));
+    private static final List<Character> ALPHABET = "abcdefghijklmnopqrstuvwxyz"
+            .toUpperCase().chars().mapToObj(c -> (char) c)
+            .collect(Collectors.toList());
 
-    private List<Character> key = new ArrayList<>(26);
+    private static final byte ALPHABET_LENGTH = 26;
+
+    private List<Character> key = new ArrayList<>(ALPHABET_LENGTH);
 
     public Reflector() {
-        for (int i = 0; i < 26; i++) {
+        for (int i = 0; i < ALPHABET_LENGTH; i++) {
             key.add(i, null);
         }
 
         final Random rand = new Random();
-        final int alphabetLength = ALPHABET.size();
         final ArrayList<Integer> alreadyUsed = new ArrayList<>();
-        for (int i = 0; i < alphabetLength; i++) {
+        for (int i = 0; i < ALPHABET_LENGTH; i++) {
             if (key.get(i) == null) {
-                int letterIndex = rand.nextInt(alphabetLength);
+                int letterIndex = rand.nextInt(ALPHABET_LENGTH);
                 while (alreadyUsed.contains(letterIndex) || letterIndex == i) {
-                    letterIndex = rand.nextInt(alphabetLength);
+                    letterIndex = rand.nextInt(ALPHABET_LENGTH);
                 }
                 key.set(i, ALPHABET.get(letterIndex));
                 alreadyUsed.add(letterIndex);
@@ -45,12 +46,5 @@ public class Reflector {
 
     public List<Character> getKey() {
         return key;
-    }
-
-    public void showKey() {
-        for (final Character letter : key) {
-            System.out.print(letter);
-        }
-        System.out.print("\n");
     }
 }

@@ -28,18 +28,18 @@ import javax.swing.JTextField;
 
 public class EnigmaPanel extends JPanel {
 
-    private final FontMetrics metrics;
-
-    private List<Rotor> rotors = new ArrayList<>();
-
     /**
      * Serial ID for the Panel.
      */
     private static final long serialVersionUID = 7298201505806512569L;
 
-    private static final List<Character> ALPHABET = Arrays
-            .asList("abcdefghijklmnopqrstuvwxyz".toUpperCase().chars()
-                    .mapToObj(c -> (char) c).toArray(Character[]::new));
+    private static final byte ALPHABET_LENGTH = 26;
+
+    private static final List<Character> ALPHABET = "abcdefghijklmnopqrstuvwxyz"
+            .toUpperCase().chars().mapToObj(c -> (char) c)
+            .collect(Collectors.toList());
+
+    private List<Rotor> rotors = new ArrayList<>();
 
     private final JCheckBox[] rotorCheckBox = { new JCheckBox("Rotor 1"),
             new JCheckBox("Rotor 2"), new JCheckBox("Rotor 3"),
@@ -52,7 +52,7 @@ public class EnigmaPanel extends JPanel {
     private final Object[] optionParams = { rotorChangeDialog, rotorCheckBox,
             selectedRotorsMessage, displayRotorsLabel };
 
-    private final List<Integer> rotorsChosen = new ArrayList<>(3);
+    private final List<Byte> rotorsChosen = new ArrayList<>(3);
 
     private final JButton plugBoardButton;
     private final JButton rotorSet;
@@ -62,16 +62,18 @@ public class EnigmaPanel extends JPanel {
     private JTextArea originalMessage;
     private JTextArea codedMessage;
 
+    private final FontMetrics metrics;
+
     private final JLabel[] rotorDisplay = new JLabel[3];
     private final JTextField message;
     private final Enigma enigma;
     private final EnigmaListener listener = new EnigmaListener();
     private boolean changingRotors;
-    private final int[] rotorRotation = new int[3];
+    private final byte[] rotorRotation = new byte[3];
 
-    private List<List<Character>> plugBoard = new ArrayList<>(26);
-    private final List<JTextField> plugs = new ArrayList<>(26);
-    private final List<JLabel> plugLabels = new ArrayList<>(26);
+    private List<List<Character>> plugBoard = new ArrayList<>(ALPHABET_LENGTH);
+    private final List<JTextField> plugs = new ArrayList<>(ALPHABET_LENGTH);
+    private final List<JLabel> plugLabels = new ArrayList<>(ALPHABET_LENGTH);
     private boolean changingPlugs;
 
     private final Runnable clearText = () -> {
@@ -114,10 +116,10 @@ public class EnigmaPanel extends JPanel {
         final int fontWidth = metrics.getMaxAdvance();
 
         JTextField temp;
-        for (int i = 0; i < 26; i++) {
+        for (int i = 0; i < ALPHABET_LENGTH; i++) {
             temp = new JTextField();
             temp.setEnabled(false);
-            temp.setDocument(new JTextFieldLimit(1));
+            // temp.setDocument(new JTextFieldLimit(1));
             temp.addKeyListener(listener);
             temp.setDisabledTextColor(Color.black);
             plugs.add(temp);
@@ -157,59 +159,45 @@ public class EnigmaPanel extends JPanel {
         codedMessage.setBounds(350, 130, fontWidth * textWidth, fontHeight
                 * textHeight);
 
-        rotorDisplay[0].setBounds(292, 70, 20, 20);
-        rotorDisplay[1].setBounds(332, 70, 20, 20);
-        rotorDisplay[2].setBounds(372, 70, 20, 20);
-
-        rotorPlusMinus.get(0).setBounds(285, 50, 20, 20);
-        rotorPlusMinus.get(1).setBounds(285, 90, 20, 20);
-        rotorPlusMinus.get(2).setBounds(325, 50, 20, 20);
-        rotorPlusMinus.get(3).setBounds(325, 90, 20, 20);
-        rotorPlusMinus.get(4).setBounds(365, 50, 20, 20);
-        rotorPlusMinus.get(5).setBounds(365, 90, 20, 20);
-
-        plugs.get(0).setBounds(20, 410, fontWidth, fontHeight);
-        plugs.get(1).setBounds(20, 490, fontWidth, fontHeight);
-        plugs.get(2).setBounds(70, 410, fontWidth, fontHeight);
-        plugs.get(3).setBounds(70, 490, fontWidth, fontHeight);
-        plugs.get(4).setBounds(120, 410, fontWidth, fontHeight);
-        plugs.get(5).setBounds(120, 490, fontWidth, fontHeight);
-        plugs.get(6).setBounds(170, 410, fontWidth, fontHeight);
-        plugs.get(7).setBounds(170, 490, fontWidth, fontHeight);
-        plugs.get(8).setBounds(220, 410, fontWidth, fontHeight);
-        plugs.get(9).setBounds(220, 490, fontWidth, fontHeight);
-        plugs.get(10).setBounds(270, 410, fontWidth, fontHeight);
-        plugs.get(11).setBounds(270, 490, fontWidth, fontHeight);
-        plugs.get(12).setBounds(320, 410, fontWidth, fontHeight);
-        plugs.get(13).setBounds(320, 490, fontWidth, fontHeight);
-        plugs.get(14).setBounds(370, 410, fontWidth, fontHeight);
-        plugs.get(15).setBounds(370, 490, fontWidth, fontHeight);
-        plugs.get(16).setBounds(420, 410, fontWidth, fontHeight);
-        plugs.get(17).setBounds(420, 490, fontWidth, fontHeight);
-        plugs.get(18).setBounds(470, 410, fontWidth, fontHeight);
-        plugs.get(19).setBounds(470, 490, fontWidth, fontHeight);
-        plugs.get(20).setBounds(520, 410, fontWidth, fontHeight);
-        plugs.get(21).setBounds(520, 490, fontWidth, fontHeight);
-        plugs.get(22).setBounds(570, 410, fontWidth, fontHeight);
-        plugs.get(23).setBounds(570, 490, fontWidth, fontHeight);
-        plugs.get(24).setBounds(620, 410, fontWidth, fontHeight);
-        plugs.get(25).setBounds(620, 490, fontWidth, fontHeight);
-
-        for (final JTextField plug : plugs) {
-            add(plug);
+        int rotorLabelX = 292;
+        int rotorLabelY = 70;
+        int rotorLabelSize = 20;
+        for (JLabel display : rotorDisplay) {
+            display.setBounds(rotorLabelX, rotorLabelY, rotorLabelSize,
+                    rotorLabelSize);
+            rotorLabelX += 40;
         }
 
-        for (int i = 0; i < plugLabels.size(); i++) {
-            plugLabels.get(i).setBounds(plugs.get(i).getX() + (fontWidth / 3),
-                    plugs.get(i).getY() - 20, fontWidth, fontHeight);
-            add(plugLabels.get(i));
-        }
-
-        for (final JButton button : rotorPlusMinus) {
+        int plusMinusX = 285;
+        int plusMinusY = 50;
+        int plusMinusSize = 20;
+        for (JButton button : rotorPlusMinus) {
+            button.setBounds(plusMinusX, plusMinusY, plusMinusSize,
+                    plusMinusSize);
+            plusMinusY = (plusMinusY == 50) ? 90 : 50;
+            if (rotorPlusMinus.indexOf(button) % 2 != 0) {
+                plusMinusX += 40;
+            }
             button.setMargin(new Insets(0, 0, 0, 0));
             button.addActionListener(listener);
             add(button);
             button.setVisible(false);
+        }
+
+        int plugX = 20;
+        int plugY = 410;
+        for (int i = 0; i < plugs.size(); i++) {
+            plugs.get(i).setBounds(plugX, plugY, fontWidth, fontHeight);
+            plugLabels.get(i).setBounds(plugs.get(i).getX() + (fontWidth / 3),
+                    plugs.get(i).getY() - 20, fontWidth, fontHeight);
+
+            plugY = (plugY == 410) ? 490 : 410;
+
+            if (i % 2 != 0) {
+                plugX += 50;
+            }
+            add(plugs.get(i));
+            add(plugLabels.get(i));
         }
 
         add(message);
@@ -230,7 +218,7 @@ public class EnigmaPanel extends JPanel {
         super.paintComponent(g);
     }
 
-    public void formatRotorSettings() {
+    private void formatRotorSettings() {
         final int length = rotorRotation.length - 1;
         for (int i = length; i > -1; i--) {
             if (rotorRotation[i] < 0) {
@@ -288,10 +276,11 @@ public class EnigmaPanel extends JPanel {
         private final int MAX_SELECTIONS = 3;
         private int currentSelections = 0;
 
-        private final List<char[]> textChangeCache = new ArrayList<>(26);
+        private final List<char[]> textChangeCache = new ArrayList<>(
+                ALPHABET_LENGTH);
 
         public EnigmaListener() {
-            for (int i = 0; i < 26; i++) {
+            for (int i = 0; i < ALPHABET_LENGTH; i++) {
                 textChangeCache.add(new char[2]);
             }
         }
@@ -471,7 +460,7 @@ public class EnigmaPanel extends JPanel {
                 for (int i = 0; i < length; i++) {
                     if (rotorsChosen.get(i) == null) {
                         rotorsChosen.remove(i);
-                        rotorsChosen.add(i, Arrays.asList(rotorCheckBox)
+                        rotorsChosen.add(i, (byte) Arrays.asList(rotorCheckBox)
                                 .indexOf(source));
                         break;
                     }
@@ -498,11 +487,11 @@ public class EnigmaPanel extends JPanel {
                                 break;
                             }
                         }
-                        final Integer temp = rotorsChosen.get(firstNullIndex);
                         for (int j = firstNullIndex; j < length - 1; j++) {
                             rotorsChosen.set(j, rotorsChosen.get(j + 1));
                         }
-                        rotorsChosen.set(length - 1, temp);
+                        rotorsChosen.set(length - 1,
+                                rotorsChosen.get(firstNullIndex));
                     }
                 }
                 if (currentSelections < MAX_SELECTIONS) {
@@ -522,7 +511,7 @@ public class EnigmaPanel extends JPanel {
             displayRotorsLabel.setText(display);
         }
 
-        public int getCurrentSelections() {
+        private int getCurrentSelections() {
             return currentSelections;
         }
     }

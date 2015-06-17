@@ -160,9 +160,9 @@ public class EnigmaPanel extends JPanel {
                 * textHeight);
 
         int rotorLabelX = 292;
-        int rotorLabelY = 70;
-        int rotorLabelSize = 20;
-        for (JLabel display : rotorDisplay) {
+        final int rotorLabelY = 70;
+        final int rotorLabelSize = 20;
+        for (final JLabel display : rotorDisplay) {
             display.setBounds(rotorLabelX, rotorLabelY, rotorLabelSize,
                     rotorLabelSize);
             rotorLabelX += 40;
@@ -170,8 +170,8 @@ public class EnigmaPanel extends JPanel {
 
         int plusMinusX = 285;
         int plusMinusY = 50;
-        int plusMinusSize = 20;
-        for (JButton button : rotorPlusMinus) {
+        final int plusMinusSize = 20;
+        for (final JButton button : rotorPlusMinus) {
             button.setBounds(plusMinusX, plusMinusY, plusMinusSize,
                     plusMinusSize);
             plusMinusY = (plusMinusY == 50) ? 90 : 50;

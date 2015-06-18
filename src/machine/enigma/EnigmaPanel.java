@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -25,6 +26,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.text.JTextComponent;
 
 public class EnigmaPanel extends JPanel {
 
@@ -44,7 +46,6 @@ public class EnigmaPanel extends JPanel {
     private final JCheckBox[] rotorCheckBox = { new JCheckBox("Rotor 1"),
             new JCheckBox("Rotor 2"), new JCheckBox("Rotor 3"),
             new JCheckBox("Rotor 4"), new JCheckBox("Rotor 5") };
-
     private final String rotorChangeDialog = "Please select three rotors";
     private final JLabel selectedRotorsMessage = new JLabel(
             "You have selected rotors: ");
@@ -76,10 +77,8 @@ public class EnigmaPanel extends JPanel {
     private final List<JLabel> plugLabels = new ArrayList<>(ALPHABET_LENGTH);
     private boolean changingPlugs;
 
-    private final Runnable clearText = () -> {
-        originalMessage.setText("");
-        codedMessage.setText("");
-    };
+    private final Consumer<JTextComponent> clearText = (field) -> field
+            .setText("");
 
     public EnigmaPanel() throws IOException {
         for (int i = 0; i < 3; i++) {
@@ -119,7 +118,7 @@ public class EnigmaPanel extends JPanel {
         for (int i = 0; i < ALPHABET_LENGTH; i++) {
             temp = new JTextField();
             temp.setEnabled(false);
-            // temp.setDocument(new JTextFieldLimit(1));
+            temp.setDocument(new JTextFieldLimit(1));
             temp.addKeyListener(listener);
             temp.setDisabledTextColor(Color.black);
             plugs.add(temp);
@@ -282,11 +281,14 @@ public class EnigmaPanel extends JPanel {
         public EnigmaListener() {
             for (int i = 0; i < ALPHABET_LENGTH; i++) {
                 textChangeCache.add(new char[2]);
+                textChangeCache.get(i)[0] = ' ';
+                textChangeCache.get(i)[1] = ' ';
             }
         }
 
         @Override
         public void keyReleased(final KeyEvent e) {
+
             final char letter = Character.toUpperCase(e.getKeyChar());
             match = alpha.matcher(Character.toString(letter));
             if (!match.matches()) {
@@ -297,7 +299,7 @@ public class EnigmaPanel extends JPanel {
                     if (e.getKeyCode() == 8) {
                         return;
                     } else {
-                        message.setText("");
+                        clearText.accept(message);
                         originalMessage.setText(originalMessage.getText()
                                 + letter);
                         rotorRotation[2]++;
@@ -341,10 +343,9 @@ public class EnigmaPanel extends JPanel {
                                 .get(plugs.indexOf(e.getComponent()))[1];
                         textChangeCache.get(plugs.indexOf(e.getComponent()))[1] = ' ';
 
-                        plugs.get(
-                                ALPHABET.indexOf(textChangeCache.get(plugs
-                                        .indexOf(e.getComponent()))[0]))
-                                .setText("");
+                        clearText.accept(plugs.get(ALPHABET
+                                .indexOf(textChangeCache.get(plugs.indexOf(e
+                                        .getComponent()))[0])));
 
                         removePlug(textChangeCache.get(plugs.indexOf(e
                                 .getComponent()))[0]);
@@ -359,42 +360,49 @@ public class EnigmaPanel extends JPanel {
                     } else {
                         final int letterIndex = ALPHABET.indexOf(letter);
 
-                        if (!plugs.get(letterIndex).getText().equals("")
-                                && !plugs
-                                        .get(letterIndex)
-                                        .getText()
-                                        .equals(String.valueOf(ALPHABET
-                                                .get(plugs.indexOf(e
-                                                        .getComponent()))))) {
+                        if (!plugs
+                                .get(letterIndex)
+                                .getText()
+                                .equals(String.valueOf(ALPHABET.get(plugs
+                                        .indexOf(e.getComponent()))))) {
 
-                            JOptionPane.showMessageDialog(null, letter
-                                    + " is already taken. Please "
-                                    + "choose another plug or delete its"
-                                    + " value first.");
+                            if (!(textChangeCache.get(plugs.indexOf(e
+                                    .getComponent()))[1] == ' ')) {
+                                JOptionPane
+                                        .showMessageDialog(
+                                                null,
+                                                ALPHABET.get(plugs.indexOf(e
+                                                        .getComponent()))
+                                                        + " is already in use. Please delete its "
+                                                        + "value before trying to change it.");
+                                return;
+                            }
 
-                            ((JTextField) e.getComponent()).setText("");
-
-                        } else {
-
-                            updatePlugBoard(letter,
-                                    plugs.indexOf(e.getComponent()));
-
-                            textChangeCache
-                                    .get(plugs.indexOf(e.getComponent()))[0] = textChangeCache
-                                    .get(plugs.indexOf(e.getComponent()))[1];
-                            textChangeCache
-                                    .get(plugs.indexOf(e.getComponent()))[1] = letter;
-
-                            plugs.get(letterIndex).setText(
-                                    String.valueOf(ALPHABET.get(plugs.indexOf(e
-                                            .getComponent()))));
-
-                            textChangeCache.get(letterIndex)[0] = textChangeCache
-                                    .get(letterIndex)[1];
-                            textChangeCache.get(letterIndex)[1] = ALPHABET
-                                    .get(plugs.indexOf(e.getComponent()));
+                            if (!plugs.get(letterIndex).getText().equals("")) {
+                                JOptionPane.showMessageDialog(null, letter
+                                        + " is already taken. Please "
+                                        + "choose another plug or delete its"
+                                        + " value first.");
+                                clearText.accept((JTextField) e.getComponent());
+                                return;
+                            }
 
                         }
+
+                        updatePlugBoard(letter, plugs.indexOf(e.getComponent()));
+
+                        textChangeCache.get(plugs.indexOf(e.getComponent()))[0] = textChangeCache
+                                .get(plugs.indexOf(e.getComponent()))[1];
+                        textChangeCache.get(plugs.indexOf(e.getComponent()))[1] = letter;
+
+                        plugs.get(letterIndex).setText(
+                                String.valueOf(ALPHABET.get(plugs.indexOf(e
+                                        .getComponent()))));
+
+                        textChangeCache.get(letterIndex)[0] = textChangeCache
+                                .get(letterIndex)[1];
+                        textChangeCache.get(letterIndex)[1] = ALPHABET
+                                .get(plugs.indexOf(e.getComponent()));
                     }
                 }
             }
@@ -409,7 +417,8 @@ public class EnigmaPanel extends JPanel {
                     for (final JTextField plug : plugs) {
                         plug.setEnabled(false);
                     }
-                    clearText.run();
+                    clearText.accept(originalMessage);
+                    clearText.accept(codedMessage);
                 } else {
                     plugBoardButton.setText("Done");
                     changingPlugs = true;
@@ -432,7 +441,8 @@ public class EnigmaPanel extends JPanel {
                     }
                 }
             } else if (e.getSource() == clearTextButton) {
-                clearText.run();
+                clearText.accept(originalMessage);
+                clearText.accept(codedMessage);
             } else {
                 if (e.getSource() == rotorPlusMinus.get(0)) {
                     rotorRotation[0]++;

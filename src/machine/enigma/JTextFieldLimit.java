@@ -3,7 +3,6 @@ package machine.enigma;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.swing.JOptionPane;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.PlainDocument;
@@ -34,15 +33,8 @@ public class JTextFieldLimit extends PlainDocument {
 
         match = alpha.matcher(str);
 
-        if ((getLength() + str.length()) <= limit) {
-            if (match.matches()) {
-                super.insertString(offset, str.toUpperCase(), attr);
-            }
-        } else {
-            JOptionPane.showMessageDialog(null,
-                    "The text field you are trying to use "
-                            + "already has a value. Please delete its contents"
-                            + " if you wish to change it.");
+        if ((getLength() + str.length()) <= limit && match.matches()) {
+            super.insertString(offset, str.toUpperCase(), attr);
         }
     }
 }

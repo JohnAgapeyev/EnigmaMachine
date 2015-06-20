@@ -4,32 +4,51 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
-import java.util.function.BinaryOperator;
-import java.util.stream.Collectors;
 
+/**
+ * This is the rotor class for the Enigma Machine. It has two constructors, one
+ * which randomly generates a key, and the other which takes a key as a
+ * parameter and uses that.
+ *
+ * @author John Agapeyev
+ *
+ */
 public class Rotor {
 
-    private static final List<Character> ALPHABET = "abcdefghijklmnopqrstuvwxyz"
-            .toUpperCase().chars().mapToObj(c -> (char) c)
-            .collect(Collectors.toList());
+    /**
+     * All documentation for this constant is provided in the Enigma Class.
+     */
+    private static final List<Character> ALPHABET = Enigma.ALPHABET;
 
-    private static final byte ALPHABET_LENGTH = 26;
+    /**
+     * All documentation for this constant is provided in the Enigma Class.
+     */
+    private static final byte ALPHABET_LENGTH = Enigma.ALPHABET_LENGTH;
 
-    private final List<Character> originalKey = new ArrayList<>(ALPHABET_LENGTH);
+    /**
+     * The original key that the rotor has.
+     */
+    private List<Character> originalKey = new ArrayList<>(ALPHABET_LENGTH);
 
+    /**
+     * The current version of the key that is rotated by the program.
+     */
     private List<Character> rotatedKey = new ArrayList<>(ALPHABET_LENGTH);
 
-    private final List<Character> rotatedAlphabet = new ArrayList<>(
-            ALPHABET_LENGTH);
+    /**
+     * The current offset of the rotor, that is rotated by the program.
+     */
+    private List<Character> rotatedAlphabet;
 
-    private final BinaryOperator<List<Character>> clone = (parent, child) -> {
-        child.clear();
-        parent.forEach(child::add);
-        return child;
-    };
-
+    /**
+     * Main constructor that randomly generates a key. It does this by iterating
+     * through the length of the key, randomly generating a letter that is then
+     * used and added to a separate list that keeps track of all the letters
+     * that have already been used.
+     */
     public Rotor() {
-        clone.apply(ALPHABET, rotatedAlphabet);
+        rotatedAlphabet = new ArrayList<>(ALPHABET);
+        // Used to prevent null pointer exceptions later in the program.
         for (int i = 0; i < ALPHABET_LENGTH; i++) {
             originalKey.add(null);
             rotatedKey.add(null);
@@ -45,27 +64,54 @@ public class Rotor {
             originalKey.set(i, ALPHABET.get(letterIndex));
             alreadyUsed.add(letterIndex);
         }
-        rotatedKey = clone.apply(originalKey, rotatedKey);
+        rotatedKey = new ArrayList<>(originalKey);
         ;
     }
 
+    /**
+     * This is the other constructor for this class that uses whatever key is
+     * given to it.
+     *
+     * @param key
+     *            The key to be used.
+     */
     public Rotor(final List<Character> key) {
-        clone.apply(ALPHABET, rotatedAlphabet);
-        clone.apply(key, originalKey);
-        clone.apply(key, rotatedKey);
+        rotatedAlphabet = new ArrayList<>(ALPHABET);
+        originalKey = new ArrayList<>(key);
+        rotatedKey = new ArrayList<>(key);
     }
 
+    /**
+     * Getter method.
+     *
+     * @return The current Key.
+     */
     public List<Character> getKey() {
         return rotatedKey;
     }
 
+    /**
+     * Getter method.
+     *
+     * @return The current alphabet offset.
+     */
     public List<Character> getAlphabet() {
         return rotatedAlphabet;
     }
 
+    /**
+     * Sets the rotation of the rotor based on rotateSteps. Resets the alphabet
+     * and key to their original values, then rotates them however many steps
+     * they need to be rotated. Because of how Collections.rotate works, the
+     * value is made negative to allow it to work correctly with the rest of the
+     * program.
+     *
+     * @param rotateSteps
+     *            Number of steps to rotate
+     */
     public void setRotation(final byte rotateSteps) {
-        clone.apply(originalKey, rotatedKey);
-        clone.apply(ALPHABET, rotatedAlphabet);
+        rotatedKey = new ArrayList<>(originalKey);
+        rotatedAlphabet = new ArrayList<>(ALPHABET);
         if (rotateSteps == 0) {
             return;
         } else {

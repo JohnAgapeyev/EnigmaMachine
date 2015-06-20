@@ -3,21 +3,37 @@ package machine.enigma;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
 
 public class Reflector {
 
-    private static final List<Character> ALPHABET = "abcdefghijklmnopqrstuvwxyz"
-            .toUpperCase().chars().mapToObj(c -> (char) c)
-            .collect(Collectors.toList());
+    /**
+     * All documentation for this constant is provided in the Enigma Class.
+     */
+    private static final List<Character> ALPHABET = Enigma.ALPHABET;
 
-    private static final byte ALPHABET_LENGTH = 26;
+    /**
+     * All documentation for this constant is provided in the Enigma Class.
+     */
+    private static final byte ALPHABET_LENGTH = Enigma.ALPHABET_LENGTH;
 
+    /**
+     * The reflector's key.
+     */
     private List<Character> key = new ArrayList<>(ALPHABET_LENGTH);
 
+    /**
+     * Default constructor for the reflector. It randomly generates a key by
+     * iterating through each space in the key, and if its null, filling it with
+     * an unused character. The index of that character is then filled with the
+     * letter represented by the original index. For example: if i is equal to
+     * 3, and a G was generated, then index 6 would contain a D, creating a pair
+     * D <-> G. Finally those letters are added to a separate list that prevents
+     * them being used elsewhere in the key.
+     */
     public Reflector() {
+        // Used to prevent null pointer exceptions.
         for (int i = 0; i < ALPHABET_LENGTH; i++) {
-            key.add(i, null);
+            key.set(i, null);
         }
 
         final Random rand = new Random();
@@ -40,10 +56,22 @@ public class Reflector {
         }
     }
 
+    /**
+     * Secondary constructor that sets the key based on the parameter sent to
+     * it.
+     *
+     * @param key
+     *            The key to be used.
+     */
     public Reflector(final List<Character> key) {
         this.key = key;
     }
 
+    /**
+     * Getter Method.
+     *
+     * @return The reflector's key.
+     */
     public List<Character> getKey() {
         return key;
     }

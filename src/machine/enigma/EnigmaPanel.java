@@ -62,9 +62,10 @@ public class EnigmaPanel extends JPanel {
      * A list of check boxes that are used in a popup at the start of the
      * program for the suer to pick which 3 rotors to use.
      */
-    private final List<JCheckBox> rotorCheckBox = Arrays.asList(new JCheckBox(
-            "Rotor 1"), new JCheckBox("Rotor 2"), new JCheckBox("Rotor 3"),
-            new JCheckBox("Rotor 4"), new JCheckBox("Rotor 5"));
+    private final List<JCheckBox> rotorCheckBox = Arrays.asList(
+            new JCheckBox("Rotor 1"), new JCheckBox("Rotor 2"),
+            new JCheckBox("Rotor 3"), new JCheckBox("Rotor 4"),
+            new JCheckBox("Rotor 5"));
 
     /**
      * A display for the popup of which rotors are currently chosen.
@@ -155,9 +156,9 @@ public class EnigmaPanel extends JPanel {
     /**
      * The constructor for this panel. It calls a method to let the user pick 3
      * rotors for use in the program. Setting up multiple panels and complex
-     * layouts was too complicated, so I remove the layout and position things
-     * absolutely. This method mostly just gives values to variables, and adds
-     * them to the panel.
+     * layouts was outside of my abilities when I made this project, so I
+     * removed the layout and positioned things absolutely. This method mostly
+     * just gives values to variables, and adds them to the panel.
      *
      * @throws IOException
      *             Exception thrown if config file cannot be found for the
@@ -175,15 +176,13 @@ public class EnigmaPanel extends JPanel {
         enigma = new Enigma();
         rotors = enigma.getRotors();
 
-        final int textWidth = 10;
-        final int textHeight = 5;
         message = new JTextField();
 
-        originalMessage = new JTextArea(10, 5);
+        originalMessage = new JTextArea();
         originalMessage.setEnabled(false);
         originalMessage.setDisabledTextColor(Color.black);
 
-        codedMessage = new JTextArea(10, 5);
+        codedMessage = new JTextArea();
         codedMessage.setEnabled(false);
         codedMessage.setDisabledTextColor(Color.black);
 
@@ -192,19 +191,20 @@ public class EnigmaPanel extends JPanel {
         final int fontHeight = metrics.getHeight();
         final int fontWidth = metrics.getMaxAdvance();
 
+        final int characterLimit = 1;
         final List<JLabel> plugLabels = new ArrayList<>(ALPHABET_LENGTH);
         JTextField temp;
         for (int i = 0; i < ALPHABET_LENGTH; i++) {
             temp = new JTextField();
             temp.setEnabled(false);
-            temp.setDocument(new JTextFieldLimit(1));
+            temp.setDocument(new JTextFieldLimit(characterLimit));
             temp.addKeyListener(listener);
             temp.setDisabledTextColor(Color.black);
             plugs.add(temp);
             plugLabels.add(new JLabel(String.valueOf(ALPHABET.get(i))));
         }
 
-        message.setDocument(new JTextFieldLimit(1));
+        message.setDocument(new JTextFieldLimit(characterLimit));
 
         plugBoardButton = new JButton("Set Plugboard");
         rotorSet = new JButton("Set Rotors");
@@ -231,13 +231,15 @@ public class EnigmaPanel extends JPanel {
         final int messageY = 20;
         message.setBounds(messageX, messageY, fontWidth, fontHeight);
 
+        final int textWidth = 10;
+        final int textHeight = 5;
         final int originalMessageX = 80;
         final int codedMessageX = 350;
         final int outputMessageY = 130;
-        originalMessage.setBounds(originalMessageX, outputMessageY, fontWidth
-                * textWidth, fontHeight * textHeight);
-        codedMessage.setBounds(codedMessageX, outputMessageY, fontWidth
-                * textWidth, fontHeight * textHeight);
+        originalMessage.setBounds(originalMessageX, outputMessageY,
+                fontWidth * textWidth, fontHeight * textHeight);
+        codedMessage.setBounds(codedMessageX, outputMessageY,
+                fontWidth * textWidth, fontHeight * textHeight);
 
         int rotorLabelX = 292;
         final int rotorLabelY = 70;
@@ -274,7 +276,7 @@ public class EnigmaPanel extends JPanel {
 
         int plugX = 20;
         int plugY = 410;
-        for (int i = 0; i < plugs.size(); i++) {
+        for (int i = 0; i < ALPHABET_LENGTH; i++) {
             plugs.get(i).setBounds(plugX, plugY, fontWidth, fontHeight);
             plugLabels.get(i).setBounds(plugs.get(i).getX() + (fontWidth / 3),
                     plugs.get(i).getY() - 20, fontWidth, fontHeight);
@@ -325,7 +327,8 @@ public class EnigmaPanel extends JPanel {
             rotors.get(rotorsChosen.get(i)).setRotation(rotorRotation[i]);
         }
 
-        for (int i = 0; i < rotorDisplay.size(); i++) {
+        final int rotorDisplayLength = rotorDisplay.size();
+        for (int i = 0; i < rotorDisplayLength; i++) {
             rotorDisplay.get(i).setText(String.valueOf(rotorRotation[i]));
         }
     }
@@ -354,7 +357,7 @@ public class EnigmaPanel extends JPanel {
         JOptionPane.showConfirmDialog(null, panel, "Rotor Selection",
                 JOptionPane.DEFAULT_OPTION);
         while (!areThreeRotorsChosen) {
-            if (listener.getCurrentSelections() == 3) {
+            if (listener.getCurrentSelections() == listener.MAX_SELECTIONS) {
                 areThreeRotorsChosen = true;
             } else {
                 JOptionPane.showConfirmDialog(null, panel, "Rotor Selection",
@@ -398,8 +401,8 @@ public class EnigmaPanel extends JPanel {
      * @author John Agapeyev
      *
      */
-    private class EnigmaListener extends KeyAdapter implements ItemListener,
-            ActionListener {
+    private class EnigmaListener extends KeyAdapter
+            implements ItemListener, ActionListener {
 
         /**
          * Any alphabetic character or a backspace.
@@ -466,19 +469,18 @@ public class EnigmaPanel extends JPanel {
                      * Won't encrypt unless the text is alphabetic and neither
                      * the rotors nor plugboard are being altered
                      */
-                    if (e.getKeyCode() == 8 || changingRotors || changingPlugs) {
+                    if (e.getKeyCode() == 8 || changingRotors
+                            || changingPlugs) {
                         clearText.accept(message);
                         return;
                     } else {
                         clearText.accept(message);
-                        originalMessage.setText(originalMessage.getText()
-                                + letter);
+                        originalMessage
+                                .setText(originalMessage.getText() + letter);
                         rotorRotation[2]++;
                         formatRotorSettings();
-                        codedMessage
-                                .setText(codedMessage.getText()
-                                        + enigma.encode(letter, rotorsChosen,
-                                                plugBoard));
+                        codedMessage.setText(codedMessage.getText() + enigma
+                                .encode(letter, rotorsChosen, plugBoard));
 
                         final String originText = originalMessage.getText();
                         final String codeText = codedMessage.getText();
@@ -525,8 +527,8 @@ public class EnigmaPanel extends JPanel {
                         userAlteredPlugCache[0] = userAlteredPlugCache[1];
                         userAlteredPlugCache[1] = ' ';
 
-                        clearText.accept(plugs.get(ALPHABET
-                                .indexOf(userAlteredPlugCache[0])));
+                        clearText.accept(plugs.get(
+                                ALPHABET.indexOf(userAlteredPlugCache[0])));
 
                         removePlug(userAlteredPlugCache[0]);
 
@@ -536,27 +538,22 @@ public class EnigmaPanel extends JPanel {
                     } else {
                         final int letterIndex = ALPHABET.indexOf(letter);
 
-                        if (!plugs
-                                .get(letterIndex)
-                                .getText()
-                                .equals(String.valueOf(ALPHABET
-                                        .get(userAlteredPlugIndex)))) {
+                        if (!plugs.get(letterIndex).getText().equals(String
+                                .valueOf(ALPHABET.get(userAlteredPlugIndex)))) {
 
                             if (!(userAlteredPlugCache[1] == ' ')) {
-                                JOptionPane
-                                        .showMessageDialog(
-                                                null,
-                                                ALPHABET.get(userAlteredPlugIndex)
-                                                        + " is already in use. Please delete its "
-                                                        + "value before trying to change it.");
+                                JOptionPane.showMessageDialog(null, ALPHABET
+                                        .get(userAlteredPlugIndex)
+                                        + " is already in use. Please delete its "
+                                        + "value before trying to change it.");
                                 return;
                             }
 
                             if (!plugs.get(letterIndex).getText().equals("")) {
-                                JOptionPane.showMessageDialog(null, letter
-                                        + " is already taken. Please "
-                                        + "choose another plug or delete its"
-                                        + " value first.");
+                                JOptionPane.showMessageDialog(null,
+                                        letter + " is already taken. Please "
+                                                + "choose another plug or delete its"
+                                                + " value first.");
                                 clearText.accept((JTextField) source);
                                 return;
                             }
@@ -573,9 +570,8 @@ public class EnigmaPanel extends JPanel {
                         userAlteredPlugCache[0] = userAlteredPlugCache[1];
                         userAlteredPlugCache[1] = letter;
 
-                        plugs.get(letterIndex).setText(
-                                String.valueOf(ALPHABET
-                                        .get(userAlteredPlugIndex)));
+                        plugs.get(letterIndex).setText(String
+                                .valueOf(ALPHABET.get(userAlteredPlugIndex)));
 
                         textChangeCache.get(letterIndex)[0] = textChangeCache
                                 .get(letterIndex)[1];
@@ -618,18 +614,14 @@ public class EnigmaPanel extends JPanel {
                 clearText.accept(originalMessage);
                 clearText.accept(codedMessage);
             } else {
-                if (source == rotorPlusMinus.get(0)) {
-                    rotorRotation[0]++;
-                } else if (e.getSource() == rotorPlusMinus.get(1)) {
-                    rotorRotation[0]--;
-                } else if (e.getSource() == rotorPlusMinus.get(2)) {
-                    rotorRotation[1]++;
-                } else if (e.getSource() == rotorPlusMinus.get(3)) {
-                    rotorRotation[1]--;
-                } else if (e.getSource() == rotorPlusMinus.get(4)) {
-                    rotorRotation[2]++;
-                } else if (e.getSource() == rotorPlusMinus.get(5)) {
-                    rotorRotation[2]--;
+                if (rotorPlusMinus.contains(source)) {
+                    final int rotorPlusMinusClickedIndex = rotorPlusMinus
+                            .indexOf(source);
+                    if (rotorPlusMinusClickedIndex % 2 == 0) {
+                        rotorRotation[rotorPlusMinusClickedIndex / 2]++;
+                    } else {
+                        rotorRotation[rotorPlusMinusClickedIndex / 2]--;
+                    }
                 }
                 formatRotorSettings();
             }
@@ -638,7 +630,9 @@ public class EnigmaPanel extends JPanel {
         /**
          * Method called whenever an item's state is changed. In practicality,
          * that only refers to the checkboxes on the popup as nothing else calls
-         * this method.
+         * this method. Whenever a checkbox is selected, it adds that rotor to
+         * rotorsChosen and updates the display. When one is deselected, it
+         * removes both the rotor and then updates the display.
          */
         @Override
         public void itemStateChanged(final ItemEvent e) {
@@ -663,9 +657,8 @@ public class EnigmaPanel extends JPanel {
             } else {
                 currentSelections--;
                 for (int i = 0; i < length; i++) {
-                    if (rotorsChosen.get(i) != null
-                            && rotorsChosen.get(i) == rotorCheckBox
-                                    .indexOf(source)) {
+                    if (rotorsChosen.get(i) != null && rotorsChosen
+                            .get(i) == rotorCheckBox.indexOf(source)) {
                         rotorsChosen.set(i, null);
 
                         int firstNullIndex = 0;

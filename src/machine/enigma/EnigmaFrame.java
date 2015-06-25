@@ -18,6 +18,16 @@ public class EnigmaFrame extends JFrame {
     private static final long serialVersionUID = -4908457653373357661L;
 
     /**
+     * Width of the Frame.
+     */
+    private static final int FRAME_WIDTH = 675;
+
+    /**
+     * Height of the Frame.
+     */
+    private static final int FRAME_HEIGHT = 600;
+
+    /**
      * Constructor for the frame.
      *
      * @throws IOException
@@ -28,7 +38,7 @@ public class EnigmaFrame extends JFrame {
         super("Enigma Machine");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setContentPane(new EnigmaPanel());
-        setSize(675, 600);
+        setSize(FRAME_WIDTH, FRAME_HEIGHT);
         setResizable(false);
         setVisible(true);
     }

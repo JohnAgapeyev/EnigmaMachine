@@ -9,7 +9,6 @@ In its current state it is finished, no further documentation or additions are p
 Features missing from this that exist in a real enigma machine:
 	Double stepping mechanism
 	Unique turnover points for each rotor
-	Ability to change rotors whenever desired
 	
 It reads from config.ini and currently the user cannot save anything to that file.
 Altering the first two lines allows the program to randomly generate keys for the rotor and reflector.

@@ -57,8 +57,7 @@ public class Enigma {
         }
 
         /*
-         * An interface form the java.util.Function library. It's used to save
-         * space when creating rotors from the file.
+         * A BiConsumer used to save space when creating rotors from the file.
          */
         final BiConsumer<Integer, String> setRotorFromFile = (index, key) -> {
             rotors.set(index, new Rotor(key.toUpperCase().chars()
@@ -81,17 +80,18 @@ public class Enigma {
          * values. If false, randomly generate them using their default
          * constructor.
          */
-        for (final String[] line : options) {
+
+        options.forEach(line -> {
             if (line[0].equals("default_rotor_rand")) {
                 if (!Boolean.valueOf(line[1])) {
-                    for (final String[] findValue : options) {
+                    options.forEach(findValue -> {
                         if (findValue[0].startsWith("rotor_")) {
                             setRotorFromFile.accept(
                                     Integer.valueOf(findValue[0]
                                             .replaceAll("[\\D]", "")) - 1,
                                     findValue[1]);
                         }
-                    }
+                    });
                 } else {
                     for (int i = 0; i < rotorLength; i++) {
                         rotors.set(i, new Rotor());
@@ -99,19 +99,18 @@ public class Enigma {
                 }
             } else if (line[0].equals("default_reflector_rand")) {
                 if (!Boolean.valueOf(line[1])) {
-                    for (final String[] findValue : options) {
+                    options.forEach(findValue -> {
                         if (findValue[0].equals("reflector")) {
                             reflector = new Reflector(findValue[1].toUpperCase()
                                     .chars().mapToObj(c -> (char) c)
                                     .collect(Collectors.toList()));
-                            break;
                         }
-                    }
+                    });
                 } else {
                     reflector = new Reflector();
                 }
             }
-        }
+        });
     }
 
     /**

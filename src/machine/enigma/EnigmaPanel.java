@@ -508,6 +508,10 @@ public class EnigmaPanel extends JPanel {
                         final String codeText = codedMessage.getText();
                         int length = originText.length();
 
+                        /*
+                         * Prevent blank spaces from being counted towards the
+                         * function below that adds spacing.
+                         */
                         for (int i = 0; i < length; i++) {
                             if (originText.charAt(i) == ' ') {
                                 length--;
@@ -704,15 +708,15 @@ public class EnigmaPanel extends JPanel {
                     rotorCheckBox.forEach(check -> check.setEnabled(true));
                 }
             }
-            String display = "";
-            for (int i = 0; i < length; i++) {
-                if (rotorsChosen.get(i) == null) {
-                    display += "Empty   ";
+            final StringBuilder display = new StringBuilder();
+            rotorsChosen.forEach(choice -> {
+                if (choice == null) {
+                    display.append("Empty   ");
                 } else {
-                    display += (rotorsChosen.get(i) + 1) + "   ";
+                    display.append((choice + 1) + "   ");
                 }
-            }
-            displayRotorsLabel.setText(display);
+            });
+            displayRotorsLabel.setText(display.toString());
         }
 
         /**

@@ -48,7 +48,7 @@ public class Rotor {
      */
     public Rotor() {
         rotatedAlphabet = new ArrayList<>(ALPHABET);
-        // Used to prevent null pointer exceptions later in the program.
+        // Used to prevent null pointer exceptions.
         for (int i = 0; i < ALPHABET_LENGTH; i++) {
             originalKey.add(null);
             rotatedKey.add(null);

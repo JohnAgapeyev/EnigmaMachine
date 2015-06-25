@@ -14,6 +14,7 @@ import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
@@ -347,14 +348,13 @@ public class EnigmaPanel extends JPanel {
      * use.
      */
     private void chooseRotors() {
-        System.out.println(rotorsChosen);
-        System.out.println(rotorDisplay);
         if (rotorsChosen == null && rotorDisplay == null) {
             rotorsChosen = new ArrayList<>(Arrays.asList(null, null, null));
             rotorDisplay = new ArrayList<>(Arrays.asList(new JLabel("0"),
                     new JLabel("0"), new JLabel("0")));
         } else {
-            for (int i = 0; i < 3; i++) {
+            final int numberOfChosenRotors = 3;
+            for (int i = 0; i < numberOfChosenRotors; i++) {
                 rotorsChosen.set(i, null);
                 rotorDisplay.get(i).setText("0");
             }
@@ -664,7 +664,7 @@ public class EnigmaPanel extends JPanel {
          * that only refers to the checkboxes on the popup as nothing else calls
          * this method. Whenever a checkbox is selected, it adds that rotor to
          * rotorsChosen and updates the display. When one is deselected, it
-         * removes both the rotor and then updates the display.
+         * removes the rotor and then updates the display.
          */
         @Override
         public void itemStateChanged(final ItemEvent e) {
@@ -694,18 +694,10 @@ public class EnigmaPanel extends JPanel {
 
                         rotorsChosen.set(i, null);
 
-                        int firstNullIndex = 0;
-                        for (int j = 0; j < length; j++) {
-                            if (rotorsChosen.get(j) == null) {
-                                firstNullIndex = j;
-                                break;
-                            }
-                        }
-                        Byte value = rotorsChosen.get(firstNullIndex);
-                        for (int j = firstNullIndex; j < length - 1; j++) {
-                            rotorsChosen.set(j, rotorsChosen.get(j + 1));
-                        }
-                        rotorsChosen.set(length - 1, value);
+                        final int numListRotateSteps = -1;
+                        Collections.rotate(rotorsChosen
+                                .subList(rotorsChosen.indexOf(null), length),
+                                numListRotateSteps);
                     }
                 }
                 if (currentSelections < MAX_SELECTIONS) {
@@ -735,11 +727,11 @@ public class EnigmaPanel extends JPanel {
         /**
          * Setter Method used to reset current selections if the user wants to
          * re-choose the rotors.
-         * 
+         *
          * @param currentSelections
          *            The number of current selections.
          */
-        private void setCurrentSelections(int currentSelections) {
+        private void setCurrentSelections(final int currentSelections) {
             this.currentSelections = currentSelections;
         }
     }

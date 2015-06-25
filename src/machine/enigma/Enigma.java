@@ -61,9 +61,8 @@ public class Enigma {
          * space when creating rotors from the file.
          */
         final BiConsumer<Integer, String> setRotorFromFile = (index, key) -> {
-            rotors.set(index,
-                    new Rotor(key.toUpperCase().chars().mapToObj(c -> (char) c)
-                            .collect(Collectors.toList())));
+            rotors.set(index, new Rotor(key.toUpperCase().chars()
+                    .mapToObj(c -> (char) c).collect(Collectors.toList())));
         };
 
         /*
@@ -72,8 +71,8 @@ public class Enigma {
          */
         final Path configPath = FileSystems.getDefault().getPath("config.ini");
         final List<String[]> options = new ArrayList<>();
-        Files.readAllLines(configPath).forEach(
-                line -> options.add(line.split("\\s+")));
+        Files.readAllLines(configPath)
+                .forEach(line -> options.add(line.split("\\s+")));
 
         /*
          * This iterates through the file. Currently it only has 2 actions,
@@ -87,9 +86,10 @@ public class Enigma {
                 if (!Boolean.valueOf(line[1])) {
                     for (final String[] findValue : options) {
                         if (findValue[0].startsWith("rotor_")) {
-                            setRotorFromFile.accept(Integer
-                                    .valueOf(findValue[0].replaceAll("[\\D]",
-                                            "")) - 1, findValue[1]);
+                            setRotorFromFile.accept(
+                                    Integer.valueOf(findValue[0]
+                                            .replaceAll("[\\D]", "")) - 1,
+                                    findValue[1]);
                         }
                     }
                 } else {
@@ -101,9 +101,8 @@ public class Enigma {
                 if (!Boolean.valueOf(line[1])) {
                     for (final String[] findValue : options) {
                         if (findValue[0].equals("reflector")) {
-                            reflector = new Reflector(findValue[1]
-                                    .toUpperCase().chars()
-                                    .mapToObj(c -> (char) c)
+                            reflector = new Reflector(findValue[1].toUpperCase()
+                                    .chars().mapToObj(c -> (char) c)
                                     .collect(Collectors.toList()));
                             break;
                         }

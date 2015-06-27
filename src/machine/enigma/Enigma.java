@@ -9,7 +9,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 import javax.swing.JOptionPane;
@@ -68,19 +67,9 @@ public class Enigma {
         }
 
         /*
-         * A BiConsumer used to save space when creating rotors from the file.
-         */
-        // final BiConsumer<Integer, String> setRotorFromFile = (index, key) ->
-        // {
-        // rotors.set(index, new Rotor(key.toUpperCase().chars()
-        // .mapToObj(c -> (char) c).collect(Collectors.toList())));
-        // };
-
-        /*
          * Read all lines of the config file, splits them on whitespace so that
          * index 0 is the name, and index 1 is the value
          */
-
         final Path configPath = FileSystems.getDefault().getPath(fileName);
 
         try {
@@ -96,48 +85,8 @@ public class Enigma {
                     if (Boolean.valueOf(keyValue[1])) {
                         reflector = new Reflector();
                     }
-                } else if (keyValue[0].equals(optionKey.get(2))
-                        && rotors.get(0) == null) {
-                    rotors.set(
-                            Integer.parseInt(
-                                    keyValue[0].replaceAll("[\\D]", "")) - 1,
-                            new Rotor(
-                                    keyValue[1].toUpperCase().chars()
-                                            .mapToObj(c -> (char) c)
-                                            .collect(Collectors.toList()),
-                                    keyValue[2].charAt(0)));
-                } else if (keyValue[0].equals(optionKey.get(3))
-                        && rotors.get(1) == null) {
-                    rotors.set(
-                            Integer.parseInt(
-                                    keyValue[0].replaceAll("[\\D]", "")) - 1,
-                            new Rotor(
-                                    keyValue[1].toUpperCase().chars()
-                                            .mapToObj(c -> (char) c)
-                                            .collect(Collectors.toList()),
-                                    keyValue[2].charAt(0)));
-                } else if (keyValue[0].equals(optionKey.get(4))
-                        && rotors.get(2) == null) {
-                    rotors.set(
-                            Integer.parseInt(
-                                    keyValue[0].replaceAll("[\\D]", "")) - 1,
-                            new Rotor(
-                                    keyValue[1].toUpperCase().chars()
-                                            .mapToObj(c -> (char) c)
-                                            .collect(Collectors.toList()),
-                                    keyValue[2].charAt(0)));
-                } else if (keyValue[0].equals(optionKey.get(5))
-                        && rotors.get(3) == null) {
-                    rotors.set(
-                            Integer.parseInt(
-                                    keyValue[0].replaceAll("[\\D]", "")) - 1,
-                            new Rotor(
-                                    keyValue[1].toUpperCase().chars()
-                                            .mapToObj(c -> (char) c)
-                                            .collect(Collectors.toList()),
-                                    keyValue[2].charAt(0)));
-                } else if (keyValue[0].equals(optionKey.get(6))
-                        && rotors.get(4) == null) {
+                } else if (keyValue[0].startsWith("rotor_")
+                        && rotors.contains(null)) {
                     rotors.set(
                             Integer.parseInt(
                                     keyValue[0].replaceAll("[\\D]", "")) - 1,
@@ -235,12 +184,13 @@ public class Enigma {
      */
     private char rotorEncryption(final char letter, final byte rotorNumber,
             final boolean isReverse) {
+
         List<Character> rotorKey = new ArrayList<>(ALPHABET_LENGTH);
         List<Character> alphabetKey = new ArrayList<>(ALPHABET_LENGTH);
         char response = letter;
 
         /*
-         * Gets the key to be sued based on rotorNumber, along with the alphabet
+         * Gets the key to be used based on rotorNumber, along with the alphabet
          * representing the offset
          */
         if (rotorNumber == REFLECTOR_CODE) {

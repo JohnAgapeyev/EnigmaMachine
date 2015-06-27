@@ -331,8 +331,9 @@ public class EnigmaPanel extends JPanel {
     }
 
     /**
-     * Formats the rotor rotation in the program. Bumps the next rotor if it
-     * passes 25, then sets the rotation based on that value.
+     * Formats the rotor rotation in the program. Bumps the next rotor if the
+     * previous one reaches its turnover point. Also checks the rotation of the
+     * middle and fast rotor to create the double-stepping mechanism.
      */
     private void formatRotorSettings() {
         final int length = rotorRotation.length - 1;

@@ -40,6 +40,8 @@ public class Rotor {
      */
     private List<Character> rotatedAlphabet;
 
+    private char turnoverPoint;
+
     /**
      * Main constructor that randomly generates a key. It does this by iterating
      * through the length of the key, randomly generating a letter that is then
@@ -65,7 +67,7 @@ public class Rotor {
             alreadyUsed.add(letterIndex);
         }
         rotatedKey = new ArrayList<>(originalKey);
-        ;
+        turnoverPoint = ALPHABET.get(rand.nextInt(ALPHABET_LENGTH));
     }
 
     /**
@@ -75,10 +77,11 @@ public class Rotor {
      * @param key
      *            The key to be used.
      */
-    public Rotor(final List<Character> key) {
+    public Rotor(final List<Character> key, char turnoverPoint) {
         rotatedAlphabet = new ArrayList<>(ALPHABET);
         originalKey = new ArrayList<>(key);
         rotatedKey = new ArrayList<>(key);
+        this.turnoverPoint = turnoverPoint;
     }
 
     /**
@@ -118,5 +121,13 @@ public class Rotor {
             Collections.rotate(rotatedKey, -rotateSteps);
             Collections.rotate(rotatedAlphabet, -rotateSteps);
         }
+    }
+
+    public char getTurnover() {
+        return turnoverPoint;
+    }
+
+    public void setTurnover(char turnoverPoint) {
+        this.turnoverPoint = turnoverPoint;
     }
 }

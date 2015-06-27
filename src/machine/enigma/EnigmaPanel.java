@@ -667,6 +667,8 @@ public class EnigmaPanel extends JPanel {
                     check.setSelected(false);
                 });
                 displayRotorsLabel.setText("");
+                clearText.accept(originalMessage);
+                clearText.accept(codedMessage);
                 listener.setCurrentSelections(0);
                 rotorRotation[0] = 0;
                 rotorRotation[1] = 0;

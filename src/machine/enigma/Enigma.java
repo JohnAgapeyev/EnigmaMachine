@@ -1,5 +1,7 @@
 package machine.enigma;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -44,6 +46,8 @@ public class Enigma {
     private final List<Rotor> rotors = new ArrayList<>(rotorLength);
     private Reflector reflector;
 
+    private final String fileName = "config.ini";
+
     private List<String> optionKey = new ArrayList<>(Arrays.asList(
             "default_rotor_rand", "default_reflector_rand", "rotor_1",
             "rotor_2", "rotor_3", "rotor_4", "rotor_5", "reflector"));
@@ -66,72 +70,84 @@ public class Enigma {
         /*
          * A BiConsumer used to save space when creating rotors from the file.
          */
-        final BiConsumer<Integer, String> setRotorFromFile = (index, key) -> {
-            rotors.set(index, new Rotor(key.toUpperCase().chars()
-                    .mapToObj(c -> (char) c).collect(Collectors.toList())));
-        };
+        // final BiConsumer<Integer, String> setRotorFromFile = (index, key) ->
+        // {
+        // rotors.set(index, new Rotor(key.toUpperCase().chars()
+        // .mapToObj(c -> (char) c).collect(Collectors.toList())));
+        // };
 
         /*
          * Read all lines of the config file, splits them on whitespace so that
          * index 0 is the name, and index 1 is the value
          */
-        final String fileName = "config.ini";
+
         final Path configPath = FileSystems.getDefault().getPath(fileName);
 
         try {
             Files.lines(configPath).forEach(line -> {
-                boolean rotorRand = false;
-                boolean reflectorRand = false;
                 String[] keyValue = line.split("\\s+");
                 if (keyValue[0].equals(optionKey.get(0))) {
-                    rotorRand = Boolean.valueOf(keyValue[1]);
-                    if (rotorRand) {
+                    if (Boolean.valueOf(keyValue[1])) {
                         for (int i = 0; i < rotorLength; i++) {
                             rotors.set(i, new Rotor());
                         }
                     }
                 } else if (keyValue[0].equals(optionKey.get(1))) {
-                    reflectorRand = Boolean.valueOf(keyValue[1]);
-                    if (reflectorRand) {
+                    if (Boolean.valueOf(keyValue[1])) {
                         reflector = new Reflector();
                     }
-                } else if (keyValue[0].equals(optionKey.get(2)) && !rotorRand) {
+                } else if (keyValue[0].equals(optionKey.get(2))
+                        && rotors.get(0) == null) {
                     rotors.set(
-                            Integer.valueOf(keyValue[0].replaceAll("[\\D]", ""))
-                                    - 1,
-                            new Rotor(keyValue[1].toUpperCase().chars()
-                                    .mapToObj(c -> (char) c)
-                                    .collect(Collectors.toList())));
-                } else if (keyValue[0].equals(optionKey.get(3)) && !rotorRand) {
+                            Integer.parseInt(
+                                    keyValue[0].replaceAll("[\\D]", "")) - 1,
+                            new Rotor(
+                                    keyValue[1].toUpperCase().chars()
+                                            .mapToObj(c -> (char) c)
+                                            .collect(Collectors.toList()),
+                                    keyValue[2].charAt(0)));
+                } else if (keyValue[0].equals(optionKey.get(3))
+                        && rotors.get(0) == null) {
                     rotors.set(
-                            Integer.valueOf(keyValue[0].replaceAll("[\\D]", ""))
-                                    - 1,
-                            new Rotor(keyValue[1].toUpperCase().chars()
-                                    .mapToObj(c -> (char) c)
-                                    .collect(Collectors.toList())));
-                } else if (keyValue[0].equals(optionKey.get(4)) && !rotorRand) {
+                            Integer.parseInt(
+                                    keyValue[0].replaceAll("[\\D]", "")) - 1,
+                            new Rotor(
+                                    keyValue[1].toUpperCase().chars()
+                                            .mapToObj(c -> (char) c)
+                                            .collect(Collectors.toList()),
+                                    keyValue[2].charAt(0)));
+                } else if (keyValue[0].equals(optionKey.get(4))
+                        && rotors.get(0) == null) {
                     rotors.set(
-                            Integer.valueOf(keyValue[0].replaceAll("[\\D]", ""))
-                                    - 1,
-                            new Rotor(keyValue[1].toUpperCase().chars()
-                                    .mapToObj(c -> (char) c)
-                                    .collect(Collectors.toList())));
-                } else if (keyValue[0].equals(optionKey.get(5)) && !rotorRand) {
+                            Integer.parseInt(
+                                    keyValue[0].replaceAll("[\\D]", "")) - 1,
+                            new Rotor(
+                                    keyValue[1].toUpperCase().chars()
+                                            .mapToObj(c -> (char) c)
+                                            .collect(Collectors.toList()),
+                                    keyValue[2].charAt(0)));
+                } else if (keyValue[0].equals(optionKey.get(5))
+                        && rotors.get(0) == null) {
                     rotors.set(
-                            Integer.valueOf(keyValue[0].replaceAll("[\\D]", ""))
-                                    - 1,
-                            new Rotor(keyValue[1].toUpperCase().chars()
-                                    .mapToObj(c -> (char) c)
-                                    .collect(Collectors.toList())));
-                } else if (keyValue[0].equals(optionKey.get(6)) && !rotorRand) {
+                            Integer.parseInt(
+                                    keyValue[0].replaceAll("[\\D]", "")) - 1,
+                            new Rotor(
+                                    keyValue[1].toUpperCase().chars()
+                                            .mapToObj(c -> (char) c)
+                                            .collect(Collectors.toList()),
+                                    keyValue[2].charAt(0)));
+                } else if (keyValue[0].equals(optionKey.get(6))
+                        && rotors.get(0) == null) {
                     rotors.set(
-                            Integer.valueOf(keyValue[0].replaceAll("[\\D]", ""))
-                                    - 1,
-                            new Rotor(keyValue[1].toUpperCase().chars()
-                                    .mapToObj(c -> (char) c)
-                                    .collect(Collectors.toList())));
+                            Integer.parseInt(
+                                    keyValue[0].replaceAll("[\\D]", "")) - 1,
+                            new Rotor(
+                                    keyValue[1].toUpperCase().chars()
+                                            .mapToObj(c -> (char) c)
+                                            .collect(Collectors.toList()),
+                                    keyValue[2].charAt(0)));
                 } else if (keyValue[0].equals(optionKey.get(7))
-                        && !reflectorRand) {
+                        && reflector == null) {
                     reflector = new Reflector(keyValue[1].toUpperCase().chars()
                             .mapToObj(c -> (char) c)
                             .collect(Collectors.toList()));
@@ -146,6 +162,16 @@ public class Enigma {
                 rotors.set(i, new Rotor());
             }
             reflector = new Reflector();
+        }
+    }
+
+    public void saveSettings() {
+        try {
+            BufferedWriter fileWriter = new BufferedWriter(
+                    new FileWriter(fileName));
+            fileWriter.close();
+        } catch (IOException e) {
+            System.out.print("");
         }
     }
 

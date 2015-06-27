@@ -358,18 +358,8 @@ public class EnigmaPanel extends JPanel {
                     }
                 }
             }
-
-            // if (rotorRotation[i] < 0) {
-            // rotorRotation[i] = 25;
-            // } else if (rotorRotation[i] > 25) {
-            // if (i > 0) {
-            // rotorRotation[i - 1]++;
-            // }
-            // rotorRotation[i] = 0;
-            // }
             rotors.get(rotorsChosen.get(i)).setRotation(rotorRotation[i]);
         }
-
         final int rotorDisplayLength = rotorDisplay.size();
         for (int i = 0; i < rotorDisplayLength; i++) {
             rotorDisplay.get(i)

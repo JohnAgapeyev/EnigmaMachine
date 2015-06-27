@@ -5,10 +5,6 @@ This is an enigma machine, written in Java, and coded using the swing framework.
 It features many of the elements in a real enigma machine.
 
 In its current state it is finished, no further documentation or additions are planned.
-
-Features missing from this that exist in a real enigma machine:
-	Double stepping mechanism
-	Unique turnover points for each rotor
 	
 It reads from config.ini and currently the user cannot save anything to that file.
 Altering the first two lines allows the program to randomly generate keys for the rotor and reflector.

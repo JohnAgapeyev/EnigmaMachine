@@ -5,9 +5,12 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
+
+import javax.swing.JOptionPane;
 
 /**
  * This is where all the encryption happens in the program. It will read from a
@@ -41,6 +44,10 @@ public class Enigma {
     private final List<Rotor> rotors = new ArrayList<>(rotorLength);
     private Reflector reflector;
 
+    private List<String> optionKey = new ArrayList<>(Arrays.asList(
+            "default_rotor_rand", "default_reflector_rand", "rotor_1",
+            "rotor_2", "rotor_3", "rotor_4", "rotor_5", "reflector"));
+
     /**
      * This is the constructor for this class. It reads all the lines in the
      * config file, splits them on the whitespace, and then iterates through
@@ -68,49 +75,78 @@ public class Enigma {
          * Read all lines of the config file, splits them on whitespace so that
          * index 0 is the name, and index 1 is the value
          */
-        final Path configPath = FileSystems.getDefault().getPath("config.ini");
-        final List<String[]> options = new ArrayList<>();
-        Files.readAllLines(configPath)
-                .forEach(line -> options.add(line.split("\\s+")));
+        final String fileName = "config.ini";
+        final Path configPath = FileSystems.getDefault().getPath(fileName);
 
-        /*
-         * This iterates through the file. Currently it only has 2 actions,
-         * checking whether the rotors or reflector is randomly generated. If
-         * the value is true, reiterate through the file to find the default
-         * values. If false, randomly generate them using their default
-         * constructor.
-         */
-
-        options.forEach(line -> {
-            if (line[0].equals("default_rotor_rand")) {
-                if (!Boolean.valueOf(line[1])) {
-                    options.forEach(findValue -> {
-                        if (findValue[0].startsWith("rotor_")) {
-                            setRotorFromFile.accept(
-                                    Integer.valueOf(findValue[0]
-                                            .replaceAll("[\\D]", "")) - 1,
-                                    findValue[1]);
+        try {
+            Files.lines(configPath).forEach(line -> {
+                boolean rotorRand = false;
+                boolean reflectorRand = false;
+                String[] keyValue = line.split("\\s+");
+                if (keyValue[0].equals(optionKey.get(0))) {
+                    rotorRand = Boolean.valueOf(keyValue[1]);
+                    if (rotorRand) {
+                        for (int i = 0; i < rotorLength; i++) {
+                            rotors.set(i, new Rotor());
                         }
-                    });
-                } else {
-                    for (int i = 0; i < rotorLength; i++) {
-                        rotors.set(i, new Rotor());
                     }
+                } else if (keyValue[0].equals(optionKey.get(1))) {
+                    reflectorRand = Boolean.valueOf(keyValue[1]);
+                    if (reflectorRand) {
+                        reflector = new Reflector();
+                    }
+                } else if (keyValue[0].equals(optionKey.get(2)) && !rotorRand) {
+                    rotors.set(
+                            Integer.valueOf(keyValue[0].replaceAll("[\\D]", ""))
+                                    - 1,
+                            new Rotor(keyValue[1].toUpperCase().chars()
+                                    .mapToObj(c -> (char) c)
+                                    .collect(Collectors.toList())));
+                } else if (keyValue[0].equals(optionKey.get(3)) && !rotorRand) {
+                    rotors.set(
+                            Integer.valueOf(keyValue[0].replaceAll("[\\D]", ""))
+                                    - 1,
+                            new Rotor(keyValue[1].toUpperCase().chars()
+                                    .mapToObj(c -> (char) c)
+                                    .collect(Collectors.toList())));
+                } else if (keyValue[0].equals(optionKey.get(4)) && !rotorRand) {
+                    rotors.set(
+                            Integer.valueOf(keyValue[0].replaceAll("[\\D]", ""))
+                                    - 1,
+                            new Rotor(keyValue[1].toUpperCase().chars()
+                                    .mapToObj(c -> (char) c)
+                                    .collect(Collectors.toList())));
+                } else if (keyValue[0].equals(optionKey.get(5)) && !rotorRand) {
+                    rotors.set(
+                            Integer.valueOf(keyValue[0].replaceAll("[\\D]", ""))
+                                    - 1,
+                            new Rotor(keyValue[1].toUpperCase().chars()
+                                    .mapToObj(c -> (char) c)
+                                    .collect(Collectors.toList())));
+                } else if (keyValue[0].equals(optionKey.get(6)) && !rotorRand) {
+                    rotors.set(
+                            Integer.valueOf(keyValue[0].replaceAll("[\\D]", ""))
+                                    - 1,
+                            new Rotor(keyValue[1].toUpperCase().chars()
+                                    .mapToObj(c -> (char) c)
+                                    .collect(Collectors.toList())));
+                } else if (keyValue[0].equals(optionKey.get(7))
+                        && !reflectorRand) {
+                    reflector = new Reflector(keyValue[1].toUpperCase().chars()
+                            .mapToObj(c -> (char) c)
+                            .collect(Collectors.toList()));
                 }
-            } else if (line[0].equals("default_reflector_rand")) {
-                if (!Boolean.valueOf(line[1])) {
-                    options.forEach(findValue -> {
-                        if (findValue[0].equals("reflector")) {
-                            reflector = new Reflector(findValue[1].toUpperCase()
-                                    .chars().mapToObj(c -> (char) c)
-                                    .collect(Collectors.toList()));
-                        }
-                    });
-                } else {
-                    reflector = new Reflector();
-                }
+            });
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(null,
+                    "\" " + fileName
+                            + "\" could not be located. No settings may be saved, and all "
+                            + "encryptions keys will be randomly generated.");
+            for (int i = 0; i < rotorLength; i++) {
+                rotors.set(i, new Rotor());
             }
-        });
+            reflector = new Reflector();
+        }
     }
 
     /**

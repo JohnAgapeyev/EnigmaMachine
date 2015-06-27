@@ -340,11 +340,33 @@ public class EnigmaPanel extends JPanel {
             if (rotorRotation[i] < 0) {
                 rotorRotation[i] = 25;
             } else if (rotorRotation[i] > 25) {
-                if (i > 0) {
-                    rotorRotation[i - 1]++;
-                }
                 rotorRotation[i] = 0;
             }
+            if (!listener.changingRotors) {
+                if (rotorRotation[1] == ALPHABET.indexOf(
+                        rotors.get(rotorsChosen.get(1)).getTurnover()) + 1
+                        && rotorRotation[2] == ALPHABET.indexOf(
+                                rotors.get(rotorsChosen.get(2)).getTurnover())
+                                + 2) {
+
+                    rotorRotation[1]++;
+
+                } else if (rotorRotation[i] == ALPHABET.indexOf(
+                        rotors.get(rotorsChosen.get(i)).getTurnover()) + 1) {
+                    if (i > 0) {
+                        rotorRotation[i - 1]++;
+                    }
+                }
+            }
+
+            // if (rotorRotation[i] < 0) {
+            // rotorRotation[i] = 25;
+            // } else if (rotorRotation[i] > 25) {
+            // if (i > 0) {
+            // rotorRotation[i - 1]++;
+            // }
+            // rotorRotation[i] = 0;
+            // }
             rotors.get(rotorsChosen.get(i)).setRotation(rotorRotation[i]);
         }
 
@@ -391,7 +413,7 @@ public class EnigmaPanel extends JPanel {
         JOptionPane.showConfirmDialog(null, panel, "Rotor Selection",
                 JOptionPane.DEFAULT_OPTION);
         while (!areThreeRotorsChosen) {
-            if (listener.getCurrentSelections() == listener.MAX_SELECTIONS) {
+            if (listener.currentSelections == listener.MAX_SELECTIONS) {
                 areThreeRotorsChosen = true;
             } else {
                 JOptionPane.showConfirmDialog(null, panel, "Rotor Selection",
@@ -669,7 +691,7 @@ public class EnigmaPanel extends JPanel {
                 displayRotorsLabel.setText("");
                 clearText.accept(originalMessage);
                 clearText.accept(codedMessage);
-                listener.setCurrentSelections(0);
+                listener.currentSelections = 0;
                 rotorRotation[0] = 0;
                 rotorRotation[1] = 0;
                 rotorRotation[2] = 0;
@@ -731,26 +753,6 @@ public class EnigmaPanel extends JPanel {
                 }
             });
             displayRotorsLabel.setText(display.toString());
-        }
-
-        /**
-         * Getter Method used to ensure the user picked 3 rotors.
-         *
-         * @return The number of selected checkboxes.
-         */
-        private int getCurrentSelections() {
-            return currentSelections;
-        }
-
-        /**
-         * Setter Method used to reset current selections if the user wants to
-         * re-choose the rotors.
-         *
-         * @param currentSelections
-         *            The number of current selections.
-         */
-        private void setCurrentSelections(final int currentSelections) {
-            this.currentSelections = currentSelections;
         }
     }
 }

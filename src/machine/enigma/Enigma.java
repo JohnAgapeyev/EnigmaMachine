@@ -107,7 +107,7 @@ public class Enigma {
                                             .collect(Collectors.toList()),
                                     keyValue[2].charAt(0)));
                 } else if (keyValue[0].equals(optionKey.get(3))
-                        && rotors.get(0) == null) {
+                        && rotors.get(1) == null) {
                     rotors.set(
                             Integer.parseInt(
                                     keyValue[0].replaceAll("[\\D]", "")) - 1,
@@ -117,7 +117,7 @@ public class Enigma {
                                             .collect(Collectors.toList()),
                                     keyValue[2].charAt(0)));
                 } else if (keyValue[0].equals(optionKey.get(4))
-                        && rotors.get(0) == null) {
+                        && rotors.get(2) == null) {
                     rotors.set(
                             Integer.parseInt(
                                     keyValue[0].replaceAll("[\\D]", "")) - 1,
@@ -127,7 +127,7 @@ public class Enigma {
                                             .collect(Collectors.toList()),
                                     keyValue[2].charAt(0)));
                 } else if (keyValue[0].equals(optionKey.get(5))
-                        && rotors.get(0) == null) {
+                        && rotors.get(3) == null) {
                     rotors.set(
                             Integer.parseInt(
                                     keyValue[0].replaceAll("[\\D]", "")) - 1,
@@ -137,7 +137,7 @@ public class Enigma {
                                             .collect(Collectors.toList()),
                                     keyValue[2].charAt(0)));
                 } else if (keyValue[0].equals(optionKey.get(6))
-                        && rotors.get(0) == null) {
+                        && rotors.get(4) == null) {
                     rotors.set(
                             Integer.parseInt(
                                     keyValue[0].replaceAll("[\\D]", "")) - 1,

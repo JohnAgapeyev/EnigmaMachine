@@ -2,6 +2,7 @@ package machine.enigma;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Insets;
@@ -21,6 +22,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -387,30 +389,62 @@ public class EnigmaPanel extends JPanel {
 
         final JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        final int panelWidth = 10;
+        final int panelHeight = 200;
+        panel.setPreferredSize(new Dimension(panelWidth, panelHeight));
 
         final JLabel rotorChangeDialog = new JLabel(
                 "Please select three rotors");
         final JLabel selectedRotorsMessage = new JLabel(
                 "You have selected rotors: ");
+        final String rotorChooseTitle = "Rotor Selection";
+
+        rotorChangeDialog.setAlignmentX(Component.CENTER_ALIGNMENT);
+        selectedRotorsMessage.setAlignmentX(Component.CENTER_ALIGNMENT);
+        displayRotorsLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         panel.add(rotorChangeDialog);
-        rotorCheckBox.forEach(check -> panel.add(check));
+        panel.add(Box.createVerticalGlue());
+        rotorCheckBox.forEach(check -> {
+            check.addItemListener(listener);
+            check.setAlignmentX(Component.CENTER_ALIGNMENT);
+            panel.add(check);
+        });
         panel.add(selectedRotorsMessage);
+        panel.add(Box.createVerticalGlue());
         panel.add(displayRotorsLabel);
+        panel.add(Box.createVerticalGlue());
 
         boolean areThreeRotorsChosen = false;
-        rotorCheckBox.forEach(check -> check.addItemListener(listener));
 
-        JOptionPane.showConfirmDialog(null, panel, "Rotor Selection",
-                JOptionPane.DEFAULT_OPTION);
-        while (!areThreeRotorsChosen) {
+        do {
             if (listener.currentSelections == listener.MAX_SELECTIONS) {
                 areThreeRotorsChosen = true;
             } else {
-                JOptionPane.showConfirmDialog(null, panel, "Rotor Selection",
-                        JOptionPane.DEFAULT_OPTION);
+                JOptionPane.showConfirmDialog(null, panel, rotorChooseTitle,
+                        JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE);
             }
-        }
+        } while (!areThreeRotorsChosen);
+    }
+
+    private void launchOptionMenu() {
+        final JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        final String optionsTitle = "Options";
+        final JButton deleteSettingsButton = new JButton("Delete settings");
+        final JButton saveButton = new JButton("Save");
+        final Component elementSeparator = Box
+                .createRigidArea(new Dimension(20, 10));
+
+        saveButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        deleteSettingsButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        panel.add(saveButton);
+        panel.add(elementSeparator);
+        panel.add(deleteSettingsButton);
+
+        JOptionPane.showConfirmDialog(null, panel, optionsTitle,
+                JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE);
     }
 
     /**
@@ -687,6 +721,8 @@ public class EnigmaPanel extends JPanel {
                 rotorRotation[1] = 0;
                 rotorRotation[2] = 0;
                 chooseRotors();
+            } else if (source == optionsButton) {
+                launchOptionMenu();
             }
         }
 

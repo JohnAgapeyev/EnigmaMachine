@@ -115,13 +115,23 @@ public class Enigma {
     }
 
     public void saveSettings() {
-        try {
-            BufferedWriter fileWriter = new BufferedWriter(
-                    new FileWriter(fileName));
-            fileWriter.close();
-        } catch (IOException e) {
-            System.out.print("");
-        }
+        // try {
+        // BufferedWriter fileWriter = new BufferedWriter(
+        // new FileWriter(fileName));
+        // fileWriter.close();
+        // } catch (IOException e) {
+        // System.out.print("");
+        // }
+    }
+
+    public void deleteSettings() {
+        // try {
+        // BufferedWriter fileWriter = new BufferedWriter(
+        // new FileWriter(fileName));
+        // fileWriter.close();
+        // } catch (IOException e) {
+        // System.out.print("");
+        // }
     }
 
     /**

@@ -439,6 +439,14 @@ public class EnigmaPanel extends JPanel {
         saveButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         deleteSettingsButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 
+        saveButton.addActionListener(actionEvent -> {
+            enigma.saveSettings();
+        });
+
+        deleteSettingsButton.addActionListener(actionEvent -> {
+            enigma.deleteSettings();
+        });
+
         panel.add(saveButton);
         panel.add(elementSeparator);
         panel.add(deleteSettingsButton);

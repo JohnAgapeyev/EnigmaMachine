@@ -177,7 +177,7 @@ public class EnigmaPanel extends JPanel {
      *             Exception thrown if config file cannot be found for the
      *             enigma constructor.
      */
-    public EnigmaPanel() throws IOException {
+    public EnigmaPanel() {
         chooseRotors();
         setLayout(null);
         enigma = new Enigma();
@@ -421,8 +421,9 @@ public class EnigmaPanel extends JPanel {
             if (listener.currentSelections == listener.MAX_SELECTIONS) {
                 areThreeRotorsChosen = true;
             } else {
-                JOptionPane.showConfirmDialog(null, panel, rotorChooseTitle,
-                        JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE);
+                JOptionPane.showConfirmDialog(this.getParent(), panel,
+                        rotorChooseTitle, JOptionPane.DEFAULT_OPTION,
+                        JOptionPane.PLAIN_MESSAGE);
             }
         } while (!areThreeRotorsChosen);
     }
@@ -440,7 +441,7 @@ public class EnigmaPanel extends JPanel {
         deleteSettingsButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         saveButton.addActionListener(actionEvent -> {
-            enigma.saveSettings();
+            enigma.createUserSettings(rotorsChosen);
         });
 
         deleteSettingsButton.addActionListener(actionEvent -> {
@@ -451,7 +452,7 @@ public class EnigmaPanel extends JPanel {
         panel.add(elementSeparator);
         panel.add(deleteSettingsButton);
 
-        JOptionPane.showConfirmDialog(null, panel, optionsTitle,
+        JOptionPane.showConfirmDialog(this.getParent(), panel, optionsTitle,
                 JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE);
     }
 
@@ -635,15 +636,17 @@ public class EnigmaPanel extends JPanel {
                                 .valueOf(ALPHABET.get(userAlteredPlugIndex)))) {
 
                             if (!(userAlteredPlugCache[1] == ' ')) {
-                                JOptionPane.showMessageDialog(null, ALPHABET
-                                        .get(userAlteredPlugIndex)
-                                        + " is already in use. Please delete its "
-                                        + "value before trying to change it.");
+                                JOptionPane.showMessageDialog(
+                                        EnigmaPanel.this.getParent(),
+                                        ALPHABET.get(userAlteredPlugIndex)
+                                                + " is already in use. Please delete its "
+                                                + "value before trying to change it.");
                                 return;
                             }
 
                             if (!plugs.get(letterIndex).getText().equals("")) {
-                                JOptionPane.showMessageDialog(null,
+                                JOptionPane.showMessageDialog(
+                                        EnigmaPanel.this.getParent(),
                                         letter + " is already taken. Please "
                                                 + "choose another plug or delete its"
                                                 + " value first.");

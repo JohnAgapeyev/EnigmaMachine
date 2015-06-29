@@ -7,7 +7,6 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -47,19 +46,24 @@ public class Enigma {
 
     private final String fileName = "config.ini";
 
-    private List<String> optionKey = new ArrayList<>(Arrays.asList(
-            "default_rotor_rand", "default_reflector_rand", "rotor_1",
-            "rotor_2", "rotor_3", "rotor_4", "rotor_5", "reflector"));
+    private final String[] optionKey = {"default_rotor_rand",
+            "default_reflector_rand", "user_settings_saved", "user_rotor_1",
+            "user_rotor_2", "user_rotor_3", "user_reflector", "rotor_1",
+            "rotor_2", "rotor_3", "rotor_4", "rotor_5", "reflector"};
+
+    private final String[] optionValue = {"true", "true", "false", "", "", "",
+            "", "EKMFLGDQVZNTOWYHXUSPAIBRCJ    Q",
+            "AJDKSIRUXBLHWTMCQGZNPYFVOE    E",
+            "BDFHJLCPRTXVZNYEIWGAKMUSQO    V",
+            "ESOVPZJAYQUIRHXLNFTGKDCMWB    J",
+            "VZBRGITYUPSDNHLXAWMJQOFECK    Z", "YRUHQSLDPXNGOKMIEBFZCWVJAT"};
 
     /**
      * This is the constructor for this class. It reads all the lines in the
      * config file, splits them on the whitespace, and then iterates through
      * each one, performing actions based on the value.
-     *
-     * @throws IOException
-     *             Thrown if config.ini cannot be found by the program
      */
-    public Enigma() throws IOException {
+    public Enigma() {
 
         // Used to prevent null pointer exceptions further in the constructor.
         for (int i = 0; i < rotorLength; i++) {
@@ -67,21 +71,23 @@ public class Enigma {
         }
 
         /*
-         * Read all lines of the config file, splits them on whitespace so that
-         * index 0 is the name, and index 1 is the value
+         * Read all lines of the config file and sets the rotors accordingly.
+         * Each line is split based on whitespace so that index 0 is the name,
+         * index 1 is the value, and in the cases of the rotors, index 2 is the
+         * turnover point.
          */
         final Path configPath = FileSystems.getDefault().getPath(fileName);
 
         try {
             Files.lines(configPath).forEach(line -> {
                 String[] keyValue = line.split("\\s+");
-                if (keyValue[0].equals(optionKey.get(0))) {
+                if (keyValue[0].equals(optionKey[0])) {
                     if (Boolean.valueOf(keyValue[1])) {
                         for (int i = 0; i < rotorLength; i++) {
                             rotors.set(i, new Rotor());
                         }
                     }
-                } else if (keyValue[0].equals(optionKey.get(1))) {
+                } else if (keyValue[0].equals(optionKey[1])) {
                     if (Boolean.valueOf(keyValue[1])) {
                         reflector = new Reflector();
                     }
@@ -95,7 +101,7 @@ public class Enigma {
                                             .mapToObj(c -> (char) c)
                                             .collect(Collectors.toList()),
                                     keyValue[2].charAt(0)));
-                } else if (keyValue[0].equals(optionKey.get(7))
+                } else if (keyValue[0].equals(optionKey[12])
                         && reflector == null) {
                     reflector = new Reflector(keyValue[1].toUpperCase().chars()
                             .mapToObj(c -> (char) c)
@@ -103,35 +109,71 @@ public class Enigma {
                 }
             });
         } catch (IOException e) {
-            JOptionPane.showMessageDialog(null,
-                    "\" " + fileName
-                            + "\" could not be located. No settings may be saved, and all "
-                            + "encryptions keys will be randomly generated.");
+            JOptionPane.showMessageDialog(null, "\" " + fileName
+                    + "\" could not be located. No settings may be saved, and all "
+                    + "encryptions keys will be set as their default values.");
             for (int i = 0; i < rotorLength; i++) {
-                rotors.set(i, new Rotor());
+                String[] keyTurnoverSplit = optionValue[i + 7].split("\\s+");
+                rotors.set(i,
+                        new Rotor(
+                                keyTurnoverSplit[0].toUpperCase().chars()
+                                        .mapToObj(c -> (char) c)
+                                        .collect(Collectors.toList()),
+                                keyTurnoverSplit[1].charAt(0)));
             }
-            reflector = new Reflector();
+            reflector = new Reflector(optionValue[12].toUpperCase().chars()
+                    .mapToObj(c -> (char) c).collect(Collectors.toList()));
         }
     }
 
-    public void saveSettings() {
-        // try {
-        // BufferedWriter fileWriter = new BufferedWriter(
-        // new FileWriter(fileName));
-        // fileWriter.close();
-        // } catch (IOException e) {
-        // System.out.print("");
-        // }
+    private void saveSettings() {
+        try {
+            BufferedWriter fileWriter = new BufferedWriter(
+                    new FileWriter(fileName));
+            int fileLength = optionKey.length;
+            for (int i = 0; i < fileLength; i++) {
+                fileWriter.write(optionKey[i] + " " + optionValue[i]);
+                fileWriter.newLine();
+            }
+            fileWriter.close();
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(null, "\" " + fileName
+                    + "\" could not be located. No settings will be saved.");
+        }
+    }
+
+    public void createUserSettings(List<Byte> rotorsChosen) {
+        StringBuilder rotorBuild = new StringBuilder(ALPHABET_LENGTH + 1);
+        StringBuilder reflectorBuild = new StringBuilder(ALPHABET_LENGTH);
+        List<Character> reflectorKey = reflector.getKey();
+
+        optionValue[2] = "true";
+
+        for (int i = 0; i < 3; i++) {
+            List<Character> rotorKey = rotors.get(rotorsChosen.get(i))
+                    .getOriginalKey();
+            for (int j = 0; j < ALPHABET_LENGTH; j++) {
+                rotorBuild.append(rotorKey.get(j));
+            }
+            rotorBuild.append("    ");
+            rotorBuild.append(rotors.get(rotorsChosen.get(i)).getTurnover());
+            optionValue[i + 3] = rotorBuild.toString();
+            rotorBuild = new StringBuilder(ALPHABET_LENGTH + 1);
+        }
+        for (int i = 0; i < ALPHABET_LENGTH; i++) {
+            reflectorBuild.append(reflectorKey.get(i));
+        }
+
+        optionValue[6] = reflectorBuild.toString();
+        saveSettings();
     }
 
     public void deleteSettings() {
-        // try {
-        // BufferedWriter fileWriter = new BufferedWriter(
-        // new FileWriter(fileName));
-        // fileWriter.close();
-        // } catch (IOException e) {
-        // System.out.print("");
-        // }
+        optionValue[2] = "false";
+        for (int i = 3; i < 7; i++) {
+            optionValue[i] = "";
+        }
+        saveSettings();
     }
 
     /**

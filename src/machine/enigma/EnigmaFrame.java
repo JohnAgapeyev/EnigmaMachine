@@ -34,7 +34,7 @@ public class EnigmaFrame extends JFrame {
      *             Exception thrown if config file cannot be found for the
      *             enigma constructor.
      */
-    public EnigmaFrame() throws IOException {
+    public EnigmaFrame() {
         super("Enigma Machine");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setContentPane(new EnigmaPanel());

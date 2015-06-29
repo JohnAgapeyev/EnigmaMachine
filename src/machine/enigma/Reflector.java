@@ -33,7 +33,7 @@ public class Reflector {
     public Reflector() {
         // Used to prevent null pointer exceptions.
         for (int i = 0; i < ALPHABET_LENGTH; i++) {
-            key.set(i, null);
+            key.add(null);
         }
 
         final Random rand = new Random();

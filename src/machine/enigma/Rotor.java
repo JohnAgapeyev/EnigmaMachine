@@ -93,6 +93,10 @@ public class Rotor {
         return rotatedKey;
     }
 
+    public List<Character> getOriginalKey() {
+        return originalKey;
+    }
+
     /**
      * Getter method.
      *

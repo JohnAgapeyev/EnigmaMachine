@@ -7,6 +7,7 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -46,17 +47,21 @@ public class Enigma {
 
     private final String fileName = "config.ini";
 
-    private final String[] optionKey = {"default_rotor_rand",
-            "default_reflector_rand", "user_settings_saved", "user_rotor_1",
-            "user_rotor_2", "user_rotor_3", "user_reflector", "rotor_1",
-            "rotor_2", "rotor_3", "rotor_4", "rotor_5", "reflector"};
+    private final String[] optionKey = {"user_settings_saved",
+            "default_rotor_rand", "default_reflector_rand", "user_rotor_1",
+            "user_rotor_2", "user_rotor_3", "user_reflector", "user_plugboard",
+            "rotor_1", "rotor_2", "rotor_3", "rotor_4", "rotor_5", "reflector"};
 
     private final String[] optionValue = {"true", "true", "false", "", "", "",
-            "", "EKMFLGDQVZNTOWYHXUSPAIBRCJ    Q",
+            "", "", "EKMFLGDQVZNTOWYHXUSPAIBRCJ    Q",
             "AJDKSIRUXBLHWTMCQGZNPYFVOE    E",
             "BDFHJLCPRTXVZNYEIWGAKMUSQO    V",
             "ESOVPZJAYQUIRHXLNFTGKDCMWB    J",
             "VZBRGITYUPSDNHLXAWMJQOFECK    Z", "YRUHQSLDPXNGOKMIEBFZCWVJAT"};
+
+    private boolean userRotorsLoaded = false;
+
+    private List<List<Character>> plugBoard;
 
     /**
      * This is the constructor for this class. It reads all the lines in the
@@ -82,30 +87,74 @@ public class Enigma {
             Files.lines(configPath).forEach(line -> {
                 String[] keyValue = line.split("\\s+");
                 if (keyValue[0].equals(optionKey[0])) {
-                    if (Boolean.valueOf(keyValue[1])) {
-                        for (int i = 0; i < rotorLength; i++) {
-                            rotors.set(i, new Rotor());
+                    userRotorsLoaded = Boolean.valueOf(keyValue[1]);
+                } else if (userRotorsLoaded) {
+                    if (keyValue[0].startsWith("user_rotor")) {
+                        rotors.set(
+                                Integer.parseInt(
+                                        keyValue[0].replaceAll("[\\D]", ""))
+                                - 1,
+                                new Rotor(
+                                        keyValue[1].toUpperCase().chars()
+                                                .mapToObj(c -> (char) c)
+                                                .collect(Collectors.toList()),
+                                        keyValue[2].charAt(0)));
+                    } else if (keyValue[0].equals(optionKey[6])) {
+                        reflector = new Reflector(keyValue[1].toUpperCase()
+                                .chars().mapToObj(c -> (char) c)
+                                .collect(Collectors.toList()));
+                    } else if (keyValue[0].equals(optionKey[7])) {
+                        if (!keyValue[1].isEmpty()) {
+                            // List<String> pairs = Arrays
+                            // .asList(keyValue[1].split("#"));
+                            // List<List<Character>> plugPairs = new
+                            // ArrayList<>();
+                            // for (String pair : pairs) {
+                            // List<char[]> loop =
+                            // Arrays.asList(pair.toCharArray());
+                            // List<Character> temp = new ArrayList<>();
+                            // for (char[] letter : loop) {
+                            // temp.add(letter);
+                            // }
+                            // plugPairs.add(temp);
+                            // }
+                            // System.out.println(plugPairs);
                         }
                     }
-                } else if (keyValue[0].equals(optionKey[1])) {
-                    if (Boolean.valueOf(keyValue[1])) {
-                        reflector = new Reflector();
+                } else {
+                    if (keyValue[0].equals(optionKey[1])) {
+                        if (Boolean.valueOf(keyValue[1])) {
+                            for (int i = 0; i < rotorLength; i++) {
+                                rotors.set(i, new Rotor());
+                            }
+                        }
+                    } else if (keyValue[0].equals(optionKey[2])) {
+                        if (Boolean.valueOf(keyValue[1])) {
+                            reflector = new Reflector();
+                        }
+                    } else {
+                        if (!rotors.contains(null) && reflector != null) {
+                            return;
+                        } else {
+                            if (keyValue[0].startsWith("rotor_")) {
+                                rotors.set(
+                                        Integer.parseInt(keyValue[0]
+                                                .replaceAll("[\\D]", "")) - 1,
+                                        new Rotor(
+                                                keyValue[1].toUpperCase()
+                                                        .chars()
+                                                        .mapToObj(c -> (char) c)
+                                                        .collect(Collectors
+                                                                .toList()),
+                                                keyValue[2].charAt(0)));
+                            } else if (keyValue[0].equals(optionKey[13])) {
+                                reflector = new Reflector(
+                                        keyValue[1].toUpperCase().chars()
+                                                .mapToObj(c -> (char) c)
+                                                .collect(Collectors.toList()));
+                            }
+                        }
                     }
-                } else if (keyValue[0].startsWith("rotor_")
-                        && rotors.contains(null)) {
-                    rotors.set(
-                            Integer.parseInt(
-                                    keyValue[0].replaceAll("[\\D]", "")) - 1,
-                            new Rotor(
-                                    keyValue[1].toUpperCase().chars()
-                                            .mapToObj(c -> (char) c)
-                                            .collect(Collectors.toList()),
-                                    keyValue[2].charAt(0)));
-                } else if (keyValue[0].equals(optionKey[12])
-                        && reflector == null) {
-                    reflector = new Reflector(keyValue[1].toUpperCase().chars()
-                            .mapToObj(c -> (char) c)
-                            .collect(Collectors.toList()));
                 }
             });
         } catch (IOException e) {
@@ -113,7 +162,7 @@ public class Enigma {
                     + "\" could not be located. No settings may be saved, and all "
                     + "encryptions keys will be set as their default values.");
             for (int i = 0; i < rotorLength; i++) {
-                String[] keyTurnoverSplit = optionValue[i + 7].split("\\s+");
+                String[] keyTurnoverSplit = optionValue[i + 8].split("\\s+");
                 rotors.set(i,
                         new Rotor(
                                 keyTurnoverSplit[0].toUpperCase().chars()
@@ -121,7 +170,7 @@ public class Enigma {
                                         .collect(Collectors.toList()),
                                 keyTurnoverSplit[1].charAt(0)));
             }
-            reflector = new Reflector(optionValue[12].toUpperCase().chars()
+            reflector = new Reflector(optionValue[13].toUpperCase().chars()
                     .mapToObj(c -> (char) c).collect(Collectors.toList()));
         }
     }
@@ -142,7 +191,8 @@ public class Enigma {
         }
     }
 
-    public void createUserSettings(List<Byte> rotorsChosen) {
+    public void createUserSettings(List<Byte> rotorsChosen,
+            List<List<Character>> plugBoard) {
         StringBuilder rotorBuild = new StringBuilder(ALPHABET_LENGTH + 1);
         StringBuilder reflectorBuild = new StringBuilder(ALPHABET_LENGTH);
         List<Character> reflectorKey = reflector.getKey();
@@ -163,13 +213,19 @@ public class Enigma {
         for (int i = 0; i < ALPHABET_LENGTH; i++) {
             reflectorBuild.append(reflectorKey.get(i));
         }
+        StringBuilder plugBuild = new StringBuilder();
+        plugBoard.forEach(pair -> {
+            pair.forEach(letter -> plugBuild.append(letter));
+            plugBuild.append("#");
+        });
 
         optionValue[6] = reflectorBuild.toString();
+        optionValue[7] = plugBuild.toString();
         saveSettings();
     }
 
     public void deleteSettings() {
-        optionValue[2] = "false";
+        optionValue[0] = "false";
         for (int i = 3; i < 7; i++) {
             optionValue[i] = "";
         }
@@ -247,14 +303,14 @@ public class Enigma {
          */
         if (rotorNumber == REFLECTOR_CODE) {
             rotorKey = reflector.getKey();
-
             alphabetKey.clear();
             ALPHABET.forEach(alphabetKey::add);
-
         } else {
             rotorKey = rotors.get(rotorNumber).getKey();
             alphabetKey = rotors.get(rotorNumber).getAlphabet();
         }
+
+        System.out.println(rotorKey + "\n\n");
 
         if (!isReverse) {
 
@@ -328,16 +384,13 @@ public class Enigma {
      */
     private char plugBoardSwap(final List<List<Character>> plugBoard,
             final char letter) {
-
         char output = letter;
-
         for (final List<Character> pair : plugBoard) {
             if (pair.contains(letter)) {
                 output = (output == pair.get(0)) ? pair.get(1) : pair.get(0);
             }
             break;
         }
-
         return output;
     }
 
@@ -348,5 +401,18 @@ public class Enigma {
      */
     public List<Rotor> getRotors() {
         return rotors;
+    }
+
+    /**
+     * Getter Method.
+     * 
+     * @return Whether the program has loaded any rotors from file.
+     */
+    public boolean getUserRotorsLoaded() {
+        return userRotorsLoaded;
+    }
+
+    public List<List<Character>> getPlugBoard() {
+        return plugBoard;
     }
 }

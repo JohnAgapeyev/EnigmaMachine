@@ -441,10 +441,26 @@ public class EnigmaPanel extends JPanel {
         deleteSettingsButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         saveButton.addActionListener(actionEvent -> {
-            enigma.createUserSettings(rotorsChosen);
+            if (listener.changingRotors || listener.changingPlugs) {
+                JOptionPane.showMessageDialog(this.getParent(),
+                        "You are in the process of changing values in the program."
+                                + " Please complete your changes and press any buttons labeled"
+                                + " \"Done\" to lock in your changes. Until changes are locked in,"
+                                + " you will be unable to save or delete any settings.");
+                return;
+            }
+            enigma.createUserSettings(rotorsChosen, plugBoard);
         });
 
         deleteSettingsButton.addActionListener(actionEvent -> {
+            if (listener.changingRotors || listener.changingPlugs) {
+                JOptionPane.showMessageDialog(this.getParent(),
+                        "You are in the process of changing values in the program."
+                                + " Please complete your changes and press any buttons labeled"
+                                + " \"Done\" to lock in your changes. Until changes are locked in,"
+                                + " you will be unable to save or delete any settings.");
+                return;
+            }
             enigma.deleteSettings();
         });
 

@@ -267,7 +267,7 @@ public class EnigmaPanel extends JPanel {
             rotorLabelX += 40;
         }
 
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0, limit = 6; i < limit; i++) {
             if (i % 2 == 0) {
                 rotorPlusMinus.add(new JButton("+"));
             } else {
@@ -363,8 +363,7 @@ public class EnigmaPanel extends JPanel {
             }
             rotors.get(rotorsChosen.get(i)).setRotation(rotorRotation[i]);
         }
-        final int rotorDisplayLength = rotorDisplay.size();
-        for (int i = 0; i < rotorDisplayLength; i++) {
+        for (int i = 0, limit = rotorDisplay.size(); i < limit; i++) {
             rotorDisplay.get(i)
                     .setText(String.valueOf(ALPHABET.get(rotorRotation[i])));
         }
@@ -380,8 +379,7 @@ public class EnigmaPanel extends JPanel {
             rotorDisplay = new ArrayList<>(Arrays.asList(new JLabel("A"),
                     new JLabel("A"), new JLabel("A")));
         } else {
-            final int numberOfChosenRotors = 3;
-            for (int i = 0; i < numberOfChosenRotors; i++) {
+            for (int i = 0, rotorChooseLimit = 3; i < rotorChooseLimit; i++) {
                 rotorsChosen.set(i, null);
                 rotorDisplay.get(i).setText("A");
             }
@@ -421,7 +419,7 @@ public class EnigmaPanel extends JPanel {
             if (listener.currentSelections == listener.MAX_SELECTIONS) {
                 areThreeRotorsChosen = true;
             } else {
-                JOptionPane.showConfirmDialog(this.getParent(), panel,
+                JOptionPane.showConfirmDialog(getParent(), panel,
                         rotorChooseTitle, JOptionPane.DEFAULT_OPTION,
                         JOptionPane.PLAIN_MESSAGE);
             }
@@ -442,7 +440,7 @@ public class EnigmaPanel extends JPanel {
 
         saveButton.addActionListener(actionEvent -> {
             if (listener.changingRotors || listener.changingPlugs) {
-                JOptionPane.showMessageDialog(this.getParent(),
+                JOptionPane.showMessageDialog(getParent(),
                         "You are in the process of changing values in the program."
                                 + " Please complete your changes and press any buttons labeled"
                                 + " \"Done\" to lock in your changes. Until changes are locked in,"
@@ -454,7 +452,7 @@ public class EnigmaPanel extends JPanel {
 
         deleteSettingsButton.addActionListener(actionEvent -> {
             if (listener.changingRotors || listener.changingPlugs) {
-                JOptionPane.showMessageDialog(this.getParent(),
+                JOptionPane.showMessageDialog(getParent(),
                         "You are in the process of changing values in the program."
                                 + " Please complete your changes and press any buttons labeled"
                                 + " \"Done\" to lock in your changes. Until changes are locked in,"
@@ -468,7 +466,7 @@ public class EnigmaPanel extends JPanel {
         panel.add(elementSeparator);
         panel.add(deleteSettingsButton);
 
-        JOptionPane.showConfirmDialog(this.getParent(), panel, optionsTitle,
+        JOptionPane.showConfirmDialog(getParent(), panel, optionsTitle,
                 JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE);
     }
 
@@ -652,8 +650,7 @@ public class EnigmaPanel extends JPanel {
                                 .valueOf(ALPHABET.get(userAlteredPlugIndex)))) {
 
                             if (!(userAlteredPlugCache[1] == ' ')) {
-                                JOptionPane.showMessageDialog(
-                                        EnigmaPanel.this.getParent(),
+                                JOptionPane.showMessageDialog(getParent(),
                                         ALPHABET.get(userAlteredPlugIndex)
                                                 + " is already in use. Please delete its "
                                                 + "value before trying to change it.");
@@ -661,8 +658,7 @@ public class EnigmaPanel extends JPanel {
                             }
 
                             if (!plugs.get(letterIndex).getText().equals("")) {
-                                JOptionPane.showMessageDialog(
-                                        EnigmaPanel.this.getParent(),
+                                JOptionPane.showMessageDialog(getParent(),
                                         letter + " is already taken. Please "
                                                 + "choose another plug or delete its"
                                                 + " value first.");

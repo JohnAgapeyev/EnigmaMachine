@@ -61,7 +61,7 @@ public class Enigma {
 
     private boolean userRotorsLoaded = false;
 
-    private List<List<Character>> plugBoard;
+    private final List<List<Character>> plugBoard = new ArrayList<>();
 
     /**
      * This is the constructor for this class. It reads all the lines in the
@@ -85,7 +85,7 @@ public class Enigma {
 
         try {
             Files.lines(configPath).forEach(line -> {
-                String[] keyValue = line.split("\\s+");
+                final String[] keyValue = line.split("\\s+");
                 if (keyValue[0].equals(optionKey[0])) {
                     userRotorsLoaded = Boolean.valueOf(keyValue[1]);
                 } else if (userRotorsLoaded) {
@@ -105,20 +105,15 @@ public class Enigma {
                                 .collect(Collectors.toList()));
                     } else if (keyValue[0].equals(optionKey[7])) {
                         if (!keyValue[1].isEmpty()) {
-                            // List<String> pairs = Arrays
-                            // .asList(keyValue[1].split("#"));
-                            // List<List<Character>> plugPairs = new
-                            // ArrayList<>();
-                            // for (String pair : pairs) {
-                            // List<char[]> loop =
-                            // Arrays.asList(pair.toCharArray());
-                            // List<Character> temp = new ArrayList<>();
-                            // for (char[] letter : loop) {
-                            // temp.add(letter);
-                            // }
-                            // plugPairs.add(temp);
-                            // }
-                            // System.out.println(plugPairs);
+                            Arrays.asList(keyValue[1].split("#"))
+                                    .forEach(pair -> {
+                                final List<Character> plugPair = new ArrayList<>(
+                                        2);
+                                for (final char letter : pair.toCharArray()) {
+                                    plugPair.add(letter);
+                                }
+                                plugBoard.add(plugPair);
+                            });
                         }
                     }
                 } else {
@@ -157,12 +152,13 @@ public class Enigma {
                     }
                 }
             });
-        } catch (IOException e) {
+        } catch (final IOException e) {
             JOptionPane.showMessageDialog(null, "\" " + fileName
                     + "\" could not be located. No settings may be saved, and all "
                     + "encryptions keys will be set as their default values.");
             for (int i = 0; i < rotorLength; i++) {
-                String[] keyTurnoverSplit = optionValue[i + 8].split("\\s+");
+                final String[] keyTurnoverSplit = optionValue[i + 8]
+                        .split("\\s+");
                 rotors.set(i,
                         new Rotor(
                                 keyTurnoverSplit[0].toUpperCase().chars()
@@ -177,30 +173,30 @@ public class Enigma {
 
     private void saveSettings() {
         try {
-            BufferedWriter fileWriter = new BufferedWriter(
+            final BufferedWriter fileWriter = new BufferedWriter(
                     new FileWriter(fileName));
-            int fileLength = optionKey.length;
+            final int fileLength = optionKey.length;
             for (int i = 0; i < fileLength; i++) {
                 fileWriter.write(optionKey[i] + " " + optionValue[i]);
                 fileWriter.newLine();
             }
             fileWriter.close();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             JOptionPane.showMessageDialog(null, "\" " + fileName
                     + "\" could not be located. No settings will be saved.");
         }
     }
 
-    public void createUserSettings(List<Byte> rotorsChosen,
-            List<List<Character>> plugBoard) {
+    public void createUserSettings(final List<Byte> rotorsChosen,
+            final List<List<Character>> plugBoard) {
         StringBuilder rotorBuild = new StringBuilder(ALPHABET_LENGTH + 1);
-        StringBuilder reflectorBuild = new StringBuilder(ALPHABET_LENGTH);
-        List<Character> reflectorKey = reflector.getKey();
+        final StringBuilder reflectorBuild = new StringBuilder(ALPHABET_LENGTH);
+        final List<Character> reflectorKey = reflector.getKey();
 
         optionValue[2] = "true";
 
         for (int i = 0; i < 3; i++) {
-            List<Character> rotorKey = rotors.get(rotorsChosen.get(i))
+            final List<Character> rotorKey = rotors.get(rotorsChosen.get(i))
                     .getOriginalKey();
             for (int j = 0; j < ALPHABET_LENGTH; j++) {
                 rotorBuild.append(rotorKey.get(j));
@@ -213,7 +209,7 @@ public class Enigma {
         for (int i = 0; i < ALPHABET_LENGTH; i++) {
             reflectorBuild.append(reflectorKey.get(i));
         }
-        StringBuilder plugBuild = new StringBuilder();
+        final StringBuilder plugBuild = new StringBuilder();
         plugBoard.forEach(pair -> {
             pair.forEach(letter -> plugBuild.append(letter));
             plugBuild.append("#");
@@ -250,14 +246,13 @@ public class Enigma {
     public char encode(final char sentLetter, final List<Byte> rotorsChosen,
             final List<List<Character>> plugBoard) {
         char output = sentLetter;
-        final int length = rotorsChosen.size() - 1;
         boolean isReverse = false;
 
         // PlugBoard swap
         output = plugBoardSwap(plugBoard, output);
 
         // Normal encryption
-        for (int i = length; i > -1; i--) {
+        for (int i = rotorsChosen.size() - 1; i > -1; i--) {
             output = rotorEncryption(output, rotorsChosen.get(i), isReverse);
         }
 
@@ -405,7 +400,7 @@ public class Enigma {
 
     /**
      * Getter Method.
-     * 
+     *
      * @return Whether the program has loaded any rotors from file.
      */
     public boolean getUserRotorsLoaded() {

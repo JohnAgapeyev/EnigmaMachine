@@ -77,7 +77,7 @@ public class Rotor {
      * @param key
      *            The key to be used.
      */
-    public Rotor(final List<Character> key, char turnoverPoint) {
+    public Rotor(final List<Character> key, final char turnoverPoint) {
         rotatedAlphabet = new ArrayList<>(ALPHABET);
         originalKey = new ArrayList<>(key);
         rotatedKey = new ArrayList<>(key);
@@ -131,7 +131,7 @@ public class Rotor {
         return turnoverPoint;
     }
 
-    public void setTurnover(char turnoverPoint) {
+    public void setTurnover(final char turnoverPoint) {
         this.turnoverPoint = turnoverPoint;
     }
 }

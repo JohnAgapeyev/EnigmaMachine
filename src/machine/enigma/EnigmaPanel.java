@@ -19,7 +19,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -146,12 +145,6 @@ public class EnigmaPanel extends JPanel {
     private final byte[] rotorRotation = new byte[3];
 
     /**
-     * THe plugBoard. It's a list of Character lists, creating essentially a
-     * list of pair representing the current plug pairs in use.
-     */
-    private List<List<Character>> plugBoard = new ArrayList<>(ALPHABET_LENGTH);
-
-    /**
      * A list of text fields that represent the individual plugs on the
      * plugBoard.
      */
@@ -172,6 +165,19 @@ public class EnigmaPanel extends JPanel {
         enigma = new Enigma();
         rotors = enigma.getRotors();
 
+        final int characterLimit = 1;
+        final List<JLabel> plugLabels = new ArrayList<>(ALPHABET_LENGTH);
+        JTextField temp;
+        for (int i = 0; i < ALPHABET_LENGTH; i++) {
+            temp = new JTextField();
+            temp.setEnabled(false);
+            temp.setDocument(new JTextFieldLimit(characterLimit));
+            temp.addKeyListener(listener);
+            temp.setDisabledTextColor(Color.black);
+            plugs.add(temp);
+            plugLabels.add(new JLabel(String.valueOf(ALPHABET.get(i))));
+        }
+
         if (enigma.getUserRotorsLoaded()) {
             final int rotorChooseLimit = 3;
             rotorsChosen = new ArrayList<>(rotorChooseLimit);
@@ -180,6 +186,17 @@ public class EnigmaPanel extends JPanel {
                 rotorsChosen.add((byte) i);
                 rotorDisplay.add(new JLabel("A"));
             }
+            final List<List<Character>> plugBoard = enigma.getPlugBoard();
+            plugBoard.forEach(pair -> {
+                plugs.get(ALPHABET.indexOf(pair.get(0)))
+                        .setText(String.valueOf(pair.get(1)));
+                plugs.get(ALPHABET.indexOf(pair.get(1)))
+                        .setText(String.valueOf(pair.get(0)));
+                listener.textChangeCache[ALPHABET
+                        .indexOf(pair.get(0))][1] = pair.get(1);
+                listener.textChangeCache[ALPHABET
+                        .indexOf(pair.get(1))][1] = pair.get(0);
+            });
         } else {
             chooseRotors();
         }
@@ -200,19 +217,6 @@ public class EnigmaPanel extends JPanel {
                 .getFontMetrics(originalMessage.getFont());
         final int fontHeight = metrics.getHeight();
         final int fontWidth = metrics.getMaxAdvance();
-
-        final int characterLimit = 1;
-        final List<JLabel> plugLabels = new ArrayList<>(ALPHABET_LENGTH);
-        JTextField temp;
-        for (int i = 0; i < ALPHABET_LENGTH; i++) {
-            temp = new JTextField();
-            temp.setEnabled(false);
-            temp.setDocument(new JTextFieldLimit(characterLimit));
-            temp.addKeyListener(listener);
-            temp.setDisabledTextColor(Color.black);
-            plugs.add(temp);
-            plugLabels.add(new JLabel(String.valueOf(ALPHABET.get(i))));
-        }
 
         message.setDocument(new JTextFieldLimit(characterLimit));
 
@@ -452,7 +456,7 @@ public class EnigmaPanel extends JPanel {
                                 + " you will be unable to save or delete any settings.");
                 return;
             }
-            enigma.createUserSettings(rotorsChosen, plugBoard);
+            enigma.createUserSettings(rotorsChosen);
         });
 
         deleteSettingsButton.addActionListener(actionEvent -> {
@@ -473,35 +477,6 @@ public class EnigmaPanel extends JPanel {
 
         JOptionPane.showConfirmDialog(getParent(), panel, optionsTitle,
                 JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE);
-    }
-
-    /**
-     * Adds a pair to the plugboard using the arguments passed to it.
-     *
-     * @param first
-     *            The first letter in the pair.
-     * @param secondIndex
-     *            The index of the second letter in the alphabet.
-     */
-    private void updatePlugBoard(final char first, final int secondIndex) {
-        final List<Character> pair = new ArrayList<>(2);
-        pair.add(first);
-        pair.add(ALPHABET.get(secondIndex));
-        plugBoard.add(pair);
-    }
-
-    /**
-     * This method removes a pair from the plugboard based on the char passed to
-     * it. It streams the plugboard, filters it to contain every pair that
-     * doesn't have firstHalf and then stores that back into plugBoard.
-     *
-     * @param firstHalf
-     *            One of the letters of the pair that s to be removed.
-     */
-    private void removePlug(final char firstHalf) {
-        plugBoard = plugBoard.stream()
-                .filter(plug -> !(plug.contains(firstHalf)))
-                .collect(Collectors.toList());
     }
 
     /**
@@ -538,8 +513,7 @@ public class EnigmaPanel extends JPanel {
          * backspace was pressed, so this list is a cache of previous text
          * values for each plug.
          */
-        private final List<char[]> textChangeCache = new ArrayList<>(
-                ALPHABET_LENGTH);
+        private final char[][] textChangeCache = new char[ALPHABET_LENGTH][2];
 
         /**
          * Is the user currently changing rotors?
@@ -553,9 +527,9 @@ public class EnigmaPanel extends JPanel {
 
         public EnigmaListener() {
             for (int i = 0; i < ALPHABET_LENGTH; i++) {
-                textChangeCache.add(new char[2]);
-                textChangeCache.get(i)[0] = ' ';
-                textChangeCache.get(i)[1] = ' ';
+                for (int j = 0; j < 2; j++) {
+                    textChangeCache[i][j] = ' ';
+                }
             }
             changingRotors = false;
             changingPlugs = false;
@@ -588,8 +562,8 @@ public class EnigmaPanel extends JPanel {
                                 .setText(originalMessage.getText() + letter);
                         rotorRotation[2]++;
                         formatRotorSettings();
-                        codedMessage.setText(codedMessage.getText() + enigma
-                                .encode(letter, rotorsChosen, plugBoard));
+                        codedMessage.setText(codedMessage.getText()
+                                + enigma.encode(letter, rotorsChosen));
 
                         final String originText = originalMessage.getText();
                         final String codeText = codedMessage.getText();
@@ -619,8 +593,7 @@ public class EnigmaPanel extends JPanel {
                     }
                 } else if (plugs.contains(source)) {
                     final int userAlteredPlugIndex = plugs.indexOf(source);
-                    final char[] userAlteredPlugCache = textChangeCache
-                            .get(userAlteredPlugIndex);
+                    final char[] userAlteredPlugCache = textChangeCache[userAlteredPlugIndex];
 
                     if (e.getKeyCode() == 8) {
                         if (userAlteredPlugCache[1] == ' ') {
@@ -634,8 +607,8 @@ public class EnigmaPanel extends JPanel {
                          * plugBoard.
                          */
 
-                        final char[] userTypedPlugCache = textChangeCache
-                                .get(ALPHABET.indexOf(userAlteredPlugCache[1]));
+                        final char[] userTypedPlugCache = textChangeCache[ALPHABET
+                                .indexOf(userAlteredPlugCache[1])];
 
                         userAlteredPlugCache[0] = userAlteredPlugCache[1];
                         userAlteredPlugCache[1] = ' ';
@@ -643,7 +616,7 @@ public class EnigmaPanel extends JPanel {
                         plugs.get(ALPHABET.indexOf(userAlteredPlugCache[0]))
                                 .setText("");
 
-                        removePlug(userAlteredPlugCache[0]);
+                        enigma.removePlug(userAlteredPlugCache[0]);
 
                         userTypedPlugCache[0] = userTypedPlugCache[1];
                         userTypedPlugCache[1] = ' ';
@@ -679,7 +652,7 @@ public class EnigmaPanel extends JPanel {
                          * removing it.
                          */
 
-                        updatePlugBoard(letter, userAlteredPlugIndex);
+                        enigma.updatePlugBoard(letter, userAlteredPlugIndex);
 
                         userAlteredPlugCache[0] = userAlteredPlugCache[1];
                         userAlteredPlugCache[1] = letter;
@@ -687,9 +660,8 @@ public class EnigmaPanel extends JPanel {
                         plugs.get(letterIndex).setText(String
                                 .valueOf(ALPHABET.get(userAlteredPlugIndex)));
 
-                        textChangeCache.get(letterIndex)[0] = textChangeCache
-                                .get(letterIndex)[1];
-                        textChangeCache.get(letterIndex)[1] = ALPHABET
+                        textChangeCache[letterIndex][0] = textChangeCache[letterIndex][1];
+                        textChangeCache[letterIndex][1] = ALPHABET
                                 .get(userAlteredPlugIndex);
                     }
                 }

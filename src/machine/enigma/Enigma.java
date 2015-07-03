@@ -61,7 +61,11 @@ public class Enigma {
 
     private boolean userRotorsLoaded = false;
 
-    private final List<List<Character>> plugBoard = new ArrayList<>(
+    /**
+     * The plugBoard. It's a list of Character lists, creating essentially a
+     * list of pairs representing the current plug pairs in use.
+     */
+    private List<List<Character>> plugBoard = new ArrayList<>(
             ALPHABET_LENGTH / 2);
 
     /**
@@ -206,8 +210,7 @@ public class Enigma {
         }
     }
 
-    public void createUserSettings(final List<Byte> rotorsChosen,
-            final List<List<Character>> plugBoard) {
+    public void createUserSettings(final List<Byte> rotorsChosen) {
         StringBuilder rotorBuild = new StringBuilder(ALPHABET_LENGTH + 1);
         final StringBuilder reflectorBuild = new StringBuilder(ALPHABET_LENGTH);
         final List<Character> reflectorKey = reflector.getKey();
@@ -262,13 +265,12 @@ public class Enigma {
      *            The plugBoard set by the user.
      * @return The encoded letter.
      */
-    public char encode(final char sentLetter, final List<Byte> rotorsChosen,
-            final List<List<Character>> plugBoard) {
+    public char encode(final char sentLetter, final List<Byte> rotorsChosen) {
         char output = sentLetter;
         boolean isReverse = false;
 
         // PlugBoard swap
-        output = plugBoardSwap(plugBoard, output);
+        output = plugBoardSwap(output);
 
         // Normal encryption
         for (int i = rotorsChosen.size() - 1; i > -1; i--) {
@@ -286,7 +288,7 @@ public class Enigma {
         }
 
         // PlugBoard swap again
-        output = plugBoardSwap(plugBoard, output);
+        output = plugBoardSwap(output);
 
         return output;
     }
@@ -394,16 +396,47 @@ public class Enigma {
      *            The letter to be swapped.
      * @return The swapped letter.
      */
-    private char plugBoardSwap(final List<List<Character>> plugBoard,
-            final char letter) {
+    private char plugBoardSwap(final char letter) {
+        System.out.println(letter);
         char output = letter;
         for (final List<Character> pair : plugBoard) {
+            System.out.println(pair);
             if (pair.contains(letter)) {
                 output = (output == pair.get(0)) ? pair.get(1) : pair.get(0);
+                break;
             }
-            break;
         }
+        System.out.println(output);
         return output;
+    }
+
+    /**
+     * Adds a pair to the plugboard using the arguments passed to it.
+     *
+     * @param first
+     *            The first letter in the pair.
+     * @param secondIndex
+     *            The index of the second letter in the alphabet.
+     */
+    public void updatePlugBoard(final char first, final int secondIndex) {
+        final List<Character> pair = new ArrayList<>(2);
+        pair.add(first);
+        pair.add(ALPHABET.get(secondIndex));
+        plugBoard.add(pair);
+    }
+
+    /**
+     * This method removes a pair from the plugboard based on the char passed to
+     * it. It streams the plugboard, filters it to contain every pair that
+     * doesn't have firstHalf and then stores that back into plugBoard.
+     *
+     * @param firstHalf
+     *            One of the letters of the pair that s to be removed.
+     */
+    public void removePlug(final char firstHalf) {
+        plugBoard = plugBoard.stream()
+                .filter(plug -> !(plug.contains(firstHalf)))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -424,6 +457,11 @@ public class Enigma {
         return userRotorsLoaded;
     }
 
+    /**
+     * Getter Method.
+     *
+     * @return The plugboard.
+     */
     public List<List<Character>> getPlugBoard() {
         return plugBoard;
     }

@@ -61,7 +61,8 @@ public class Enigma {
 
     private boolean userRotorsLoaded = false;
 
-    private final List<List<Character>> plugBoard = new ArrayList<>();
+    private final List<List<Character>> plugBoard = new ArrayList<>(
+            ALPHABET_LENGTH / 2);
 
     /**
      * This is the constructor for this class. It reads all the lines in the
@@ -88,6 +89,24 @@ public class Enigma {
                 final String[] keyValue = line.split("\\s+");
                 if (keyValue[0].equals(optionKey[0])) {
                     userRotorsLoaded = Boolean.valueOf(keyValue[1]);
+                    final int fourthRotorDefaultKeyIndex = 11;
+                    final int fifthRotorDefaultKeyIndex = 12;
+                    final String[] fourthRotorDefaultKey = optionValue[fourthRotorDefaultKeyIndex]
+                            .split("\\s+");
+                    final String[] fifthRotorDefaultKey = optionValue[fifthRotorDefaultKeyIndex]
+                            .split("\\s+");
+                    rotors.set(3,
+                            new Rotor(
+                                    fourthRotorDefaultKey[0].toUpperCase()
+                                            .chars().mapToObj(c -> (char) c)
+                                            .collect(Collectors.toList()),
+                                    fourthRotorDefaultKey[1].charAt(0)));
+                    rotors.set(4,
+                            new Rotor(
+                                    fifthRotorDefaultKey[0].toUpperCase()
+                                            .chars().mapToObj(c -> (char) c)
+                                            .collect(Collectors.toList()),
+                                    fifthRotorDefaultKey[1].charAt(0)));
                 } else if (userRotorsLoaded) {
                     if (keyValue[0].startsWith("user_rotor")) {
                         rotors.set(
@@ -304,8 +323,6 @@ public class Enigma {
             rotorKey = rotors.get(rotorNumber).getKey();
             alphabetKey = rotors.get(rotorNumber).getAlphabet();
         }
-
-        System.out.println(rotorKey + "\n\n");
 
         if (!isReverse) {
 

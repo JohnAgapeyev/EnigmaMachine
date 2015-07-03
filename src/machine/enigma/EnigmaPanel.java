@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -31,7 +30,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import javax.swing.text.JTextComponent;
 
 /**
  * The panel that is used for all the visual elements of the program.
@@ -160,13 +158,6 @@ public class EnigmaPanel extends JPanel {
     private final List<JTextField> plugs = new ArrayList<>(ALPHABET_LENGTH);
 
     /**
-     * A basic Consumer that I use to clear the text of whatever text component
-     * I send to it.
-     */
-    private final Consumer<JTextComponent> clearText = (field) -> field
-            .setText("");
-
-    /**
      * The constructor for this panel. It calls a method to let the user pick 3
      * rotors for use in the program. Setting up multiple panels and complex
      * layouts was outside of my abilities when I made this project, so I
@@ -178,10 +169,22 @@ public class EnigmaPanel extends JPanel {
      *             enigma constructor.
      */
     public EnigmaPanel() {
-        chooseRotors();
-        setLayout(null);
         enigma = new Enigma();
         rotors = enigma.getRotors();
+
+        if (enigma.getUserRotorsLoaded()) {
+            final int rotorChooseLimit = 3;
+            rotorsChosen = new ArrayList<>(rotorChooseLimit);
+            rotorDisplay = new ArrayList<>(rotorChooseLimit);
+            for (int i = 0; i < rotorChooseLimit; i++) {
+                rotorsChosen.add((byte) i);
+                rotorDisplay.add(new JLabel("A"));
+            }
+        } else {
+            chooseRotors();
+        }
+
+        setLayout(null);
 
         message = new JTextField();
 
@@ -219,7 +222,7 @@ public class EnigmaPanel extends JPanel {
         chooseRotors = new JButton("Choose Rotors");
         optionsButton = new JButton("Options");
 
-        message.addActionListener(listener);
+        message.addKeyListener(listener);
         plugBoardButton.addActionListener(listener);
         rotorSet.addActionListener(listener);
         clearTextButton.addActionListener(listener);
@@ -320,8 +323,6 @@ public class EnigmaPanel extends JPanel {
         rotorDisplay.forEach(label -> add(label));
         add(originalMessage);
         add(codedMessage);
-
-        message.addKeyListener(listener);
     }
 
     /**
@@ -374,12 +375,16 @@ public class EnigmaPanel extends JPanel {
      * use.
      */
     private void chooseRotors() {
+        final int rotorChooseLimit = 3;
         if (rotorsChosen == null && rotorDisplay == null) {
-            rotorsChosen = new ArrayList<>(Arrays.asList(null, null, null));
-            rotorDisplay = new ArrayList<>(Arrays.asList(new JLabel("A"),
-                    new JLabel("A"), new JLabel("A")));
+            rotorsChosen = new ArrayList<>(rotorChooseLimit);
+            rotorDisplay = new ArrayList<>(rotorChooseLimit);
+            for (int i = 0; i < rotorChooseLimit; i++) {
+                rotorsChosen.add(null);
+                rotorDisplay.add(new JLabel("A"));
+            }
         } else {
-            for (int i = 0, rotorChooseLimit = 3; i < rotorChooseLimit; i++) {
+            for (int i = 0; i < rotorChooseLimit; i++) {
                 rotorsChosen.set(i, null);
                 rotorDisplay.get(i).setText("A");
             }
@@ -575,10 +580,10 @@ public class EnigmaPanel extends JPanel {
                      */
                     if (e.getKeyCode() == 8 || changingRotors
                             || changingPlugs) {
-                        clearText.accept(message);
+                        message.setText("");
                         return;
                     } else {
-                        clearText.accept(message);
+                        message.setText("");
                         originalMessage
                                 .setText(originalMessage.getText() + letter);
                         rotorRotation[2]++;
@@ -635,8 +640,8 @@ public class EnigmaPanel extends JPanel {
                         userAlteredPlugCache[0] = userAlteredPlugCache[1];
                         userAlteredPlugCache[1] = ' ';
 
-                        clearText.accept(plugs.get(
-                                ALPHABET.indexOf(userAlteredPlugCache[0])));
+                        plugs.get(ALPHABET.indexOf(userAlteredPlugCache[0]))
+                                .setText("");
 
                         removePlug(userAlteredPlugCache[0]);
 
@@ -662,7 +667,8 @@ public class EnigmaPanel extends JPanel {
                                         letter + " is already taken. Please "
                                                 + "choose another plug or delete its"
                                                 + " value first.");
-                                clearText.accept((JTextField) source);
+                                ((JTextField) source).setText("");
+
                                 return;
                             }
 
@@ -701,8 +707,8 @@ public class EnigmaPanel extends JPanel {
                     changingPlugs = false;
                     plugBoardButton.setText("Set Plugboard");
                     plugs.forEach(plug -> plug.setEnabled(false));
-                    clearText.accept(originalMessage);
-                    clearText.accept(codedMessage);
+                    originalMessage.setText("");
+                    codedMessage.setText("");
                 } else {
                     plugBoardButton.setText("Done");
                     changingPlugs = true;
@@ -719,8 +725,8 @@ public class EnigmaPanel extends JPanel {
                     rotorPlusMinus.forEach(button -> button.setVisible(true));
                 }
             } else if (source == clearTextButton) {
-                clearText.accept(originalMessage);
-                clearText.accept(codedMessage);
+                originalMessage.setText("");
+                codedMessage.setText("");
             } else if (rotorPlusMinus.contains(source)) {
                 final int rotorPlusMinusClickedIndex = rotorPlusMinus
                         .indexOf(source);
@@ -737,8 +743,8 @@ public class EnigmaPanel extends JPanel {
                     check.setSelected(false);
                 });
                 displayRotorsLabel.setText("");
-                clearText.accept(originalMessage);
-                clearText.accept(codedMessage);
+                originalMessage.setText("");
+                codedMessage.setText("");
                 listener.currentSelections = 0;
                 rotorRotation[0] = 0;
                 rotorRotation[1] = 0;

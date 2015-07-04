@@ -41,24 +41,47 @@ public class Enigma {
      */
     private static final byte REFLECTOR_CODE = 100;
 
+    /**
+     * Total number of rotors to choose from.
+     */
     private final int rotorLength = 5;
+
+    /**
+     * The rotors for the program.
+     */
     private final List<Rotor> rotors = new ArrayList<>(rotorLength);
+
+    /**
+     * The reflector for the program.
+     */
     private Reflector reflector;
 
+    /**
+     * The name of the config file.
+     */
     private final String fileName = "config.ini";
 
+    /**
+     * Default names for all options.
+     */
     private final String[] optionKey = {"user_settings_saved",
             "default_rotor_rand", "default_reflector_rand", "user_rotor_1",
             "user_rotor_2", "user_rotor_3", "user_reflector", "user_plugboard",
             "rotor_1", "rotor_2", "rotor_3", "rotor_4", "rotor_5", "reflector"};
 
-    private final String[] optionValue = {"true", "true", "false", "", "", "",
+    /**
+     * Default values for all options.
+     */
+    private final String[] optionValue = {"false", "true", "true", "", "", "",
             "", "", "EKMFLGDQVZNTOWYHXUSPAIBRCJ    Q",
             "AJDKSIRUXBLHWTMCQGZNPYFVOE    E",
             "BDFHJLCPRTXVZNYEIWGAKMUSQO    V",
             "ESOVPZJAYQUIRHXLNFTGKDCMWB    J",
             "VZBRGITYUPSDNHLXAWMJQOFECK    Z", "YRUHQSLDPXNGOKMIEBFZCWVJAT"};
 
+    /**
+     * Does the config file contain user settings?
+     */
     private boolean userRotorsLoaded = false;
 
     /**
@@ -84,7 +107,9 @@ public class Enigma {
          * Read all lines of the config file and sets the rotors accordingly.
          * Each line is split based on whitespace so that index 0 is the name,
          * index 1 is the value, and in the cases of the rotors, index 2 is the
-         * turnover point.
+         * turnover point. Certain settings take priority, with user settings
+         * being highest priority, followed by random generation, then the
+         * default values.
          */
         final Path configPath = FileSystems.getDefault().getPath(fileName);
 
@@ -99,33 +124,17 @@ public class Enigma {
                             .split("\\s+");
                     final String[] fifthRotorDefaultKey = optionValue[fifthRotorDefaultKeyIndex]
                             .split("\\s+");
-                    rotors.set(3,
-                            new Rotor(
-                                    fourthRotorDefaultKey[0].toUpperCase()
-                                            .chars().mapToObj(c -> (char) c)
-                                            .collect(Collectors.toList()),
-                                    fourthRotorDefaultKey[1].charAt(0)));
-                    rotors.set(4,
-                            new Rotor(
-                                    fifthRotorDefaultKey[0].toUpperCase()
-                                            .chars().mapToObj(c -> (char) c)
-                                            .collect(Collectors.toList()),
-                                    fifthRotorDefaultKey[1].charAt(0)));
+                    setRotor(3, fourthRotorDefaultKey[0],
+                            fourthRotorDefaultKey[1]);
+                    setRotor(4, fifthRotorDefaultKey[0],
+                            fifthRotorDefaultKey[1]);
                 } else if (userRotorsLoaded) {
                     if (keyValue[0].startsWith("user_rotor")) {
-                        rotors.set(
-                                Integer.parseInt(
-                                        keyValue[0].replaceAll("[\\D]", ""))
-                                - 1,
-                                new Rotor(
-                                        keyValue[1].toUpperCase().chars()
-                                                .mapToObj(c -> (char) c)
-                                                .collect(Collectors.toList()),
-                                        keyValue[2].charAt(0)));
+                        setRotor(Integer.parseInt(
+                                keyValue[0].replaceAll("[\\D]", "")) - 1,
+                                keyValue[1], keyValue[2]);
                     } else if (keyValue[0].equals(optionKey[6])) {
-                        reflector = new Reflector(keyValue[1].toUpperCase()
-                                .chars().mapToObj(c -> (char) c)
-                                .collect(Collectors.toList()));
+                        setReflector(keyValue[1]);
                     } else if (keyValue[0].equals(optionKey[7])) {
                         if (!keyValue[1].isEmpty()) {
                             Arrays.asList(keyValue[1].split("#"))
@@ -155,21 +164,12 @@ public class Enigma {
                             return;
                         } else {
                             if (keyValue[0].startsWith("rotor_")) {
-                                rotors.set(
+                                setRotor(
                                         Integer.parseInt(keyValue[0]
                                                 .replaceAll("[\\D]", "")) - 1,
-                                        new Rotor(
-                                                keyValue[1].toUpperCase()
-                                                        .chars()
-                                                        .mapToObj(c -> (char) c)
-                                                        .collect(Collectors
-                                                                .toList()),
-                                                keyValue[2].charAt(0)));
+                                        keyValue[1], keyValue[2]);
                             } else if (keyValue[0].equals(optionKey[13])) {
-                                reflector = new Reflector(
-                                        keyValue[1].toUpperCase().chars()
-                                                .mapToObj(c -> (char) c)
-                                                .collect(Collectors.toList()));
+                                setReflector(keyValue[1]);
                             }
                         }
                     }
@@ -182,18 +182,17 @@ public class Enigma {
             for (int i = 0; i < rotorLength; i++) {
                 final String[] keyTurnoverSplit = optionValue[i + 8]
                         .split("\\s+");
-                rotors.set(i,
-                        new Rotor(
-                                keyTurnoverSplit[0].toUpperCase().chars()
-                                        .mapToObj(c -> (char) c)
-                                        .collect(Collectors.toList()),
-                                keyTurnoverSplit[1].charAt(0)));
+                setRotor(i, keyTurnoverSplit[0], keyTurnoverSplit[1]);
             }
-            reflector = new Reflector(optionValue[13].toUpperCase().chars()
-                    .mapToObj(c -> (char) c).collect(Collectors.toList()));
+            setReflector(optionValue[13]);
         }
     }
 
+    /**
+     * Writes to the config file using the settings provided. No settings are
+     * changed, those are altered in the two methods lower down. This method
+     * only writes to file.
+     */
     private void saveSettings() {
         try {
             final BufferedWriter fileWriter = new BufferedWriter(
@@ -210,6 +209,14 @@ public class Enigma {
         }
     }
 
+    /**
+     * Sets the user settings based on the current rotors, reflector, and
+     * pluboard, followed by saving the settings.
+     * 
+     * @param rotorsChosen
+     *            A list representing the rotors chosen and their index being
+     *            the order.
+     */
     public void createUserSettings(final List<Byte> rotorsChosen) {
         StringBuilder rotorBuild = new StringBuilder(ALPHABET_LENGTH + 1);
         final StringBuilder reflectorBuild = new StringBuilder(ALPHABET_LENGTH);
@@ -242,12 +249,45 @@ public class Enigma {
         saveSettings();
     }
 
+    /**
+     * Removes any user settings before saving them.
+     */
     public void deleteSettings() {
         optionValue[0] = "false";
         for (int i = 3; i < 7; i++) {
             optionValue[i] = "";
         }
         saveSettings();
+    }
+
+    /**
+     * Sets the rotor of the given index using the key and turnover point
+     * provided.
+     * 
+     * @param index
+     *            Index of the Rotor.
+     * @param key
+     *            Encryption Key.
+     * @param turnOver
+     *            TurnOverPoint of the rotor.
+     */
+    private void setRotor(int index, String key, String turnOver) {
+        rotors.set(index,
+                new Rotor(
+                        key.toUpperCase().chars().mapToObj(c -> (char) c)
+                                .collect(Collectors.toList()),
+                        turnOver.charAt(0)));
+    }
+
+    /**
+     * Sets the reflector using the given key.
+     * 
+     * @param key
+     *            The key for the reflector.
+     */
+    private void setReflector(String key) {
+        reflector = new Reflector(key.toUpperCase().chars()
+                .mapToObj(c -> (char) c).collect(Collectors.toList()));
     }
 
     /**

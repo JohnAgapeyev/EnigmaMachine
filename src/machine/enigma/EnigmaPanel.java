@@ -12,7 +12,6 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -156,10 +155,6 @@ public class EnigmaPanel extends JPanel {
      * layouts was outside of my abilities when I made this project, so I
      * removed the layout and positioned things absolutely. This method mostly
      * just gives values to variables, and adds them to the panel.
-     *
-     * @throws IOException
-     *             Exception thrown if config file cannot be found for the
-     *             enigma constructor.
      */
     public EnigmaPanel() {
         enigma = new Enigma();
@@ -179,6 +174,8 @@ public class EnigmaPanel extends JPanel {
         }
 
         if (enigma.getUserRotorsLoaded()) {
+            JOptionPane.showMessageDialog(this.getParent(),
+                    "User settings are present and have been loaded successfully.");
             final int rotorChooseLimit = 3;
             rotorsChosen = new ArrayList<>(rotorChooseLimit);
             rotorDisplay = new ArrayList<>(rotorChooseLimit);

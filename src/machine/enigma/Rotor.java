@@ -40,6 +40,10 @@ public class Rotor {
      */
     private List<Character> rotatedAlphabet;
 
+    /**
+     * The turnover point for the rotor. When the rotor moves past this
+     * position, it kicks the next rotor.
+     */
     private char turnoverPoint;
 
     /**
@@ -93,6 +97,11 @@ public class Rotor {
         return rotatedKey;
     }
 
+    /**
+     * Getter method.
+     * 
+     * @return The un-rotated key.
+     */
     public List<Character> getOriginalKey() {
         return originalKey;
     }
@@ -127,11 +136,12 @@ public class Rotor {
         }
     }
 
+    /**
+     * Getter Method
+     * 
+     * @return The rotor's turnover point.
+     */
     public char getTurnover() {
         return turnoverPoint;
-    }
-
-    public void setTurnover(final char turnoverPoint) {
-        this.turnoverPoint = turnoverPoint;
     }
 }

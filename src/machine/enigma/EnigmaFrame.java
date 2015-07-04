@@ -29,10 +29,6 @@ public class EnigmaFrame extends JFrame {
 
     /**
      * Constructor for the frame.
-     *
-     * @throws IOException
-     *             Exception thrown if config file cannot be found for the
-     *             enigma constructor.
      */
     public EnigmaFrame() {
         super("Enigma Machine");

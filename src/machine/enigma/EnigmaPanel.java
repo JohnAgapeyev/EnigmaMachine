@@ -26,6 +26,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
@@ -173,8 +174,13 @@ public class EnigmaPanel extends JPanel {
             plugLabels.add(new JLabel(String.valueOf(ALPHABET.get(i))));
         }
 
+        /*
+         * This is what the user sees when the program launches. If user
+         * settings are found and loaded from the config file, they are used
+         * instead of letting the user choose which rotors to use.
+         */
         if (enigma.getUserRotorsLoaded()) {
-            JOptionPane.showMessageDialog(this.getParent(),
+            JOptionPane.showMessageDialog(getParent(),
                     "User settings are present and have been loaded successfully.");
             final int rotorChooseLimit = 3;
             rotorsChosen = new ArrayList<>(rotorChooseLimit);
@@ -262,6 +268,11 @@ public class EnigmaPanel extends JPanel {
         codedMessage.setBounds(codedMessageX, outputMessageY,
                 fontWidth * textWidth, fontHeight * textHeight);
 
+        final JScrollPane originalScroll = new JScrollPane(originalMessage);
+        final JScrollPane codedScroll = new JScrollPane(codedMessage);
+        originalScroll.setBounds(originalMessage.getBounds());
+        codedScroll.setBounds(codedMessage.getBounds());
+
         int rotorLabelX = 292;
         final int rotorLabelY = 70;
         final int rotorLabelSize = 20;
@@ -322,8 +333,8 @@ public class EnigmaPanel extends JPanel {
         add(chooseRotors);
         add(optionsButton);
         rotorDisplay.forEach(label -> add(label));
-        add(originalMessage);
-        add(codedMessage);
+        add(originalScroll);
+        add(codedScroll);
     }
 
     /**
@@ -432,6 +443,9 @@ public class EnigmaPanel extends JPanel {
         } while (!areThreeRotorsChosen);
     }
 
+    /**
+     * Method used to launch the options menu.
+     */
     private void launchOptionMenu() {
         final JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
@@ -440,17 +454,17 @@ public class EnigmaPanel extends JPanel {
         final JButton saveButton = new JButton("Save");
         final Component elementSeparator = Box
                 .createRigidArea(new Dimension(20, 10));
+        final String optionPopupMessage = "You are in the process of changing values in the program."
+                + " Please complete your changes and press any buttons labeled"
+                + " \"Done\" to lock in your changes. Until changes are locked in,"
+                + " you will be unable to save or delete any settings.";
 
         saveButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         deleteSettingsButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         saveButton.addActionListener(actionEvent -> {
             if (listener.changingRotors || listener.changingPlugs) {
-                JOptionPane.showMessageDialog(getParent(),
-                        "You are in the process of changing values in the program."
-                                + " Please complete your changes and press any buttons labeled"
-                                + " \"Done\" to lock in your changes. Until changes are locked in,"
-                                + " you will be unable to save or delete any settings.");
+                JOptionPane.showMessageDialog(getParent(), optionPopupMessage);
                 return;
             }
             enigma.createUserSettings(rotorsChosen);
@@ -458,11 +472,7 @@ public class EnigmaPanel extends JPanel {
 
         deleteSettingsButton.addActionListener(actionEvent -> {
             if (listener.changingRotors || listener.changingPlugs) {
-                JOptionPane.showMessageDialog(getParent(),
-                        "You are in the process of changing values in the program."
-                                + " Please complete your changes and press any buttons labeled"
-                                + " \"Done\" to lock in your changes. Until changes are locked in,"
-                                + " you will be unable to save or delete any settings.");
+                JOptionPane.showMessageDialog(getParent(), optionPopupMessage);
                 return;
             }
             enigma.deleteSettings();
@@ -507,8 +517,8 @@ public class EnigmaPanel extends JPanel {
 
         /**
          * I was having trouble retrieving the text value of a plug after the
-         * backspace was pressed, so this list is a cache of previous text
-         * values for each plug.
+         * backspace was pressed, so this is a cache of previous text values for
+         * each plug.
          */
         private final char[][] textChangeCache = new char[ALPHABET_LENGTH][2];
 
@@ -522,6 +532,10 @@ public class EnigmaPanel extends JPanel {
          */
         private boolean changingPlugs;
 
+        /**
+         * Constructor for the listener. Sets the booleans and instantiates the
+         * cache for each plug as two empty chars.
+         */
         public EnigmaListener() {
             for (int i = 0; i < ALPHABET_LENGTH; i++) {
                 for (int j = 0; j < 2; j++) {
@@ -537,7 +551,6 @@ public class EnigmaPanel extends JPanel {
          */
         @Override
         public void keyReleased(final KeyEvent e) {
-
             final char letter = Character.toUpperCase(e.getKeyChar());
             final Component source = e.getComponent();
             match = alpha.matcher(Character.toString(letter));
@@ -563,29 +576,29 @@ public class EnigmaPanel extends JPanel {
                                 + enigma.encode(letter, rotorsChosen));
 
                         final String originText = originalMessage.getText();
-                        final String codeText = codedMessage.getText();
                         int length = originText.length();
 
                         /*
                          * Prevent blank spaces from being counted towards the
                          * function below that adds spacing.
                          */
-                        for (int i = 0; i < length; i++) {
-                            if (originText.charAt(i) == ' ') {
+                        for (int i = 0, n = originText.length(); i < n; i++) {
+                            if (originText.charAt(i) == ' '
+                                    || originText.charAt(i) == '\n') {
                                 length--;
                             }
                         }
 
                         /*
-                         * Basic function that groups output in groups of 5 and
-                         * forces new lines after a certain length.
+                         * Formats output in groups of 5 and forces new lines
+                         * after a certain length.
                          */
-                        if (length % 25 == 0) {
-                            originalMessage.setText(originText + "\n");
-                            codedMessage.setText(codeText + "\n");
+                        if (length % 19 == 0) {
+                            originalMessage.append("\n");
+                            codedMessage.append("\n");
                         } else if (length % 5 == 0) {
-                            originalMessage.setText(originText + " ");
-                            codedMessage.setText(codeText + " ");
+                            originalMessage.append(" ");
+                            codedMessage.append(" ");
                         }
                     }
                 } else if (plugs.contains(source)) {

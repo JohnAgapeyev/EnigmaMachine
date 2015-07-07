@@ -44,7 +44,7 @@ public class Rotor {
      * The turnover point for the rotor. When the rotor moves past this
      * position, it kicks the next rotor.
      */
-    private char turnoverPoint;
+    private final char turnoverPoint;
 
     /**
      * Main constructor that randomly generates a key. It does this by iterating
@@ -99,7 +99,7 @@ public class Rotor {
 
     /**
      * Getter method.
-     * 
+     *
      * @return The un-rotated key.
      */
     public List<Character> getOriginalKey() {
@@ -138,7 +138,7 @@ public class Rotor {
 
     /**
      * Getter Method
-     * 
+     *
      * @return The rotor's turnover point.
      */
     public char getTurnover() {

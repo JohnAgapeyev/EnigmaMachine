@@ -7,7 +7,7 @@ import java.util.Random;
 /**
  * The reflector for the program. The no argument constructor is really all it
  * does. Otherwise it's just a holder for a predetermined key.
- * 
+ *
  * @author John Agapeyev
  *
  */

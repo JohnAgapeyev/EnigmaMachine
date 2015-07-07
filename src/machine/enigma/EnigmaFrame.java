@@ -1,7 +1,5 @@
 package machine.enigma;
 
-import java.io.IOException;
-
 import javax.swing.JFrame;
 
 /**
@@ -44,11 +42,8 @@ public class EnigmaFrame extends JFrame {
      *
      * @param args
      *            Command Line arguments
-     * @throws IOException
-     *             Exception thrown if config file cannot be found for the
-     *             enigma constructor.
      */
-    public static void main(final String[] args) throws IOException {
+    public static void main(final String[] args) {
         new EnigmaFrame();
     }
 }

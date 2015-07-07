@@ -15,8 +15,8 @@ import javax.swing.JOptionPane;
 
 /**
  * This is where all the encryption happens in the program. It will read from a
- * config file and either use default rotors and a reflector, or generate them
- * randomly, depending on the value in the file.
+ * config file and load up user settings if found, otherwise it will default to
+ * random generation or pre-set values.
  *
  * @author John Agapeyev
  *
@@ -136,7 +136,7 @@ public class Enigma {
                     } else if (keyValue[0].equals(optionKey[6])) {
                         setReflector(keyValue[1]);
                     } else if (keyValue[0].equals(optionKey[7])) {
-                        if (!keyValue[1].isEmpty()) {
+                        if (keyValue.length > 1) {
                             Arrays.asList(keyValue[1].split("#"))
                                     .forEach(pair -> {
                                 final List<Character> plugPair = new ArrayList<>(
@@ -185,6 +185,13 @@ public class Enigma {
                 setRotor(i, keyTurnoverSplit[0], keyTurnoverSplit[1]);
             }
             setReflector(optionValue[13]);
+        } catch (final ArrayIndexOutOfBoundsException f) {
+            JOptionPane.showMessageDialog(null,
+                    "User settings could not be found, yet " + fileName
+                            + " says that values exist. Please change "
+                            + optionKey[0] + " to false in " + fileName
+                            + " then restart the program.");
+            System.exit(1);
         }
     }
 
@@ -212,7 +219,7 @@ public class Enigma {
     /**
      * Sets the user settings based on the current rotors, reflector, and
      * pluboard, followed by saving the settings.
-     * 
+     *
      * @param rotorsChosen
      *            A list representing the rotors chosen and their index being
      *            the order.
@@ -222,7 +229,7 @@ public class Enigma {
         final StringBuilder reflectorBuild = new StringBuilder(ALPHABET_LENGTH);
         final List<Character> reflectorKey = reflector.getKey();
 
-        optionValue[2] = "true";
+        optionValue[0] = "true";
 
         for (int i = 0; i < 3; i++) {
             final List<Character> rotorKey = rotors.get(rotorsChosen.get(i))
@@ -263,7 +270,7 @@ public class Enigma {
     /**
      * Sets the rotor of the given index using the key and turnover point
      * provided.
-     * 
+     *
      * @param index
      *            Index of the Rotor.
      * @param key
@@ -271,7 +278,8 @@ public class Enigma {
      * @param turnOver
      *            TurnOverPoint of the rotor.
      */
-    private void setRotor(int index, String key, String turnOver) {
+    private void setRotor(final int index, final String key,
+            final String turnOver) {
         rotors.set(index,
                 new Rotor(
                         key.toUpperCase().chars().mapToObj(c -> (char) c)
@@ -281,11 +289,11 @@ public class Enigma {
 
     /**
      * Sets the reflector using the given key.
-     * 
+     *
      * @param key
      *            The key for the reflector.
      */
-    private void setReflector(String key) {
+    private void setReflector(final String key) {
         reflector = new Reflector(key.toUpperCase().chars()
                 .mapToObj(c -> (char) c).collect(Collectors.toList()));
     }
@@ -437,16 +445,13 @@ public class Enigma {
      * @return The swapped letter.
      */
     private char plugBoardSwap(final char letter) {
-        System.out.println(letter);
         char output = letter;
         for (final List<Character> pair : plugBoard) {
-            System.out.println(pair);
             if (pair.contains(letter)) {
                 output = (output == pair.get(0)) ? pair.get(1) : pair.get(0);
                 break;
             }
         }
-        System.out.println(output);
         return output;
     }
 

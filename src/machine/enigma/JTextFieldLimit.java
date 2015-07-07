@@ -31,6 +31,10 @@ public class JTextFieldLimit extends PlainDocument {
      * Alphabetic regular expression
      */
     private final Pattern alpha = Pattern.compile("[a-zA-Z]");
+
+    /**
+     * Regex Matcher.
+     */
     private Matcher match;
 
     /**

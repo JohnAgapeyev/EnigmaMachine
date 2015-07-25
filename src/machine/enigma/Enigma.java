@@ -111,11 +111,11 @@ public class Enigma {
          * being highest priority, followed by random generation, then the
          * default values.
          */
-        final Path configPath = FileSystems.getDefault().getPath(fileName);
-
         try {
+            final Path configPath = FileSystems.getDefault().getPath(fileName);
             Files.lines(configPath).forEach(line -> {
                 final String[] keyValue = line.split("\\s+");
+                // User Settings
                 if (keyValue[0].equals(optionKey[0])) {
                     userRotorsLoaded = Boolean.valueOf(keyValue[1]);
                     final int fourthRotorDefaultKeyIndex = 11;
@@ -128,6 +128,8 @@ public class Enigma {
                             fourthRotorDefaultKey[1]);
                     setRotor(4, fifthRotorDefaultKey[0],
                             fifthRotorDefaultKey[1]);
+                    // Loads rotor, reflector, and plugboard on further
+                    // iterations if settings are found.
                 } else if (userRotorsLoaded) {
                     if (keyValue[0].startsWith("user_rotor")) {
                         setRotor(Integer.parseInt(
@@ -149,6 +151,7 @@ public class Enigma {
                         }
                     }
                 } else {
+                    // Random Generation
                     if (keyValue[0].equals(optionKey[1])) {
                         if (Boolean.valueOf(keyValue[1])) {
                             for (int i = 0; i < rotorLength; i++) {
@@ -160,6 +163,7 @@ public class Enigma {
                             reflector = new Reflector();
                         }
                     } else {
+                        // Default values
                         if (!rotors.contains(null) && reflector != null) {
                             return;
                         } else {
@@ -204,8 +208,7 @@ public class Enigma {
         try {
             final BufferedWriter fileWriter = new BufferedWriter(
                     new FileWriter(fileName));
-            final int fileLength = optionKey.length;
-            for (int i = 0; i < fileLength; i++) {
+            for (int i = 0, fileLength = optionKey.length; i < fileLength; i++) {
                 fileWriter.write(optionKey[i] + " " + optionValue[i]);
                 fileWriter.newLine();
             }
@@ -472,16 +475,13 @@ public class Enigma {
 
     /**
      * This method removes a pair from the plugboard based on the char passed to
-     * it. It streams the plugboard, filters it to contain every pair that
-     * doesn't have firstHalf and then stores that back into plugBoard.
+     * it.
      *
      * @param firstHalf
-     *            One of the letters of the pair that s to be removed.
+     *            One of the letters of the pair that is to be removed.
      */
     public void removePlug(final char firstHalf) {
-        plugBoard = plugBoard.stream()
-                .filter(plug -> !(plug.contains(firstHalf)))
-                .collect(Collectors.toList());
+        plugBoard.removeIf(plug -> plug.contains(firstHalf));
     }
 
     /**

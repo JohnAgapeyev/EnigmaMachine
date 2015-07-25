@@ -58,9 +58,7 @@ public class JTextFieldLimit extends PlainDocument {
         if (str == null) {
             return;
         }
-
         match = alpha.matcher(str);
-
         if ((getLength() + str.length()) <= limit && match.matches()) {
             super.insertString(offset, str.toUpperCase(), attr);
         }

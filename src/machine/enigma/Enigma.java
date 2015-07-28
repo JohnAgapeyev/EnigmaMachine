@@ -359,7 +359,6 @@ public class Enigma {
      */
     private char rotorEncryption(final char letter, final byte rotorNumber,
             final boolean isReverse) {
-
         List<Character> rotorKey = new ArrayList<>(ALPHABET_LENGTH);
         List<Character> alphabetKey = new ArrayList<>(ALPHABET_LENGTH);
         char response = letter;
@@ -370,8 +369,7 @@ public class Enigma {
          */
         if (rotorNumber == REFLECTOR_CODE) {
             rotorKey = reflector.getKey();
-            alphabetKey.clear();
-            ALPHABET.forEach(alphabetKey::add);
+            alphabetKey = ALPHABET;
         } else {
             rotorKey = rotors.get(rotorNumber).getKey();
             alphabetKey = rotors.get(rotorNumber).getAlphabet();
@@ -467,10 +465,7 @@ public class Enigma {
      *            The index of the second letter in the alphabet.
      */
     public void updatePlugBoard(final char first, final int secondIndex) {
-        final List<Character> pair = new ArrayList<>(2);
-        pair.add(first);
-        pair.add(ALPHABET.get(secondIndex));
-        plugBoard.add(pair);
+        plugBoard.add(Arrays.asList(first, (ALPHABET.get(secondIndex))));
     }
 
     /**

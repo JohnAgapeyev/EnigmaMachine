@@ -42,7 +42,6 @@ public class Reflector {
         for (int i = 0; i < ALPHABET_LENGTH; i++) {
             key.add(null);
         }
-
         final Random rand = new Random();
         final ArrayList<Integer> alreadyUsed = new ArrayList<>();
         for (int i = 0; i < ALPHABET_LENGTH; i++) {

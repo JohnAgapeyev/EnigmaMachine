@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FontMetrics;
-import java.awt.Graphics;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -189,8 +188,8 @@ public class EnigmaPanel extends JPanel {
                 rotorsChosen.add((byte) i);
                 rotorDisplay.add(new JLabel("A"));
             }
-            final List<List<Character>> plugBoard = enigma.getPlugBoard();
-            plugBoard.forEach(pair -> {
+
+            enigma.getPlugBoard().forEach(pair -> {
                 plugs.get(ALPHABET.indexOf(pair.get(0)))
                         .setText(String.valueOf(pair.get(1)));
                 plugs.get(ALPHABET.indexOf(pair.get(1)))
@@ -338,14 +337,6 @@ public class EnigmaPanel extends JPanel {
     }
 
     /**
-     * Paint component for the panel.
-     */
-    @Override
-    public void paintComponent(final Graphics g) {
-        super.paintComponent(g);
-    }
-
-    /**
      * Formats the rotor rotation in the program. Bumps the next rotor if the
      * previous one reaches its turnover point. Also checks the rotation of the
      * middle and fast rotor to create the double-stepping mechanism.
@@ -396,10 +387,8 @@ public class EnigmaPanel extends JPanel {
                 rotorDisplay.add(new JLabel("A"));
             }
         } else {
-            for (int i = 0; i < rotorChooseLimit; i++) {
-                rotorsChosen.set(i, null);
-                rotorDisplay.get(i).setText("A");
-            }
+            Collections.fill(rotorsChosen, null);
+            rotorDisplay.forEach(label -> label.setText("A"));
         }
 
         final JPanel panel = new JPanel();
@@ -580,12 +569,11 @@ public class EnigmaPanel extends JPanel {
                          * Prevent blank spaces from being counted towards the
                          * function below that adds spacing.
                          */
-                        for (int i = 0, n = originText.length(); i < n; i++) {
-                            if (originText.charAt(i) == ' '
-                                    || originText.charAt(i) == '\n') {
-                                length--;
-                            }
-                        }
+                        length -= originText.chars()
+                                .filter(letterChar -> letterChar == ' '
+                                        || letterChar == '\n')
+                                .count();
+
                         /*
                          * Formats output in groups of 5 and forces new lines
                          * after a certain length.
@@ -717,9 +705,7 @@ public class EnigmaPanel extends JPanel {
                 originalMessage.setText("");
                 codedMessage.setText("");
                 listener.currentSelections = 0;
-                for (int i = 0; i < 3; i++) {
-                    rotorRotation[i] = 0;
-                }
+                Arrays.fill(rotorRotation, (byte) 0);
                 chooseRotors();
             } else if (source == optionsButton) {
                 launchOptionMenu();

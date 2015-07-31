@@ -135,28 +135,25 @@ public class Enigma {
                         setRotor(Integer.parseInt(
                                 keyValue[0].replaceAll("[\\D]", "")) - 1,
                                 keyValue[1], keyValue[2]);
+                        // Reflector
                     } else if (keyValue[0].equals(optionKey[6])) {
                         setReflector(keyValue[1]);
+                        // Plugboard
                     } else if (keyValue[0].equals(optionKey[7])) {
+                        // Fills plugboard if present in the settings
                         if (keyValue.length > 1) {
-                            Arrays.asList(keyValue[1].split("#"))
-                                    .forEach(pair -> {
-                                final List<Character> plugPair = new ArrayList<>(
-                                        2);
-                                for (final char letter : pair.toCharArray()) {
-                                    plugPair.add(letter);
-                                }
-                                plugBoard.add(plugPair);
-                            });
+                            plugBoard = Arrays.stream(keyValue[1].split("#"))
+                                    .map(pair -> pair.chars()
+                                            .mapToObj(c -> (char) c)
+                                            .collect(Collectors.toList()))
+                                    .collect(Collectors.toList());
                         }
                     }
                 } else {
                     // Random Generation
                     if (keyValue[0].equals(optionKey[1])) {
                         if (Boolean.valueOf(keyValue[1])) {
-                            for (int i = 0; i < rotorLength; i++) {
-                                rotors.set(i, new Rotor());
-                            }
+                            rotors.forEach(index -> new Rotor());
                         }
                     } else if (keyValue[0].equals(optionKey[2])) {
                         if (Boolean.valueOf(keyValue[1])) {
@@ -229,31 +226,25 @@ public class Enigma {
      */
     public void createUserSettings(final List<Byte> rotorsChosen) {
         StringBuilder rotorBuild = new StringBuilder(ALPHABET_LENGTH + 1);
+        List<Character> rotorKey;
         final StringBuilder reflectorBuild = new StringBuilder(ALPHABET_LENGTH);
         final List<Character> reflectorKey = reflector.getKey();
-
+        // user_settings_saved
         optionValue[0] = "true";
-
         for (int i = 0; i < 3; i++) {
-            final List<Character> rotorKey = rotors.get(rotorsChosen.get(i))
-                    .getOriginalKey();
-            for (int j = 0; j < ALPHABET_LENGTH; j++) {
-                rotorBuild.append(rotorKey.get(j));
-            }
+            rotorKey = rotors.get(rotorsChosen.get(i)).getOriginalKey();
+            rotorKey.forEach(rotorBuild::append);
             rotorBuild.append("    ");
             rotorBuild.append(rotors.get(rotorsChosen.get(i)).getTurnover());
             optionValue[i + 3] = rotorBuild.toString();
             rotorBuild = new StringBuilder(ALPHABET_LENGTH + 1);
         }
-        for (int i = 0; i < ALPHABET_LENGTH; i++) {
-            reflectorBuild.append(reflectorKey.get(i));
-        }
+        reflectorKey.forEach(reflectorBuild::append);
         final StringBuilder plugBuild = new StringBuilder();
         plugBoard.forEach(pair -> {
-            pair.forEach(letter -> plugBuild.append(letter));
+            pair.forEach(plugBuild::append);
             plugBuild.append("#");
         });
-
         optionValue[6] = reflectorBuild.toString();
         optionValue[7] = plugBuild.toString();
         saveSettings();
@@ -263,8 +254,11 @@ public class Enigma {
      * Removes any user settings before saving them.
      */
     public void deleteSettings() {
+        // user_settings_saved
         optionValue[0] = "false";
-        for (int i = 3; i < 7; i++) {
+        final int userSettingsStartIndex = 3;
+        final int userSettingsEndIndex = 7;
+        for (int i = userSettingsStartIndex; i < userSettingsEndIndex; i++) {
             optionValue[i] = "";
         }
         saveSettings();
@@ -319,28 +313,21 @@ public class Enigma {
     public char encode(final char sentLetter, final List<Byte> rotorsChosen) {
         char output = sentLetter;
         boolean isReverse = false;
-
         // PlugBoard swap
         output = plugBoardSwap(output);
-
         // Normal encryption
         for (int i = rotorsChosen.size() - 1; i > -1; i--) {
             output = rotorEncryption(output, rotorsChosen.get(i), isReverse);
         }
-
         // Reflector
         output = rotorEncryption(output, REFLECTOR_CODE, isReverse);
-
         isReverse = true;
-
         // Return back through the rotors in reverse order.
         for (final Byte rotor : rotorsChosen) {
             output = rotorEncryption(output, rotor, isReverse);
         }
-
         // PlugBoard swap again
         output = plugBoardSwap(output);
-
         return output;
     }
 
@@ -362,7 +349,6 @@ public class Enigma {
         List<Character> rotorKey = new ArrayList<>(ALPHABET_LENGTH);
         List<Character> alphabetKey = new ArrayList<>(ALPHABET_LENGTH);
         char response = letter;
-
         /*
          * Gets the key to be used based on rotorNumber, along with the alphabet
          * representing the offset
@@ -374,63 +360,42 @@ public class Enigma {
             rotorKey = rotors.get(rotorNumber).getKey();
             alphabetKey = rotors.get(rotorNumber).getAlphabet();
         }
-
         if (!isReverse) {
-
             // External alphabet gets turned into internal alphabet
-            for (int i = 0; i < ALPHABET_LENGTH; i++) {
-                if (response == alphabetKey.get(i)) {
-                    response = ALPHABET.get(i);
-                    break;
-                }
-            }
-
+            response = keySwap(alphabetKey, ALPHABET, response);
             // Internal alphabet gets turned into rotor wiring
-            for (int i = 0; i < ALPHABET_LENGTH; i++) {
-                if (response == alphabetKey.get(i)) {
-                    response = rotorKey.get(i);
-                    break;
-                }
-            }
-
+            response = keySwap(alphabetKey, rotorKey, response);
             /*
              * Rotor output is returned through the shifted alphabet key once
              * again on its way out
              */
-            for (int i = 0; i < ALPHABET_LENGTH; i++) {
-                if (response == ALPHABET.get(i)) {
-                    response = alphabetKey.get(i);
-                    break;
-                }
-            }
-
+            response = keySwap(ALPHABET, alphabetKey, response);
         } else {
-
             // Input is shifted through the rotor offset
-            for (int i = 0; i < ALPHABET_LENGTH; i++) {
-                if (response == alphabetKey.get(i)) {
-                    response = ALPHABET.get(i);
-                    break;
-                }
-            }
-
+            response = keySwap(alphabetKey, ALPHABET, response);
             // Key is transformed into the rotor offset
-            for (int i = 0; i < ALPHABET_LENGTH; i++) {
-                if (response == rotorKey.get(i)) {
-                    response = alphabetKey.get(i);
-                    break;
-                }
-            }
-
+            response = keySwap(rotorKey, alphabetKey, response);
             // Offset is transformed into the original alphabet
-            for (int i = 0; i < ALPHABET_LENGTH; i++) {
-                if (response == ALPHABET.get(i)) {
-                    response = alphabetKey.get(i);
-                    break;
-                }
-            }
+            response = keySwap(ALPHABET, alphabetKey, response);
         }
         return response;
+    }
+
+    /**
+     * Swaps a letter from its index in the start key to the same index in the
+     * end key.
+     *
+     * @param startKey
+     *            Key to compare to
+     * @param endKey
+     *            Key to swap to
+     * @param letter
+     *            Letter used for comparing
+     * @return The swapped letter
+     */
+    private Character keySwap(final List<Character> startKey,
+            final List<Character> endKey, final char letter) {
+        return endKey.get(startKey.indexOf(letter));
     }
 
     /**
@@ -446,14 +411,12 @@ public class Enigma {
      * @return The swapped letter.
      */
     private char plugBoardSwap(final char letter) {
-        char output = letter;
         for (final List<Character> pair : plugBoard) {
             if (pair.contains(letter)) {
-                output = (output == pair.get(0)) ? pair.get(1) : pair.get(0);
-                break;
+                return (letter == pair.get(0)) ? pair.get(1) : pair.get(0);
             }
         }
-        return output;
+        return letter;
     }
 
     /**

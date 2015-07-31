@@ -164,7 +164,7 @@ public class EnigmaPanel extends JPanel {
         final List<JLabel> plugLabels = new ArrayList<>(ALPHABET_LENGTH);
 
         ALPHABET.forEach(letter -> {
-            JTextField tempPlug = new JTextField();
+            final JTextField tempPlug = new JTextField();
             tempPlug.setEnabled(false);
             tempPlug.setDocument(new JTextFieldLimit(characterLimit));
             tempPlug.addKeyListener(listener);
@@ -559,6 +559,7 @@ public class EnigmaPanel extends JPanel {
                         message.setText("");
                         originalMessage
                                 .setText(originalMessage.getText() + letter);
+                        // Farthest right rotor is kicked
                         rotorRotation[2]++;
                         formatRotorSettings();
                         codedMessage.setText(codedMessage.getText()
@@ -569,11 +570,10 @@ public class EnigmaPanel extends JPanel {
                          * Prevent blank spaces from being counted towards the
                          * function below that adds spacing.
                          */
-                        length -= originText.chars()
-                                .filter(letterChar -> letterChar == ' '
-                                        || letterChar == '\n')
+                        length = (int) originText.chars()
+                                .filter(letterChar -> letterChar != ' '
+                                        && letterChar != '\n')
                                 .count();
-
                         /*
                          * Formats output in groups of 5 and forces new lines
                          * after a certain length.
@@ -608,11 +608,9 @@ public class EnigmaPanel extends JPanel {
                                 .indexOf(userAlteredPlugCache[1])];
                         userAlteredPlugCache[0] = userAlteredPlugCache[1];
                         userAlteredPlugCache[1] = ' ';
-
                         plugs.get(ALPHABET.indexOf(userAlteredPlugCache[0]))
                                 .setText("");
                         enigma.removePlug(userAlteredPlugCache[0]);
-
                         userTypedPlugCache[0] = userTypedPlugCache[1];
                         userTypedPlugCache[1] = ' ';
                     } else {
@@ -640,13 +638,10 @@ public class EnigmaPanel extends JPanel {
                          * removing it.
                          */
                         enigma.updatePlugBoard(letter, userAlteredPlugIndex);
-
                         userAlteredPlugCache[0] = userAlteredPlugCache[1];
                         userAlteredPlugCache[1] = letter;
-
                         plugs.get(letterIndex).setText(String
                                 .valueOf(ALPHABET.get(userAlteredPlugIndex)));
-
                         textChangeCache[letterIndex][0] = textChangeCache[letterIndex][1];
                         textChangeCache[letterIndex][1] = ALPHABET
                                 .get(userAlteredPlugIndex);
@@ -722,32 +717,23 @@ public class EnigmaPanel extends JPanel {
         @Override
         public void itemStateChanged(final ItemEvent e) {
             final JCheckBox source = (JCheckBox) e.getSource();
-            final int length = 3;
             if (source.isSelected()) {
                 currentSelections++;
-                for (int i = 0; i < length; i++) {
-                    if (rotorsChosen.get(i) == null) {
-                        rotorsChosen.set(i,
-                                (byte) rotorCheckBox.indexOf(source));
-                        break;
-                    }
-                }
+                rotorsChosen.set(rotorsChosen.indexOf(null),
+                        (byte) rotorCheckBox.indexOf(source));
                 if (currentSelections == MAX_SELECTIONS) {
-                    rotorCheckBox.forEach(check -> {
-                        if (!check.isSelected()) {
-                            check.setEnabled(false);
-                        }
-                    });
+                    rotorCheckBox.forEach(
+                            check -> check.setEnabled(check.isSelected()));
                 }
             } else {
                 currentSelections--;
-                for (int i = 0; i < length; i++) {
+                for (int i = 0; i < MAX_SELECTIONS; i++) {
                     if (rotorsChosen.get(i) != null && rotorsChosen
                             .get(i) == rotorCheckBox.indexOf(source)) {
                         rotorsChosen.set(i, null);
                         final int numListRotateSteps = -1;
-                        Collections.rotate(rotorsChosen
-                                .subList(rotorsChosen.indexOf(null), length),
+                        Collections.rotate(
+                                rotorsChosen.subList(i, MAX_SELECTIONS),
                                 numListRotateSteps);
                     }
                 }
@@ -756,10 +742,8 @@ public class EnigmaPanel extends JPanel {
                 }
             }
             final StringBuilder display = new StringBuilder();
-            rotorsChosen.forEach(choice -> {
-                display.append(
-                        (choice == null) ? "Empty   " : (choice + 1) + "   ");
-            });
+            rotorsChosen.forEach(choice -> display.append(
+                    (choice == null) ? "Empty   " : (choice + 1) + "   "));
             displayRotorsLabel.setText(display.toString());
         }
     }

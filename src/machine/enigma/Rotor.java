@@ -81,9 +81,9 @@ public class Rotor {
      *            The key to be used.
      */
     public Rotor(final List<Character> key, final char turnoverPoint) {
-        rotatedAlphabet = ALPHABET;
-        originalKey = key;
-        rotatedKey = key;
+        rotatedAlphabet = new ArrayList<>(ALPHABET);
+        originalKey = new ArrayList<>(key);
+        rotatedKey = new ArrayList<>(key);
         this.turnoverPoint = turnoverPoint;
     }
 
@@ -125,8 +125,8 @@ public class Rotor {
      *            Number of steps to rotate
      */
     public void setRotation(final byte rotateSteps) {
-        rotatedKey = originalKey;
-        rotatedAlphabet = ALPHABET;
+        rotatedKey = new ArrayList<>(originalKey);
+        rotatedAlphabet = new ArrayList<>(ALPHABET);
         if (rotateSteps == 0) {
             return;
         } else {
